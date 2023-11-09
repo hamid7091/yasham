@@ -172,7 +172,15 @@ const Performance = () => {
     }
   };
 
-  const getAutoFilteredActivityAxios = async () => {};
+  const getAutoFilteredActivityAxios = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
   //const performanceHeader = new Headers();
   //const performanceFormdata = new FormData();
   //performanceHeader.append("Authorization", `Bearer ${accessToken}`);
