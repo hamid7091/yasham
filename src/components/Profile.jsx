@@ -12,7 +12,7 @@ import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import fetchData from "../util-functions/fetchData";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const Profile = () => {
   const accessToken = window.localStorage.getItem("AccessToken");
@@ -35,7 +35,7 @@ const Profile = () => {
   const [userFirstName, setUserFirstName] = useState(state?.userFirstName);
   const [userLastName, setUserLastName] = useState(state?.userLastName);
   const [userAvatar, setUserAvatar] = useState(state?.userAvatar);
-  const [userMobile, setUserMobile] = useState(state?.mobile);
+  const [mobile, setMobile] = useState(state?.mobile);
   const [userPassword, setUserPassword] = useState("");
 
   const profile = useRef(null);
@@ -58,7 +58,6 @@ const Profile = () => {
     profile.current.classList.toggle("d-none");
     editProfile.current.classList.toggle("d-none");
   };
-
   const handleExitPopup = () => {
     setIsPopupActive(true);
   };
@@ -80,14 +79,14 @@ const Profile = () => {
     if (e.target.value) {
       if (mobilePattern.test(e.target.value)) {
         setMobileIsValid(true);
-        setUserMobile(e.target.value);
+        setMobile(e.target.value);
       } else {
         setMobileIsValid(false);
-        setUserMobile(e.target.value);
+        setMobile(e.target.value);
       }
     } else {
       setMobileIsValid(false);
-      setUserMobile(e.target.value);
+      setMobile(e.target.value);
     }
   };
   const handleFirstNameValidation = (e) => {
@@ -108,67 +107,6 @@ const Profile = () => {
       setUserLastName(e.target.value);
     }
   };
-  const handleSubmit = async (e) => {
-    Loading.standard("در حال بارگذاری اطلاعات");
-    e.preventDefault();
-    const updateUserFormdata = new FormData();
-    var updateUserHeader = new Headers();
-    updateUserHeader.append("Authorization", `Bearer ${accessToken}`);
-    const updateUserURL = "https://samane.zbbo.net/api/v1/user/update_profile";
-
-    if (
-      firstNameIsValid &&
-      lastNameIsValid &&
-      mobileIsValid &&
-      passwordIsValid &&
-      avatarIsChanged
-    ) {
-      updateUserFormdata.append("userFirstName", userFirstName);
-      updateUserFormdata.append("userLastName", userLastName);
-      updateUserFormdata.append("mobile", userMobile);
-      updateUserFormdata.append("userPassword", userPassword);
-      updateUserFormdata.append("userAvatar", userAvatar);
-
-      const updateUserOptions = {
-        method: "POST",
-        headers: updateUserHeader,
-        body: updateUserFormdata,
-        redirect: "follow",
-      };
-
-      const response = await fetchData(updateUserURL, updateUserOptions);
-      if (response) {
-        Loading.remove();
-        Notify.success(response);
-        navigate("/");
-      }
-    } else if (
-      firstNameIsValid &&
-      lastNameIsValid &&
-      mobileIsValid &&
-      passwordIsValid
-    ) {
-      updateUserFormdata.append("userFirstName", userFirstName);
-      updateUserFormdata.append("userLastName", userLastName);
-      updateUserFormdata.append("mobile", userMobile);
-      updateUserFormdata.append("userPassword", userPassword);
-
-      const updateUserOptions = {
-        method: "POST",
-        headers: updateUserHeader,
-        body: updateUserFormdata,
-        redirect: "follow",
-      };
-
-      const response = await fetchData(updateUserURL, updateUserOptions);
-      if (response) {
-        Loading.remove();
-        Notify.success(response);
-        navigate("/");
-      }
-    }
-    Loading.remove();
-  };
   const handlePassword = (e) => {
     const passwordPattern = /^[\w]{8,24}$/;
     if (e.target.value) {
@@ -182,8 +120,39 @@ const Profile = () => {
       setPasswordIsValid(true);
     }
   };
+  const handleSubmitAxios = async (event) => {
+    event.preventDefault();
+    const formdata = new FormData();
+    firstNameIsValid && formdata.append("userFirstName", userFirstName);
+    lastNameIsValid && formdata.append("userLastName", userLastName);
+    mobileIsValid && formdata.append("mobile", mobile);
+    passwordIsValid && formdata.append("userPassword", userPassword);
+    avatarIsChanged && formdata.append("userAvatar", userAvatar);
 
-  console.log(isClient);
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post(
+        "/user/update_profile",
+        formdata,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (response) {
+        Loading.remove();
+        Notify.success(response.data.response);
+        navigate("/");
+      } else {
+        Loading.remove();
+        Notify.failure("خطا! مجددا تلاش کنید");
+      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
   return (
     state && (
       <>
@@ -205,10 +174,7 @@ const Profile = () => {
               <BackArrow />
             </span>
           </header>
-          <form
-            className="edit-form mt-5 pb-4"
-            onSubmit={(event) => handleSubmit(event)}
-          >
+          <form className="edit-form mt-5 pb-4" onSubmit={handleSubmitAxios}>
             <div className="text-center d-flex flex-column justify-content-center align-items-center">
               <div>
                 <img

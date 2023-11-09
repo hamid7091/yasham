@@ -4,17 +4,15 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import Select from "react-select";
-import fetchData from "../util-functions/fetchData";
 import PlusButton from "../assets/svg-icons/PlusButton";
 import PopupBackground from "./PopupBackground";
 import AddDetailPopup from "./AddDetailPopup";
 import Message from "../micro-components/Message";
 import MinusButton from "../assets/svg-icons/MinusButton";
 import EditButton from "../assets/svg-icons/EditButton";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const OrderRegister = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
-
   const location = useLocation();
   const navigate = useNavigate();
   const fixedRadio = useRef(null);
@@ -37,46 +35,24 @@ const OrderRegister = () => {
   const [isAddDetailPopupActive, setIsAddDetailPopupActive] = useState(false);
   const [details, setDetails] = useState([]);
 
-  const mock = [
-    {
-      id: 1,
-      serviceType: 1,
-      taskType: { value: 27, label: "Direct Implant PFZ" },
-      toothColors: [
-        [{ value: "A2", label: "A2" }],
-        [{ value: "A3", label: "A3" }],
-      ],
-      toothNumbers: [
-        [
-          { value: "TR1", label: "TR1" },
-          { value: "TR2", label: "TR2" },
-        ],
-        [
-          { value: "TL1", label: "TL1" },
-          { value: "TL2", label: "TL2" },
-        ],
-      ],
-    },
-  ];
-
   const fixedServices = location.state.serviceType[1].serviceTaskTypes;
   const mobileServices = location.state.serviceType[2].serviceTaskTypes;
   const clients = location.state.clientsList;
   const isSupervisor = location.state.isSupervisor;
 
-  const fixedOptions = [];
-  const mobileOptions = [];
-  const clientOptions = [];
   const customStyles = {
     option: (defaultStyles, state) => ({
       ...defaultStyles,
-      color: state.isSelected ? "#2f66db" : "#79a3fe",
-      backgroundColor: state.isSelected ? "#b8cfff" : "#fff)",
+      color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+      backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
       padding: "8px",
       fontWeight: "bold",
+      ":not(:last-child)": {
+        borderBottom: "2px solid var(--gray-ultra-light)",
+      },
       ":hover": {
-        backgroundColor: "#dee7fa",
-        color: "var(--blue-royal)",
+        backgroundColor: "var(--gray-very-light)",
+        color: "#000",
       },
     }),
     control: (defaultStyles) => ({
@@ -92,7 +68,7 @@ const OrderRegister = () => {
     }),
     singleValue: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontWeight: "bold",
     }),
     placeholder: (defaultStyles) => ({
@@ -121,11 +97,11 @@ const OrderRegister = () => {
     }),
     menuList: (defaultStyles) => ({
       ...defaultStyles,
-      borderRadius: "8px",
+      borderRadius: "4px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontSize: "16px",
     }),
     multiValue: (defaultStyles) => ({
@@ -144,34 +120,25 @@ const OrderRegister = () => {
     }),
   };
 
-  fixedServices.forEach((service) => {
-    fixedOptions.push({
-      value: service.taskTypeID,
-      label: service.taskTypeName,
-    });
-  });
-  mobileServices.forEach((service) => {
-    mobileOptions.push({
-      value: service.taskTypeID,
-      label: service.taskTypeName,
-    });
-  });
+  const clientOptions = [];
   clients?.forEach((client) => {
     clientOptions.push({
       value: client.clientID,
       label: client.clientName,
     });
   });
-
-  const handleFormSubmit = async (event) => {
+  const serviceListConvertor = (array) => {
+    const result = [];
+    array.forEach((arr) => {
+      result.push({
+        value: arr.taskTypeID,
+        label: arr.taskTypeName,
+      });
+    });
+    return result;
+  };
+  const handleFormSubmitAxios = async (event) => {
     event.preventDefault();
-    console.log(firstname);
-    console.log(lastname);
-    console.log(age);
-    console.log(gender);
-    console.log(description);
-    console.log(clientID);
-    Loading.standard("در حال ثبت سفارش");
     let convertedDetails = [];
     for (let obj of details) {
       let newObj = {
@@ -197,13 +164,7 @@ const OrderRegister = () => {
 
       convertedDetails.push(newObj);
     }
-    console.log(JSON.stringify(convertedDetails));
-
-    var myHeaders = new Headers();
-    const registerURL = "https://samane.zbbo.net/api/v1/order/register";
-    myHeaders.append("Authorization", `Bearer ${accessToken}`);
-    var formdata = new FormData();
-
+    const formdata = new FormData();
     if (clientID) {
       formdata.append("clientID", `${clientID}`);
     }
@@ -213,23 +174,26 @@ const OrderRegister = () => {
     formdata.append("order-description", description);
     formdata.append("patient-gender", gender);
     formdata.append("order-detail", JSON.stringify(convertedDetails));
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: formdata,
-      redirect: "follow",
-    };
 
-    const response = await fetchData(registerURL, requestOptions);
-    console.log(response);
-
-    if (response.success) {
+    try {
+      Loading.standard("در حال ثبت سفارش شما");
+      const response = await axiosInstance.post("/order/register", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.data.response.success) {
+        Loading.remove();
+        Notify.success("سفارش با موفقیت ثبت شد");
+        navigate("/");
+      } else {
+        Loading.remove();
+        Notify.failure("خطا ! مجددا تلاش کنید");
+      }
       Loading.remove();
-      Notify.success("سفارش با موفقیت ثبت شد");
-      navigate("/");
-    } else {
+    } catch (error) {
+      console.error(error);
       Loading.remove();
-      Notify.failure("خطا ! مجددا تلاش کنید");
     }
   };
   const handleFirstnameSet = (event) => {
@@ -299,8 +263,8 @@ const OrderRegister = () => {
             setIsAddDetailPopupActive={setIsAddDetailPopupActive}
             fixedRadio={fixedRadio}
             mobileRadio={mobileRadio}
-            fixedOptions={fixedOptions}
-            mobileOptions={mobileOptions}
+            fixedOptions={serviceListConvertor(fixedServices)}
+            mobileOptions={serviceListConvertor(mobileServices)}
             customStyles={customStyles}
             details={
               selectedDetail || {
@@ -329,7 +293,7 @@ const OrderRegister = () => {
       </header>
       <form
         className="edit-form form-group mt-3 p-3 tasks"
-        onSubmit={handleFormSubmit}
+        onSubmit={handleFormSubmitAxios}
       >
         {isSupervisor && (
           <>

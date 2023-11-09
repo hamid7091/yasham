@@ -28,13 +28,16 @@ const FilterPopup = ({
   const customStyles = {
     option: (defaultStyles, state) => ({
       ...defaultStyles,
-      color: state.isSelected ? "#2f66db" : "#79a3fe",
-      backgroundColor: state.isSelected ? "#b8cfff" : "#fff)",
+      color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+      backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
       padding: "8px",
       fontWeight: "bold",
+      ":not(:last-child)": {
+        borderBottom: "2px solid var(--gray-ultra-light)",
+      },
       ":hover": {
-        backgroundColor: "#dee7fa",
-        color: "var(--blue-royal)",
+        backgroundColor: "var(--gray-very-light)",
+        color: "#000",
       },
     }),
     control: (defaultStyles) => ({
@@ -50,7 +53,7 @@ const FilterPopup = ({
     }),
     singleValue: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontWeight: "bold",
     }),
     placeholder: (defaultStyles) => ({
@@ -79,12 +82,11 @@ const FilterPopup = ({
     }),
     menuList: (defaultStyles) => ({
       ...defaultStyles,
-      borderRadius: "8px",
-      border: "2px solid var( --blue-royal)",
+      borderRadius: "4px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontSize: "16px",
     }),
     multiValue: (defaultStyles) => ({
