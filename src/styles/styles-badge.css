@@ -1,0 +1,154 @@
+/* badges */
+
+.badge-in-process {
+  border: 1px solid var(--yellow);
+  border-radius: 50rem;
+  background-color: var(--yellow-ulight);
+  color: var(--yellow);
+  text-align: center;
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+  padding: 0;
+}
+.badge-canceled {
+  border: 1px solid var(--red);
+  border-radius: 50rem;
+  background-color: var(--red-ul);
+  color: var(--red);
+  text-align: center;
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.badge-done {
+  border: 1px solid var(--green);
+  border-radius: 50rem;
+  background-color: var(--green-ul);
+  color: var(--green);
+  text-align: center;
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.badge-waiting {
+  border: 1px solid var(--blue-royal);
+  border-radius: 26px;
+  background-color: var(--blue-royal-ultra-light);
+  color: var(--blue-royal);
+  text-align: center;
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+  white-space: nowrap;
+}
+.badge-waiting-selected {
+  border: 1px solid var(--blue-royal);
+  border-radius: 50rem;
+  background-color: var(--blue-royal-very-light);
+  color: var(--blue-royal);
+  text-align: center;
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.w-auto {
+  width: auto;
+}
+.badge-sm-green {
+  color: var(--green);
+  padding: 3px 9px;
+  border-radius: 30rem;
+  border: 1px solid var(--green-teal);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.badge-sm-green span:nth-child(3) {
+  width: 25px;
+  height: 25px;
+  background-color: var(--green);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.badge-sm-yellow {
+  /* background-color: var(--yellow-ulight); */
+  color: var(--blue-royal);
+  padding: 3px 9px;
+  border-radius: 30rem;
+  border: 1px solid var(--blue-royal);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.badge-sm-yellow span:nth-child(3) {
+  width: 25px;
+  height: 25px;
+  background-color: var(--blue-royal);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-sm-royal {
+  color: var(--blue-royal);
+  padding: 5px;
+  border-radius: 30rem;
+  border: 1px solid var(--blue-royal);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.badge-sm-royal span:nth-child(2) {
+  width: 25px;
+  height: 25px;
+  background-color: var(--blue-royal);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.badge-sm-green-iconless {
+  color: var(--green-teal);
+  padding: 5px;
+  border-radius: 30rem;
+  border: 1px solid var(--green-teal);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.badge-sm-green-iconless span:nth-child(2) {
+  width: 25px;
+  height: 25px;
+  background-color: var(--green-teal);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-green-single-stock {
+  color: var(--green);
+  padding: 8px;
+  border-radius: 30rem;
+  border: 2px solid var(--green-teal);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+  width: 100%;
+}
+.badge-yellow-single-stock {
+  color: var(--yellow);
+  padding: 8px;
+  border-radius: 30rem;
+  border: 2px solid var(--yellow);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+  width: 100%;
+}
+.badge-red-single-stock {
+  color: var(--red);
+  padding: 8px;
+  border-radius: 30rem;
+  border: 2px solid var(--red);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+  width: 100%;
+}

@@ -1,0 +1,32 @@
+import React from "react";
+
+const ReturnIcon = () => {
+  return (
+    <svg
+      width="30"
+      height="30"
+      viewBox="0 0 30 30"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        opacity="0.4"
+        d="M8.9126 22.8867H18.9126C22.3626 22.8867 25.1626 20.0867 25.1626 16.6367C25.1626 13.1867 22.3626 10.3867 18.9126 10.3867H5.1626"
+        stroke="#2F66DB"
+        strokeWidth="2"
+        strokeMiterlimit="10"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.0374 13.5133L4.8374 10.3133L8.0374 7.11328"
+        stroke="#2F66DB"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export default ReturnIcon;

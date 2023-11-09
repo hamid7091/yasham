@@ -1,0 +1,477 @@
+:root {
+  /* --background-default: #f4f8ff; */
+  /* --background-default: #00000075; */
+  --background-default: #eff4ff;
+  --gray-dark: #525253;
+  --gray: #797979;
+  --gray-light: #9a9ca0;
+  --gray-very-light: #bcbcbc;
+  --gray-ultra-light: #f0f0f0;
+  --blue-royal: #2f66db;
+  --blue-royal-light: #79a3fe;
+  --blue-royal-very-light: #b8cfff;
+  --blue-royal-ultra-light: #dee7fa;
+  --red: #ec1d1d;
+  --red-l: #ff4f4f;
+  --red-ul: #ffdcdc;
+  --green-teal: #008c72;
+  --green: #02a676;
+  --green-vlight: #a0f1b7;
+  --green-light: #00ffb3;
+  --green-ul: #d0ffcf;
+  --yellow: #ffc700;
+  --yellow-light: #ffdf72;
+  --yellow-ulight: #fff3cb;
+  --font-default: 14px;
+  --font-large: 16px;
+  --font-xlarge: 18px;
+  --font-xxlarge: 20px;
+  --font-bold: 700;
+  --font-bold500: 500;
+  --font-thin: 400;
+  --general-width: 390px;
+  --Drop-shadow: 5px 6px 20px -9px rgba(90, 138, 240, 0.28);
+  --center-translate: translate(-50%, -50%);
+  --radius-light: 10px;
+}
+
+@import url("https://v1.fontapi.ir/css/VazirFD");
+
+body {
+  font-family: Vazir FD, sans-serif;
+  font-size: var(--font-default);
+  background-color: var(--background-default);
+}
+a {
+  text-decoration: none;
+  cursor: pointer;
+}
+input::placeholder {
+  color: var(--gray-very-light) !important;
+  font-size: 14px;
+}
+header {
+  z-index: 3;
+}
+input {
+  padding-right: 1rem;
+}
+input:focus {
+  box-shadow: none;
+}
+
+input {
+  border: none;
+}
+input:focus {
+  outline: none;
+}
+input.isvalid {
+  border: 2px solid var(--green);
+}
+input.isinvalid {
+  border: 2px solid var(--red);
+}
+input.form-check-input {
+  height: 18px;
+  width: 18px;
+  margin-top: 0;
+}
+label.isinvalid::before {
+  content: "\02717";
+  color: #ec1d1d;
+  font-size: 28px;
+  font-weight: 800;
+  position: absolute;
+  z-index: 2;
+  left: 5%;
+  top: 150%;
+}
+label.isinvalid::after {
+  content: "شماره موبایل ده رقمی و بدون صفر میباشد";
+  color: #ec1d1d;
+  white-space: nowrap;
+  font-size: 13px;
+  background-color: white;
+  padding: 1px 8px;
+  border: 2px solid var(--red);
+  border-radius: 20px;
+  position: absolute;
+  left: 10%;
+  top: 90%;
+}
+label.isvalid::after {
+  content: "\02713";
+  color: #02a676;
+  font-size: 28px;
+  font-weight: 800;
+  position: absolute;
+  z-index: 20;
+  left: 5%;
+  top: 150%;
+}
+
+hr {
+  /* color: var(--blue-royal-very-light); */
+  border-top: 2px dashed var(--blue-royal-very-light);
+}
+.drown {
+  z-index: -1;
+}
+.container {
+  max-width: var(--general-width);
+  position: relative;
+}
+.drop-shadow {
+  /* box-shadow: var(--Drop-shadow); */
+  box-shadow: 5px 6px 20px -9px #5a89f080;
+}
+
+.has-pointer {
+  cursor: pointer;
+}
+/* backgrounds */
+
+.bg-default {
+  background-color: var(--background-default);
+}
+.bg-royal {
+  background-color: var(--blue-royal);
+}
+.bg-vlroyal {
+  background-color: var(--blue-royal-very-light);
+}
+.bg-ulroyal {
+  background-color: var(--blue-royal-ultra-light);
+}
+.bg-ulgrey {
+  background-color: var(--gray-ultra-light);
+}
+.bg-green {
+  background-color: var(--green);
+}
+.bg-red {
+  background-color: var(--red);
+}
+
+/* font classes */
+
+.red-default-thin {
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+  color: var(--red);
+}
+.thin-default {
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+  color: var(--gray-dark);
+}
+.bold500-default {
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+  color: var(--gray-dark);
+}
+.thin-default-gl {
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+  color: var(--gray-light);
+}
+.bold500-large {
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+  color: var(--gray-dark);
+}
+.bold-default {
+  font-size: var(--font-thin);
+  font-weight: var(--font-bold);
+  color: var(--gray-dark);
+}
+.bold-large {
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+  color: var(--gray-dark);
+}
+.bold-xlarge {
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+  color: var(--gray-dark);
+}
+.bold-xxlarge {
+  font-size: var(--font-xxlarge);
+  font-weight: var(--font-bold);
+  color: var(--gray-dark);
+}
+.grey-large-bold {
+  color: var(--gray);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+}
+.grey-xlarge-bold {
+  color: var(--gray);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+}
+.grey-xxlarge-bold {
+  color: var(--gray);
+  font-size: var(--font-xxlarge);
+  font-weight: var(--font-bold);
+}
+.grey-large-bold500 {
+  color: var(--gray);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+}
+.grey-default-bold500 {
+  color: var(--gray);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.grey-default-thin {
+  color: var(--gray);
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+}
+.grey-thin-bold {
+  color: var(--gray);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold);
+}
+.dgrey-thin-bold {
+  color: var(--gray-dark);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold);
+}
+.lgrey-default-thin {
+  color: var(--gray-light);
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+}
+.lgrey-default-bold {
+  color: var(--gray-light);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold);
+}
+.lgrey-large-bold500 {
+  color: var(--gray-light);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+}
+.vlgrey-default-thin {
+  color: var(--gray-very-light);
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+}
+.royal-large {
+  color: var(--blue-royal);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+}
+.royal-large-bold {
+  color: var(--blue-royal);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+}
+.royal-xlarge-bold {
+  color: var(--blue-royal);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+}
+.royal-xxlarge-bold500 {
+  color: var(--blue-royal);
+  font-size: var(--font-xxlarge);
+  font-weight: var(--font-bold500);
+}
+.royal-default {
+  color: var(--blue-royal);
+  font-size: var(--font-default);
+}
+.royal-default-bold500 {
+  color: var(--blue-royal);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.royal-default-bold {
+  color: var(--blue-royal);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold);
+}
+.vlroyal-default-bold500 {
+  color: var(--blue-royal-very-light);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold500);
+}
+.vlroyal-large-thin {
+  color: var(--blue-royal-very-light);
+  font-size: var(--font-large);
+  font-weight: var(--font-thin);
+}
+.lroyal-default-thin {
+  color: var(--blue-royal-light);
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+}
+.lroyal-default-bold {
+  color: var(--blue-royal-light);
+  font-size: var(--font-default);
+  font-weight: var(--font-bold);
+}
+.vlroyal-default-thin {
+  color: var(--blue-royal-very-light);
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+}
+.white-xlarge-bold {
+  color: white;
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+}
+.white-large-bold500 {
+  color: white;
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+}
+.white-large-bold {
+  color: white;
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+}
+.white-default-bold500 {
+  color: white;
+  font-size: var(--font-default);
+  font-weight: var(--font-bo);
+}
+.white-default-thin {
+  color: white;
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+}
+.white-default-bold {
+  color: white;
+  font-size: var(--font-default);
+  font-weight: var(--font-bold);
+}
+.greenTeal-xlarge-bold {
+  color: var(--green-teal);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+}
+.greenTeal-large-bold500 {
+  color: var(--green-teal);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+}
+.yellow-large-bold500 {
+  color: var(--yellow);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+}
+.red-large-bold500 {
+  color: var(--red);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+}
+.yellow-xlarge-bold {
+  color: var(--yellow);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+}
+.red-xlarge-bold {
+  color: var(--red);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+}
+
+/* borders */
+
+.border-lroyal {
+  border: 1px solid var(--blue-royal-light);
+}
+.border-blroyal {
+  border: 1px solid var(--blue-royal-light);
+}
+.border-royal-2 {
+  border: 2px solid var(--blue-royal);
+}
+.tborder-vlroyal {
+  border-top: 1px solid var(--blue-royal-very-light);
+}
+.tborder-ulgrey {
+  border-top: 1px solid var(--gray-ultra-light);
+}
+.dborder-dashed-vlroyal {
+  border-bottom: 1px dashed var(--blue-royal-very-light);
+}
+.dborder-thick-royal {
+  border-bottom: 6px solid var(--blue-royal);
+}
+.dborder-thin-ulgrey {
+  border-bottom: 2px solid var(--gray-ultra-light);
+}
+.tborder-thin-ulgrey {
+  border-top: 2px solid var(--gray-ultra-light);
+}
+.rborder-yellow-thick {
+  border-right: 5px solid var(--yellow);
+}
+.rborder-red-thick {
+  border-right: 5px solid var(--red);
+}
+.rborder-royal-thick {
+  border-right: 5px solid var(--blue-royal);
+}
+.rborder-lyellow-thick {
+  border-right: 5px solid var(--yellow-light);
+}
+.rborder-green-thick {
+  border-right: 5px solid var(--green);
+}
+.rborder-lgreen-thick {
+  border-right: 5px solid var(--green-vlight);
+}
+.lborder-royal-8 {
+  border-left: 8px solid var(--blue-royal);
+}
+.lborder-tealgreen-8 {
+  border-left: 8px solid var(--green-teal);
+}
+
+/* custom scrollbar */
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--gray-ultra-light);
+  border-radius: 20px;
+  margin-block: 25px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--blue-royal);
+  border-radius: 20px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.recharts-default-legend {
+  /* display: flex;
+  flex-direction: column;
+  gap: 15px; */
+}
+.recharts-default-legend li span {
+  color: var(--gray-dark) !important;
+  margin-left: 5px;
+}
+input.form-check-input {
+  height: 30px;
+  width: 30px;
+  border: none;
+  margin-top: 0;
+}

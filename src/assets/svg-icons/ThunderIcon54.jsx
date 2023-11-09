@@ -1,0 +1,27 @@
+import React from "react";
+
+const ThunderIcon54 = () => {
+  return (
+    <span className="single-stock-bg drop-shadow">
+      <svg
+        width="30"
+        height="30"
+        viewBox="0 0 30 30"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14.9999 4.58749V25.4125L13.9999 26.55C12.6124 28.125 11.4749 27.7 11.4749 25.6V16.6H7.61239C5.86239 16.6 5.37489 15.525 6.53739 14.2125L14.9999 4.58749Z"
+          fill="white"
+        />
+        <path
+          opacity="0.4"
+          d="M23.4625 15.7875L15 25.4125V4.58749L16 3.44999C17.3875 1.87499 18.525 2.29999 18.525 4.39999V13.4H22.3875C24.1375 13.4 24.625 14.475 23.4625 15.7875Z"
+          fill="white"
+        />
+      </svg>
+    </span>
+  );
+};
+
+export default ThunderIcon54;

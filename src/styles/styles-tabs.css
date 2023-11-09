@@ -1,0 +1,27 @@
+.log-in-tabs span {
+  text-decoration: none;
+  color: var(--gray);
+  font-weight: var(--font-thin);
+  cursor: pointer;
+}
+.log-in-tabs span.active-tab {
+  background-color: var(--blue-royal-very-light);
+  color: var(--blue-royal);
+  font-weight: var(--font-bold500);
+  font-size: var(--font-default);
+  border-radius: 50rem;
+}
+.tab-contents input,
+.tab-contents .single-task-container,
+.tab-contents .history-card {
+  display: none;
+}
+.tab-contents input.active,
+.tab-contents .single-task-container.active,
+.tab-contents .history-card.active {
+  display: block;
+}
+input.form-control::placeholder {
+  font-size: var(--font-default);
+  color: var(--gray-light);
+}

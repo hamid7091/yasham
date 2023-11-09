@@ -1,0 +1,160 @@
+.btn-royal-bold {
+  background-color: var(--blue-royal);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+  width: 100%;
+}
+.btn-royal-bold.disabled {
+  color: var(--blue-royal-light);
+  pointer-events: none;
+  cursor: none;
+}
+.btn-lgrey-bold-w100 {
+  background-color: var(--gray-light);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+  width: 100%;
+}
+.btn-lgrey-bold {
+  background-color: var(--gray-light);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+  padding: 1rem;
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
+}
+.btn-royal-bold500 {
+  background-color: var(--blue-royal);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold500);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+  cursor: pointer;
+}
+.btn-red-bold {
+  background-color: var(--red);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+  color: white;
+}
+.btn-royal-bold-default {
+  background-color: var(--blue-royal);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+  color: white;
+}
+.btn-green-bold {
+  background-color: var(--green-teal);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+  padding: 1rem;
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
+}
+
+.btn-greyd-thin {
+  background-color: var(--gray-dark);
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+  padding: 0.25rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.btn-yellow-bold {
+  background-color: var(--yellow);
+  font-size: var(--font-large);
+  font-weight: var(--font-bold);
+  color: white;
+  border: none;
+  border-radius: 50rem;
+}
+.main-banner-btn {
+  position: absolute;
+  top: 116px;
+  left: 18px;
+  margin-bottom: 0;
+  border: none;
+  border-radius: 50rem;
+  background-color: var(--blue-royal);
+  color: white;
+  font-size: var(--font-default);
+  font-weight: var(--font-thin);
+  padding: 10px 20px;
+}
+.delete-field-btn {
+  position: absolute;
+  top: 80%;
+  /* top: -20%; */
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* .delete-field-btn::after {
+  content: "\0268A";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -44%);
+} */
+
+.delete-field-btn.disabled {
+  pointer-events: none;
+}
+
+/* @media (min-width: 576px) {
+  .delete-field-btn {
+    height: 30px;
+    width: 30px;
+    position: relative;
+  }
+  .delete-field-btn::after {
+    content: "\0268A";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-54%, -44%);
+  }
+} */
+
+.add-fields-btn {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  right: 50%;
+  bottom: -150%;
+  transform: translateX(50%);
+  height: 40px;
+  line-height: 40px;
+}
+
+.add-btn {
+  border-right: 2px solid white;
+  display: inline-block;
+  height: 40px;
+  padding-right: 12px;
+  padding-left: 14px;
+}
+
+input#disposable-pass-input:disabled,
+.btn-royal-bold:disabled {
+  background-color: var(--gray-ultra-light);
+  color: var(--gray-light);
+}
+input#disposable-pass-input:disabled::placeholder {
+  color: var(--gray-light);
+}

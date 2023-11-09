@@ -1,0 +1,29 @@
+input.disabled {
+  pointer-events: none;
+  background-color: var(--gray-ultra-light);
+}
+
+button.disabled {
+  pointer-events: none;
+}
+
+/* progress bar */
+.progress-bar {
+  margin: 12px;
+  width: 75px;
+}
+.line-progress-bar {
+  margin: 20px 15px;
+  height: 8px;
+  position: relative;
+  z-index: -1;
+}
+.card-line-progress-bar {
+  margin: 20px 0;
+  height: 8px;
+  position: relative;
+  z-index: -1;
+}
+.progress-bar-container {
+  height: 40px;
+}

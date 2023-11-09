@@ -1,0 +1,41 @@
+.banner {
+  padding-top: 90px;
+  margin-bottom: 42px;
+}
+
+.avatar-svg-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+}
+
+.header-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+.shipping-card-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+#profile-avatar-uploader {
+  display: none;
+}
+.doc-avatar {
+  width: 120px;
+  height: 120px;
+  top: -60px;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.single-stock-bg {
+  aspect-ratio: 1 / 1;
+  background: var(--blue-royal);
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  height: 54px;
+}

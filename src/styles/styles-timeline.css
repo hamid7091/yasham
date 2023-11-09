@@ -1,0 +1,92 @@
+/* timeline dot-line style */
+/* .line-dot-container .dot {
+  height: 25px;
+  width: 25px;
+  border: 4.5px solid var(--blue-royal);
+  border-radius: 50%;
+  position: relative;
+} */
+/* .line-dot-container .dot span {
+  position: absolute;
+  right: 0;
+  top: -10%;
+}
+.line-dot-container .line {
+  width: 2px;
+  height: 96.2px;
+  border-right: 1px dashed var(--blue-royal);
+  position: relative;
+  right: 12px;
+}
+.line-dot-container .dot.selected {
+  background-color: var(--blue-royal);
+} */
+/* timeline tasks style */
+.timeline-task-wrapper {
+  margin-bottom: 15px;
+  z-index: 1;
+}
+.timeline-task-wrapper .dot {
+  background-color: #fff;
+  height: 30px;
+  min-width: 30px;
+  border-radius: 50%;
+  background-image: url(../assets/svg-icons/info-circle.svg);
+  box-shadow: 5px 6px 20px -9px #000;
+  background-position: center;
+  background-size: 36px;
+}
+.timeline-task-wrapper.finished .dot {
+  background-image: url(../assets/svg-icons/tick-circle.svg);
+}
+
+.timeline-task-wrapper .timeline-task {
+  border-left: 7px solid var(--gray-light);
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem 10px;
+  box-shadow: 5px 6px 20px -9px #5a8af047;
+}
+.timeline-task-wrapper.current-step .timeline-task {
+  border-left: 7px solid var(--yellow);
+}
+.timeline-task-wrapper.finished .timeline-task {
+  border-left: 7px solid var(--green-teal);
+}
+.timeline-task h5 {
+  font-weight: var(--font-thin);
+  font-size: var(--font-default);
+  color: #525253;
+}
+.timeline-task h5 span {
+  font-weight: var(--font-bold);
+  font-size: var(--font-default);
+}
+
+.timeline-card-extra-info {
+  max-height: 0px;
+  overflow: hidden;
+  position: relative;
+  transition: max-height 0.3s ease;
+  padding: 0 0 0 0;
+}
+
+.timeline-task-wrapper.show-extra-info .timeline-card-extra-info {
+  max-height: 108px;
+}
+.timeline-cards-container {
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-cards-container::before {
+  content: "";
+  width: 1px;
+  height: 100%;
+  border-right: 2px dashed var(--gray);
+  position: absolute;
+  right: 0.85rem;
+  top: 0;
+  z-index: -3;
+  margin-block: 3.5rem;
+}
