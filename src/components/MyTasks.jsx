@@ -1,38 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
-import fetchData from "../util-functions/fetchData";
 import ActiveTasks from "./ActiveTasks";
 import ClientAssignedCard from "./ClientAssignedCard";
 import Message from "../micro-components/Message";
+import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const MyTasks = ({ aactiveTasks, aassignedTasks, isDash }) => {
-  console.log(isDash);
-  console.log(aactiveTasks);
-  console.log(aassignedTasks);
-
-  const accessToken = window.localStorage.getItem("AccessToken");
   const [activeTasks, setActiveTasks] = useState(aactiveTasks);
   const [assignedTasks, setAssignedTasks] = useState(aassignedTasks);
 
-  const myTasksURL = "https://samane.zbbo.net/api/v1/task/my_tasks";
-  const myTasksHeader = new Headers();
-  myTasksHeader.append("Authorization", `Bearer ${accessToken}`);
-  const myTasksRequestOptions = {
-    method: "POST",
-    headers: myTasksHeader,
-    redirect: "follow",
-  };
-
-  const getMyTasksData = async () => {
-    const response = await fetchData(myTasksURL, myTasksRequestOptions);
-    console.log(response);
-    setActiveTasks(response.activeTasks);
-    setAssignedTasks(response.assignedTasks);
+  const getMyTaskAxios = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/task/my_tasks");
+      console.log(response.data.response);
+      setActiveTasks(response.data.response.activeTasks);
+      setAssignedTasks(response.data.response.assignedTasks);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
 
   useEffect(() => {
-    !isDash && getMyTasksData();
+    !isDash && getMyTaskAxios();
   }, []);
 
   return (

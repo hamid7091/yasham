@@ -34,7 +34,7 @@ const Performance = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const filterArea = "performance";
 
-  const performanceURL = "https://samane.zbbo.net/api/v1/activity/report";
+  //const performanceURL = "https://samane.zbbo.net/api/v1/activity/report";
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
@@ -49,32 +49,32 @@ const Performance = () => {
     }
   };
 
-  const handleFilterAuto = async () => {
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
+  // const handleFilterAuto = async () => {
+  //   const filterHeader = new Headers();
+  //   filterHeader.append("Authorization", `Bearer ${accessToken}`);
 
-    let filterFormdata = new FormData();
-    filterFormdata.append("pageNum", filterPageNum);
-    if (clientName) {
-      filterFormdata.append("clientID", clientName.value);
-    }
-    if (startDate && endDate) {
-      filterFormdata.append("startDate", startDate?.toUnix());
-      filterFormdata.append("endDate", endDate?.toUnix());
-    }
+  //   let filterFormdata = new FormData();
+  //   filterFormdata.append("pageNum", filterPageNum);
+  //   if (clientName) {
+  //     filterFormdata.append("clientID", clientName.value);
+  //   }
+  //   if (startDate && endDate) {
+  //     filterFormdata.append("startDate", startDate?.toUnix());
+  //     filterFormdata.append("endDate", endDate?.toUnix());
+  //   }
 
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
+  //   const filterRequestOptions = {
+  //     method: "POST",
+  //     headers: filterHeader,
+  //     body: filterFormdata,
+  //     redirect: "follow",
+  //   };
 
-    const response = await fetchData(performanceURL, filterRequestOptions);
-    console.log(response);
-    setFilterPageNum((prevNum) => prevNum + 1);
-    setFilteredData((prevItems) => [...prevItems, ...response.cards]);
-  };
+  //   const response = await fetchData(performanceURL, filterRequestOptions);
+  //   console.log(response);
+  //   setFilterPageNum((prevNum) => prevNum + 1);
+  //   setFilteredData((prevItems) => [...prevItems, ...response.cards]);
+  // };
   // const handleFilter = async (event) => {
   //   event?.preventDefault();
   //   window.scrollTo(0, 0);
@@ -163,9 +163,10 @@ const Performance = () => {
           "Content-Type": "multipart/form-data",
         },
       });
+      console.log(response.data.response);
       setFilterPageNum((prevNum) => prevNum + 1);
       setFilteredData(response.data.response?.cards);
-      setFilterMaxPage(response.data.response.total_pages);
+      setFilterMaxPage(response.data.response?.total_pages);
     } catch (error) {
       console.error(error);
       Loading.remove();
@@ -173,8 +174,27 @@ const Performance = () => {
   };
 
   const getAutoFilteredActivityAxios = async () => {
+    const formdata = new FormData();
+    formdata.append("pageNum", filterPageNum);
+    if (clientName) {
+      formdata.append("clientID", clientName.value);
+    }
+    if (startDate && endDate) {
+      formdata.append("startDate", startDate?.toUnix());
+      formdata.append("endDate", endDate?.toUnix());
+    }
     try {
       Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/activity/report", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setFilterPageNum((prevNum) => prevNum + 1);
+      setFilteredData((prevItems) => [
+        ...prevItems,
+        ...response.data.response.cards,
+      ]);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -255,7 +275,7 @@ const Performance = () => {
         1 &&
       isFilter
     ) {
-      handleFilterAuto();
+      getAutoFilteredActivityAxios();
     }
   };
   const handleCapReduction = (cat) => {
