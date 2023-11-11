@@ -1,28 +1,23 @@
-import React, { useState, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import EditPen from "../assets/svg-icons/EditPen";
 import Select from "react-select";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
-import fetchData from "../util-functions/fetchData";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const AddNewStockItem = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
-  const location = useLocation();
-  console.log(location.state);
   // ---------------states------------------
   const [itemPicture, setItemPicture] = useState();
   const [itemName, setItemName] = useState();
-  const [itemID, setItemID] = useState();
+  const [inventoryCode, setInventoryCode] = useState();
   const [itemUnit, setItemUnit] = useState();
-  const [itemUnitID, setItemUnitID] = useState();
   const [purchasedAmount, setPurchasedAmount] = useState();
   const [purchaseCost, setPurchaseCost] = useState();
   const [warningLimit, setWarningLimit] = useState();
   // ---------------check validation states------------------
   const [isItemNameValid, setIsItemNameValid] = useState(null);
   const [isItemIDValid, setIsItemIDValid] = useState(null);
-  const [isItemUnitValid, setIsItemUnitValid] = useState();
   const [isPurchasedAmountValid, setIsPurchasedAmountValid] = useState(null);
   const [isPurchaseCostValid, setIsPurchaseCostValid] = useState(null);
   const [isWarningLimitValid, setIsWarningLimitValid] = useState(null);
@@ -120,7 +115,6 @@ const AddNewStockItem = () => {
       reader.readAsDataURL(choosenFile);
     }
   };
-
   const handleItemNameValidation = (e) => {
     if (e.target.value) {
       setIsItemNameValid(true);
@@ -133,15 +127,11 @@ const AddNewStockItem = () => {
   const handleItemIDValidation = (e) => {
     if (e.target.value) {
       setIsItemIDValid(true);
-      setItemName(e.target.value);
+      setInventoryCode(e.target.value);
     } else {
       setIsItemIDValid(false);
-      setItemName(e.target.value);
+      setInventoryCode(e.target.value);
     }
-  };
-  const handleItemUnit = (value) => {
-    console.log(value);
-    setItemUnitID(value?.value);
   };
   const handlePurchaseAmount = (e) => {
     if (e.target.value) {
@@ -172,30 +162,57 @@ const AddNewStockItem = () => {
   };
   const handleSubmitNewItem = async (event) => {
     event.preventDefault();
-    Loading.standard("در حال ثبت محصول جدید");
-    const submitURL = "some bullshit url";
-    const submitHeader = new Headers();
-    submitHeader.append("Authorization", `Bearer ${accessToken}`);
-    const submitFormdata = new FormData();
-    submitFormdata.append("itemName", itemName);
-    submitFormdata.append("itemID", itemID);
-    submitFormdata.append("itemUnit", itemUnitID);
-    submitFormdata.append("purchasedAmount", purchasedAmount);
-    submitFormdata.append("purchaseCost", purchaseCost);
-    submitFormdata.append("warningLimit", warningLimit);
-    if (itemPicture) {
-      submitFormdata.append("itemPicture", itemPicture);
+    try {
+      Loading.standard("در حال ثبت محصول جدید");
+
+      const formdata = new FormData();
+      formdata.append("itemName", itemName);
+      formdata.append("inventoryCode", inventoryCode);
+      formdata.append("itemUnit", itemUnit?.value);
+      formdata.append("purchasedAmount", purchasedAmount);
+      formdata.append("purchaseCost", purchaseCost);
+      formdata.append("warningLimit", warningLimit);
+      if (itemPicture) {
+        formdata.append("itemPicture", itemPicture);
+      }
+      console.log({
+        itemName,
+        inventoryCode,
+        itemUnit,
+        purchasedAmount,
+        purchaseCost,
+        warningLimit,
+      });
+      console.log(Object.fromEntries(formdata));
+      const response = await axiosInstance.post("/item/insert", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
     }
-    const submitItemRequestOptions = {
-      method: "POST",
-      headers: submitHeader,
-      body: submitFormdata,
-      redirect: "follow",
-    };
-    const response = await fetchData(submitURL, submitItemRequestOptions);
-    console.log(response);
-    Loading.remove();
   };
+
+  const [unitOptions, setUnitOptions] = useState();
+  const getUnits = async () => {
+    try {
+      Loading.standard("در حال بارگذاری");
+      const response = await axiosInstance.post("/item/units");
+      console.log(response.data.response);
+      setUnitOptions(response.data.response.units);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  useEffect(() => {
+    getUnits();
+  }, []);
   console.log(isItemNameValid);
   return (
     <div className="container px-2" dir="rtl">
@@ -299,8 +316,8 @@ const AddNewStockItem = () => {
             id="itemUnit"
             name="itemUnit"
             value={itemUnit}
-            onChange={(e) => handleItemUnit(e)}
-            options={location.state}
+            onChange={setItemUnit}
+            options={unitOptions}
             placeholder="واحد آیتم را انتخاب کنید"
             styles={customStyles}
             className="is-valid"
@@ -374,9 +391,9 @@ const AddNewStockItem = () => {
             آستانه هشدار{" "}
             <span
               className={`text-danger ${
-                isPurchaseCostValid
+                isWarningLimitValid
                   ? "d-none"
-                  : isPurchaseCostValid === null
+                  : isWarningLimitValid === null
                   ? "d-none"
                   : ""
               }`}
@@ -389,9 +406,9 @@ const AddNewStockItem = () => {
             type="number"
             name="warningLimit"
             className={`form-control rounded-pill border-0 py-2 ${
-              isPurchaseCostValid
+              isWarningLimitValid
                 ? "is-valid"
-                : isPurchaseCostValid === null
+                : isWarningLimitValid === null
                 ? ""
                 : "is-invalid"
             }`}
