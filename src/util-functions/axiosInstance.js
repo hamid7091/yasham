@@ -26,12 +26,12 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     // Modify the response data here (e.g., parse, transform)
-    //console.log(response);
+    console.log(response);
     return response;
   },
   (error) => {
     // Handle response errors here
-
+    console.log(error);
     return Promise.reject(error);
   }
 );

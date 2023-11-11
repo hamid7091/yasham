@@ -37,7 +37,7 @@ const EditStockInfo = () => {
 
   const itemID = param.id;
   const [itemPicture, setItemPicture] = useState();
-  const [itemName, setItemName] = useState();
+  const [itemName, setItemName] = useState(stockData?.itemName);
   const [itemUnit, setItemUnit] = useState(stockData?.itemUnit);
   const [warningLimit, setWarningLimit] = useState();
   //const [purchasedAmount, setPurchasedAmount] = useState();
@@ -185,33 +185,33 @@ const EditStockInfo = () => {
       setWarningLimit(e.target.value);
     }
   };
-  const handleSubmitNewItem = async (event) => {
-    event.preventDefault();
-    Loading.standard("در حال ثبت محصول جدید");
-    const submitURL = "some bullshit url";
-    const submitHeader = new Headers();
-    submitHeader.append("Authorization", `Bearer ${accessToken}`);
-    const submitFormdata = new FormData();
-    submitFormdata.append("itemName", itemName);
-    submitFormdata.append("itemID", itemID);
-    submitFormdata.append("itemUnit", itemUnit.value);
-    // submitFormdata.append("purchasedAmount", purchasedAmount);
-    // submitFormdata.append("purchaseCost", purchaseCost);
-    submitFormdata.append("warningLimit", warningLimit);
-    if (itemPicture) {
-      submitFormdata.append("itemPicture", itemPicture);
-    }
-    const submitItemRequestOptions = {
-      method: "POST",
-      headers: submitHeader,
-      body: submitFormdata,
-      redirect: "follow",
-    };
-    const response = await fetchData(submitURL, submitItemRequestOptions);
-    console.log(response);
-    Loading.remove();
-  };
-  console.log(isItemNameValid);
+  // const handleSubmitNewItem = async (event) => {
+  //   event.preventDefault();
+  //   Loading.standard("در حال ثبت محصول جدید");
+  //   const submitURL = "some bullshit url";
+  //   const submitHeader = new Headers();
+  //   submitHeader.append("Authorization", `Bearer ${accessToken}`);
+  //   const submitFormdata = new FormData();
+  //   submitFormdata.append("itemName", itemName);
+  //   submitFormdata.append("itemID", itemID);
+  //   submitFormdata.append("itemUnit", itemUnit.value);
+  //   // submitFormdata.append("purchasedAmount", purchasedAmount);
+  //   // submitFormdata.append("purchaseCost", purchaseCost);
+  //   submitFormdata.append("warningLimit", warningLimit);
+  //   if (itemPicture) {
+  //     submitFormdata.append("itemPicture", itemPicture);
+  //   }
+  //   const submitItemRequestOptions = {
+  //     method: "POST",
+  //     headers: submitHeader,
+  //     body: submitFormdata,
+  //     redirect: "follow",
+  //   };
+  //   const response = await fetchData(submitURL, submitItemRequestOptions);
+  //   console.log(response);
+  //   Loading.remove();
+  // };
+  //console.log(isItemNameValid);
 
   const getItemData = async () => {
     try {
@@ -232,6 +232,8 @@ const EditStockInfo = () => {
           (element) => element.value == response.data.response.itemUnit
         )
       );
+      setItemName(response.data.response.itemName);
+      setWarningLimit(response.data.response.warningLimit);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -240,16 +242,23 @@ const EditStockInfo = () => {
   };
   const updateItemData = async (e) => {
     e.preventDefault();
+    console.log({
+      itemName: itemName,
+      itemID: itemID,
+      itemPicture: itemPicture ? itemPicture : null,
+      warningLimit: warningLimit,
+      itemUnit: itemUnit.value,
+    });
     try {
       Loading.standard("در حال ارسال درخواست");
       const response = await axiosInstance.post(
         "/item/update",
         {
-          itemName,
-          itemID,
-          itemPicture,
-          warningLimit,
+          itemName: itemName,
+          itemID: itemID,
+          warningLimit: warningLimit,
           itemUnit: itemUnit.value,
+          itemPicture: itemPicture ? itemPicture : null,
         },
         {
           headers: {
@@ -278,6 +287,10 @@ const EditStockInfo = () => {
   }, []);
 
   console.log(stockData);
+  console.log(itemID);
+  console.log(itemName);
+  console.log(itemUnit);
+  console.log(warningLimit);
   return (
     stockData && (
       <div className="container px-2" dir="rtl">
@@ -481,7 +494,7 @@ const EditStockInfo = () => {
             <input
               defaultValue={stockData?.warningLimit}
               required
-              type="number"
+              type="text"
               name="warningLimit"
               className={`form-control rounded-pill border-0 py-2 ${
                 isWarningLimitValid

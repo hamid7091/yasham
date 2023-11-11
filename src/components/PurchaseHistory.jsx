@@ -6,7 +6,7 @@ const PurchaseHistory = ({ data, unit }) => {
   return (
     <div className="pb-3">
       {data.map((item, index) => {
-        return <RestockCard key={index} data={item} unit={unit} />;
+        return <RestockCard key={index} data={item} />;
       })}
     </div>
   );

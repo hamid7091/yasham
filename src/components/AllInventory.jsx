@@ -188,6 +188,8 @@ const AllInventory = () => {
         { label: stockStatus, value: "stockStatus" },
       ]);
     }
+    console.log(stockStatus);
+    console.log(searchedStock);
     const filterRequestOptions = {
       method: "POST",
       headers: filterHeader,

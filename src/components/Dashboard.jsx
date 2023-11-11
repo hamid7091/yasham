@@ -360,20 +360,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  // let packagesKeys = {};
-  // let packagesValues = {};
-  // let packagesArray = [];
-  // if (userRole[0] === "shipping" || (userRole[0] === "reception" && packages)) {
-  //   packagesKeys = Object.keys(packages);
-  //   packagesValues = Object.values(packages);
-  //   packagesKeys.forEach((key, index) => {
-  //     packagesArray.push({
-  //       clientID: key,
-  //       packages: packagesValues[index],
-  //     });
-  //   });
-  // }
-
   const packageConvertor = (packagesArray) => {
     console.log("function Fired");
     const packageKeys = Object.keys(packagesArray);

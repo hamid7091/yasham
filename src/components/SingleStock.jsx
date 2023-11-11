@@ -357,7 +357,10 @@ const SingleStock = () => {
               موجودی انبار{" "}
             </span>
             <span className="grey-xlarge-bold">
-              <span>{singleStockData.overallStockData.stockAmount} </span>
+              <span>
+                {(+singleStockData.overallStockData
+                  .stockAmount).toLocaleString()}{" "}
+              </span>
               <span>{singleStockData.overallStockData.stockUnit}</span>
             </span>
           </div>
@@ -384,14 +387,10 @@ const SingleStock = () => {
           {tabState === "purchase" && (
             <PurchaseHistory
               data={singleStockData.detailStockData.restockHistory}
-              unit={singleStockData.overallStockData.stockUnit}
             />
           )}
           {tabState === "usage" && (
-            <UsageHistory
-              data={singleStockData.detailStockData.usageHistory}
-              unit={singleStockData.overallStockData.stockUnit}
-            />
+            <UsageHistory data={singleStockData.detailStockData.usageHistory} />
           )}
         </div>
       </div>

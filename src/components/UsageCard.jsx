@@ -2,7 +2,7 @@ import React from "react";
 import UsageIcon from "../assets/svg-icons/UsageIcon";
 import useDate from "../micro-components/useDate2";
 
-const UsageCard = ({ data, unit }) => {
+const UsageCard = ({ data }) => {
   console.log(data);
   const date = useDate(data.usageDate);
 
@@ -31,7 +31,7 @@ const UsageCard = ({ data, unit }) => {
           <UsageIcon />
         </span>
         <span className="bold-xlarge">{data.usageAmount}</span>
-        <span className="flex-grow-1 thin-default">{unit}</span>
+        <span className="flex-grow-1 thin-default">{data.amountUnit}</span>
         <span className="grey-default-thin">{date}</span>
       </div>
       <div className="timeline-card-extra-info">

@@ -27,7 +27,7 @@ const InventoryItemCard = ({ data }) => {
           <div className="bold-default">{data.stockName}</div>
           <div className="grey-default-thin d-flex gap-1">
             <span>موجودی :</span>
-            <span>{data.stockAmount}</span>
+            <span>{(+data.stockAmount).toLocaleString()}</span>
             <span>{data.stockUnit}</span>
           </div>
         </div>

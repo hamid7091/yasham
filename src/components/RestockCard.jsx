@@ -30,8 +30,10 @@ const RestockCard = ({ data, unit }) => {
         <span>
           <RestockIcon />
         </span>
-        <span className="bold-xlarge">{data.restockAmount}</span>
-        <span className="flex-grow-1 thin-default">{unit}</span>
+        <span className="bold-xlarge">
+          {(+data.restockAmount).toLocaleString()}
+        </span>
+        <span className="flex-grow-1 thin-default">{data.amountUnit}</span>
         <span className="grey-default-thin">{date}</span>
       </div>
       <div className="timeline-card-extra-info">
