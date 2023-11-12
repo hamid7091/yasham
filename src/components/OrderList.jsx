@@ -11,6 +11,7 @@ import BackArrow from "../assets/svg-icons/BackArrow";
 import moment from "moment-jalaali";
 import { Loading } from "notiflix";
 import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const OrderList = ({ isDirect, fromSingleBusiness }) => {
   const navigate = useNavigate();
@@ -19,6 +20,16 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
 
   // necessary states
   const [userRole, setUserRole] = useState();
+  const [
+    isEmployeeQ,
+    isClientQ,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
 
   const [pageNum, setPageNum] = useState(1);
   const [filterPageNum, setFilterPageNum] = useState(1);
@@ -291,8 +302,9 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
     }
   }, [userRole]);
 
-  console.log(userRole);
-  console.log(isClient);
+  console.log(isClientQ);
+  console.log(isEmployeeQ);
+
   return (
     userRole && (
       <div className="px-3 mb-100 container" dir="rtl">
