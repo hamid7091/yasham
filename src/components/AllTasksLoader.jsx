@@ -35,33 +35,11 @@ const AllTasksLoader = ({ isDirect }) => {
 
   const filterArea = "allTasks";
 
-  //const totalTasksURL = "https://samane.zbbo.net/api/v1/task/all_tasks";
-  //const totalTasksHeader = new Headers();
-  //totalTasksHeader.append("Authorization", `Bearer ${accessToken}`);
-  //const totalTasksFormdata = new FormData();
-  //totalTasksFormdata.append("pageNum", currentPageNumber);
-  // const totalTasksRequestOptions = {
-  //   method: "POST",
-  //   headers: totalTasksHeader,
-  //   body: totalTasksFormdata,
-  //   redirect: "follow",
-  // };
-
   const invoiceStatusOptions = [
     { clientName: "حمید قهرمانی", clientID: 3 }, // به منظور همخوانی با نحوه کانورت در پاپ اپ فیلتر بدین شکل نوشته شده است
     { clientName: "علی قناتی", clientID: 1 },
     { clientName: "نیره بوستانی", clientID: 0 },
   ];
-
-  // async function getTotalTasksData(url, options) {
-  //   setIsLoading(true);
-  //   const response = await fetchData(url, options);
-  //   setTotalTasksData((prevData) => [...prevData, ...response.Tasks]);
-  //   setTotalPages(response.total_pages);
-  //   setCurrentPageNumber((prevPageNum) => prevPageNum + 1);
-  //   setIsLoading(false);
-  //   setIsSom(true);
-  // }
 
   // ===============================================
   const getTaskListAxios = async () => {
@@ -95,93 +73,6 @@ const AllTasksLoader = ({ isDirect }) => {
       setStartDate(null);
     }
   };
-  // const getFilteredTotalTasksData = async (event) => {
-  //   Loading.standard("در حال دریافت اطلاعات");
-  //   event?.preventDefault();
-  //   window.scrollTo(0, 0);
-  //   setCurrentFilteredPageNumber(1);
-  //   setFilteredCats([]);
-  //   setIsFiltered(true);
-  //   setIsFilterPopupActive(false);
-  //   const filterHeader = new Headers();
-  //   filterHeader.append("Authorization", `Bearer ${accessToken}`);
-
-  //   let filterFormdata = new FormData();
-  //   filterFormdata.append("pageNum", 1);
-  //   if (assignedEmployeeID) {
-  //     console.log(assignedEmployeeID);
-  //     filterFormdata.append("employeeID", assignedEmployeeID.value);
-  //     setFilteredCats((prevStates) => [
-  //       ...prevStates,
-  //       { label: assignedEmployeeID.label, value: "client" },
-  //     ]);
-  //   }
-  //   if (startDate && endDate) {
-  //     console.log(typeof startDate);
-  //     filterFormdata.append(
-  //       "startDate",
-  //       typeof startDate === "object" ? startDate?.toUnix() : startDate
-  //     );
-  //     filterFormdata.append(
-  //       "endDate",
-  //       typeof endDate === "object" ? endDate?.toUnix() : endDate
-  //     );
-  //     setFilteredCats((prevStates) => [
-  //       ...prevStates,
-  //       {
-  //         label:
-  //           typeof startDate === "object"
-  //             ? `${moment
-  //                 .unix(startDate?.toUnix())
-  //                 .format("jYYYY/jM/jD")} تا ${moment
-  //                 .unix(endDate?.toUnix())
-  //                 .format("jYYYY/jM/jD")}`
-  //             : `${moment.unix(startDate).format("jYYYY/jM/jD")} تا ${moment
-  //                 .unix(endDate)
-  //                 .format("jYYYY/jM/jD")}`,
-  //         value: "date",
-  //       },
-  //     ]);
-  //   }
-  //   const filterRequestOptions = {
-  //     method: "POST",
-  //     headers: filterHeader,
-  //     body: filterFormdata,
-  //     redirect: "follow",
-  //   };
-
-  //   const response = await fetchData(totalTasksURL, filterRequestOptions);
-  //   console.log(response);
-  //   setCurrentFilteredPageNumber((prevNum) => prevNum + 1);
-  //   setFilteredTotalTasksData(response.Tasks);
-  //   setFilteredTotalPages(response.total_pages);
-  //   Loading.remove();
-  // };
-  // const getFilteredTotalTasksDataAuto = async () => {
-  //   const filterHeader = new Headers();
-  //   filterHeader.append("Authorization", `Bearer ${accessToken}`);
-  //   const filterFormdata = new FormData();
-  //   filterFormdata.append("pageNum", currentFilteredPageNumber);
-  //   if (assignedEmployeeID) {
-  //     filterFormdata.append("invoiceStatusID", assignedEmployeeID.value);
-  //   }
-  //   if (startDate && endDate) {
-  //     filterFormdata.append("startDate", startDate?.toUnix());
-  //     filterFormdata.append("endDate", endDate?.toUnix());
-  //   }
-  //   const filterRequestOptions = {
-  //     method: "POST",
-  //     headers: filterHeader,
-  //     body: filterFormdata,
-  //     redirect: "follow",
-  //   };
-  //   const response = await fetchData(totalTasksURL, filterRequestOptions);
-  //   setCurrentFilteredPageNumber((prevNum) => prevNum + 1);
-  //   setFilteredTotalTasksData((prevItems) => [...prevItems, ...response.Tasks]);
-  //   setFilteredTotalPages(response.total_pages);
-  //   console.log(response);
-  // };
-
   const getFilteredTaskListAxios = async (e) => {
     e?.preventDefault();
     window.scrollTo(0, 0);

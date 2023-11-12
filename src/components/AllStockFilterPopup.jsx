@@ -53,9 +53,7 @@ const AllStockFilterPopup = ({
                   type="radio"
                   name="op"
                   id="op1"
-                  defaultChecked={
-                    stockStatus == "2" || stockStatus === null ? true : false
-                  }
+                  defaultChecked={stockStatus == "2" ? true : false}
                 />
                 <label className="form-check-label bold-large" htmlFor="op1">
                   موجود

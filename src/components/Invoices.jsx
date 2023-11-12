@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
-import { Loading } from "notiflix";
+import { Loading } from "notiflix/build/notiflix-aio";
 import moment from "moment-jalaali";
 import fetchData from "../util-functions/fetchData";
 import InvoiceCard from "./InvoiceCard";
@@ -10,10 +10,10 @@ import FilterPopup from "./FilterPopup";
 import PopupBackground from "./PopupBackground";
 import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
 import Message from "../micro-components/Message";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const Invoices = ({ fromSingleBusiness }) => {
   const navigate = useNavigate();
-  const accessToken = window.localStorage.getItem("AccessToken");
 
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [currentFPageNum, setCurrentFPageNum] = useState(1);
@@ -29,15 +29,13 @@ const Invoices = ({ fromSingleBusiness }) => {
   const [isFiltered, setIsFiltered] = useState(false);
   const [filteredCats, setFilteredCats] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const filterArea = "factors";
+  const filterArea = "orders";
 
   const invoiceStatusOptions = [
     { clientName: "پرداخت شده", clientID: 3 }, // به منظور همخوانی با نحوه کانورت در پاپ اپ فیلتر بدین شکل نوشته شده است
     { clientName: "در انتظار پرداخت", clientID: 1 },
     { clientName: "لغو شده", clientID: 2 },
   ];
-
-  const InvoicesURL = "https://samane.zbbo.net/api/v1/invoice/all_invoices";
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
@@ -51,28 +49,25 @@ const Invoices = ({ fromSingleBusiness }) => {
       setStartDate(null);
     }
   };
-  const getFilteredInvoicesData = async (event) => {
-    Loading.standard("در حال دریافت اطلاعات");
+  const getFilteredInvoices = async (event) => {
     event?.preventDefault();
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
     setCurrentFPageNum(1);
     setFilteredCats([]);
     setIsFiltered(true);
     setIsFilterPopupActive(false);
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
-    let filterFormdata = new FormData();
-    filterFormdata.append("pageNum", 1);
+    const formdata = new FormData();
+    formdata.append("pageNum", 1);
     if (invoiceStatus) {
-      filterFormdata.append("statusID", invoiceStatus.value);
+      formdata.append("statusID", invoiceStatus.value);
       setFilteredCats((prevStates) => [
         ...prevStates,
         { label: invoiceStatus.label, value: "client" },
       ]);
     }
     if (startDate && endDate) {
-      filterFormdata.append("startDate", startDate?.toUnix());
-      filterFormdata.append("endDate", endDate?.toUnix());
+      formdata.append("startDate", startDate?.toUnix());
+      formdata.append("endDate", endDate?.toUnix());
       setFilteredCats((prevStates) => [
         ...prevStates,
         {
@@ -85,67 +80,88 @@ const Invoices = ({ fromSingleBusiness }) => {
         },
       ]);
     }
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
-
-    const response = await fetchData(InvoicesURL, filterRequestOptions);
-    setCurrentFPageNum((prevNum) => prevNum + 1);
-    setFilteredFactorsData(response.cards);
-    setTotalFPages(response.total_pages);
-    Loading.remove();
-    console.log(response);
-    console.log(startDate?.toUnix());
-    console.log(endDate?.toUnix());
-    console.log(invoiceStatus?.value);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/invoice/all_invoices",
+        formdata,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setCurrentFPageNum((prevNum) => prevNum + 1);
+      setFilteredFactorsData(response.data.response.cards);
+      setTotalFPages(response.data.response.total_pages);
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-  const getFilteredInvoicesDataAuto = async () => {
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
-    let filterFormdata = new FormData();
-    filterFormdata.append("pageNum", currentFPageNum);
+  const getFilteredInvoicesAuto = async () => {
+    const formdata = new FormData();
+    formdata.append("pageNum", currentFPageNum);
     if (invoiceStatus) {
-      filterFormdata.append("statusID", invoiceStatus.value);
+      formdata.append("statusID", invoiceStatus.value);
     }
     if (startDate && endDate) {
-      filterFormdata.append("startDate", startDate?.toUnix());
-      filterFormdata.append("endDate", endDate?.toUnix());
+      formdata.append("startDate", startDate?.toUnix());
+      formdata.append("endDate", endDate?.toUnix());
     }
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
-    const response = await fetchData(InvoicesURL, filterRequestOptions);
-    setCurrentFPageNum((prevNum) => prevNum + 1);
-    setFilteredFactorsData((prevItems) => [...prevItems, ...response.cards]);
-    setTotalFPages(response.total_pages);
-  };
-  const invoicesHeaders = new Headers();
-  invoicesHeaders.append("Authorization", `Bearer ${accessToken}`);
-  const invoicesFormdata = new FormData();
-  invoicesFormdata.append("pageNum", currentPageNum);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/invoice/all_invoices",
+        formdata,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setCurrentFPageNum((prevNum) => prevNum + 1);
+      setFilteredFactorsData((prevItems) => [
+        ...prevItems,
+        ...response.data.response.cards,
+      ]);
+      setTotalFPages(response.data.response.total_pages);
+      console.log(response.data.response);
 
-  const invoicesRequestOptions = {
-    method: "POST",
-    headers: invoicesHeaders,
-    body: invoicesFormdata,
-    redirect: "follow",
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-  async function getInvoicesData(url, options) {
-    const invoicesData = await fetchData(url, options);
-    console.log(Array.isArray(invoiceStatus));
-    // if (Array.isArray(invoiceStatus)) {
-    setFactorsData((prevItems) => [...prevItems, ...invoicesData.cards]);
-    setTotalPages(invoicesData.total_pages);
-    setCurrentPageNum((prevPage) => prevPage + 1);
-    // }
-    console.log(invoicesData);
-  }
+  const getInvoicesList = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/invoice/all_invoices",
+        { pageNum: currentPageNum },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setFactorsData((prevItems) => [
+        ...prevItems,
+        ...response.data.response.cards,
+      ]);
+      setTotalPages(response.data.response.total_pages);
+      setCurrentPageNum((prevPage) => prevPage + 1);
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+
   const handleScroll = () => {
     if (
       !isFiltered &&
@@ -154,7 +170,7 @@ const Invoices = ({ fromSingleBusiness }) => {
         document.documentElement.scrollTop <
         1
     ) {
-      getInvoicesData(InvoicesURL, invoicesRequestOptions);
+      getInvoicesList();
     } else if (
       isFiltered &&
       document.documentElement.offsetHeight -
@@ -162,7 +178,7 @@ const Invoices = ({ fromSingleBusiness }) => {
         document.documentElement.scrollTop <
         1
     ) {
-      getFilteredInvoicesDataAuto();
+      getFilteredInvoicesAuto();
     }
   };
   const handleCapReduction = (cat) => {
@@ -180,12 +196,11 @@ const Invoices = ({ fromSingleBusiness }) => {
   };
 
   useEffect(() => {
-    // console.log("first useEffect fired");
-    if (accessToken === null) {
+    if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
     }
     if (!isFiltered) {
-      getInvoicesData(InvoicesURL, invoicesRequestOptions);
+      getInvoicesList();
     }
   }, []);
   useEffect(() => {
@@ -200,31 +215,12 @@ const Invoices = ({ fromSingleBusiness }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [currentPageNum, currentFPageNum]);
   useEffect(() => {
-    // console.log("newuseeffectfired");
     if (isSubmitted) {
-      getFilteredInvoicesData();
+      getFilteredInvoices();
       setIsSubmitted(false);
     }
   }, [isSubmitted, invoiceStatus, startDate, endDate]);
 
-  const mockData = [
-    {
-      factorID: 123456,
-      date: "1401-02-02",
-      price: 2500000,
-      paymentMethod: "نقد",
-      invoiceID: 1,
-    },
-    {
-      factorID: 654321,
-      date: "-",
-      price: 3500000,
-      paymentMethod: "-",
-      invoiceID: 3,
-    },
-  ];
-
-  console.log(factorsData);
   return (
     <div className="container" dir="rtl">
       {isFilterPopupActive && (
@@ -236,7 +232,7 @@ const Invoices = ({ fromSingleBusiness }) => {
             handleEndDateChange={handleEndDateChange}
             startDate={startDate}
             endDate={endDate}
-            handleFilter={getFilteredInvoicesData}
+            handleFilter={getFilteredInvoices}
             clientName={invoiceStatus}
             setClientName={setInvoiceStatus}
             setIsFilter={setIsFiltered}

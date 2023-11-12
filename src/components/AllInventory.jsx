@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AllStockFilterPopup from "./AllStockFilterPopup";
 import PopupBackground from "./PopupBackground";
@@ -7,86 +7,12 @@ import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
 import Message from "../micro-components/Message";
 import InventoryItemCard from "./InventoryItemCard";
 import FilterIcon from "../assets/svg-icons/FilterIcon";
-import fetchData from "../util-functions/fetchData";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const AllInventory = () => {
-  const inventoryMockData = [
-    {
-      stockID: 1,
-      stockName: "گچ سفید کاری",
-      stockAmount: 5,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      stockStatus: 0,
-    },
-    {
-      stockID: 2,
-      stockName: "گچ سیاه",
-      stockAmount: 6,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      stockStatus: 1,
-    },
-    {
-      stockID: 3,
-      stockName: "سیمان",
-      stockAmount: 0,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      stockStatus: 0,
-    },
-    {
-      stockID: 9,
-      stockName: "الکل",
-      stockAmount: 7,
-      stockUnit: "لیتر",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      stockStatus: 1,
-    },
-    {
-      stockID: 10,
-      stockName: "پشمک",
-      stockAmount: 65,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      stockStatus: 2,
-    },
-    {
-      stockID: 10,
-      stockName: "میوه",
-      stockAmount: 45,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      stockStatus: 2,
-    },
-    {
-      stockID: 11,
-      stockName: "چای",
-      stockAmount: 84,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      stockStatus: 2,
-    },
-    {
-      stockID: 12,
-      stockName: "اب نبات",
-      stockAmount: 284,
-      stockUnit: "عدد",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      stockStatus: 2,
-    },
-  ];
   const navigate = useNavigate();
-  const accessToken = window.localStorage.getItem("AccessToken");
+  const searchField = useRef(null);
 
   // ----States---
   const [currentPageNum, setCurrentPageNum] = useState(1);
@@ -98,7 +24,7 @@ const AllInventory = () => {
   const [isFilterPopupActive, setIsFilterPopupActive] = useState(false);
   const [isSom, setIsSom] = useState(false);
 
-  const [stockStatus, setStockStatus] = useState(2);
+  const [stockStatus, setStockStatus] = useState();
   const [searchedStock, setSearchedStock] = useState();
   const [isFiltered, setIsFiltered] = useState(false);
 
@@ -107,22 +33,9 @@ const AllInventory = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const filterArea = "stocks";
-
-  const allInventoryURL = "https://samane.zbbo.net/api/v1/item/all_items";
-  const allInventoryHeader = new Headers();
-  allInventoryHeader.append("Authorization", `Bearer ${accessToken}`);
-  const allInventoryFormdata = new FormData();
-  allInventoryFormdata.append("pageNum", currentPageNum);
-  const allInventoryRequestOptions = {
-    method: "POST",
-    headers: allInventoryHeader,
-    body: allInventoryFormdata,
-    redirect: "follow",
+  const handleSearchedStock = (event) => {
+    setSearchedStock(event.target.value);
   };
-
-  const handleSearchedStock = () => {};
-
   const handleCapReduction = (cat) => {
     console.log(cat);
     console.log(isFiltered);
@@ -137,83 +50,108 @@ const AllInventory = () => {
     }
     console.log(filteredCats.length);
   };
-
-  const getFilteredInventoryDataAuto = async () => {
-    console.log("fda fired");
-    console.log(filteredCurrentPageNum);
-    console.log(stockStatus);
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
-    let filterFormdata = new FormData();
-    filterFormdata.append("pageNum", filteredCurrentPageNum);
+  const getFilteredInventoryListAutoAxios = async () => {
+    const formdata = new FormData();
+    formdata.append("pageNum", filteredCurrentPageNum);
     if (stockStatus) {
-      filterFormdata.append("stockStatus", stockStatus);
+      formdata.append("stockStatus", stockStatus);
     }
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
-    const response = await fetchData(allInventoryURL, filterRequestOptions);
-    setFilteredCurrentPageNum((prevNum) => prevNum + 1);
-    setFilteredAllStockData((prevItems) => [...prevItems, ...response.cards]);
-    setFilteredTotalPages(response.total_pages);
+    if (searchedStock) {
+      formdata.append("stockName", searchedStock);
+    }
+    try {
+      Loading.standard("درحال دریافت اطلاعات");
+      const response = await axiosInstance.post("/item/all_items", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setFilteredCurrentPageNum((prevNum) => prevNum + 1);
+      setFilteredAllStockData((prevItems) => [
+        ...prevItems,
+        ...response.data.response.cards,
+      ]);
+      setFilteredTotalPages(response.data.response.total_pages);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-
-  const getFilteredInventoryData = async (event) => {
-    console.log("fd fired");
-    Loading.standard("در حال دریافت اطلاعات");
+  const getFilteredInventoryListAxios = async (event) => {
     event?.preventDefault();
     window.scrollTo({ top: 0, behavior: "instant" });
     setFilteredCurrentPageNum(1);
     setFilteredCats([]);
     setIsFiltered(true);
     setIsFilterPopupActive(false);
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
-    let filterFormdata = new FormData();
-    filterFormdata.append("pageNum", 1);
+
+    const formdata = new FormData();
+    formdata.append("pageNum", 1);
     if (searchedStock) {
-      filterFormdata.append("stockName", searchedStock);
+      formdata.append("stockName", searchedStock);
       setFilteredCats((prevStates) => [
         ...prevStates,
         { label: searchedStock, value: "stockName" },
       ]);
+      searchField.current.value = null;
     }
     if (stockStatus) {
-      filterFormdata.append("stockStatus", stockStatus);
+      console.log(stockStatus);
+      formdata.append("stockStatus", stockStatus);
       setFilteredCats((prevStates) => [
         ...prevStates,
         { label: stockStatus, value: "stockStatus" },
       ]);
     }
-    console.log(stockStatus);
-    console.log(searchedStock);
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
-
-    const response = await fetchData(allInventoryURL, filterRequestOptions);
-    console.log(response);
-    setFilteredCurrentPageNum((prevNum) => prevNum + 1);
-    setFilteredAllStockData(response.cards);
-    setFilteredTotalPages(response.total_pages);
-    Loading.remove();
+    try {
+      Loading.standard("درحال دریافت اطلاعات");
+      const response = await axiosInstance.post("/item/all_items", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setFilteredCurrentPageNum((prevNum) => prevNum + 1);
+      setFilteredAllStockData(response.data.response.cards);
+      setFilteredTotalPages(response.data.response.total_pages);
+      setSearchedStock(null);
+      setStockStatus(null);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-
-  const getAllInventoryData = async (url, options) => {
+  const getInventoryListAxios = async () => {
     setIsLoading(true);
-    const response = await fetchData(url, options);
-    setAllStockData((prevCards) => [...prevCards, ...response.cards]);
-    setTotalPages(response.total_pages);
-    setCurrentPageNum((prevNum) => prevNum + 1);
-    setIsLoading(false);
-    setIsSom(true);
-    console.log(response);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/item/all_items",
+        {
+          pageNum: currentPageNum,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setAllStockData((prevCards) => [
+        ...prevCards,
+        ...response.data.response.cards,
+      ]);
+      setTotalPages(response.data.response.total_pages);
+      setCurrentPageNum((prevNum) => prevNum + 1);
+      setIsLoading(false);
+      setIsSom(true);
+      console.log(response.data.response);
+
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
   const handleScroll = () => {
     if (
@@ -224,7 +162,7 @@ const AllInventory = () => {
         1 &&
       isSom
     ) {
-      getAllInventoryData(allInventoryURL, allInventoryRequestOptions);
+      getInventoryListAxios();
     } else if (
       isFiltered &&
       document.documentElement.offsetHeight -
@@ -232,18 +170,15 @@ const AllInventory = () => {
         document.documentElement.scrollTop <
         1
     ) {
-      console.log("sc fired");
-
-      getFilteredInventoryDataAuto();
+      getFilteredInventoryListAutoAxios();
     }
   };
-
   useEffect(() => {
-    if (accessToken === null) {
+    if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
     }
     if (!isFiltered) {
-      getAllInventoryData(allInventoryURL, allInventoryRequestOptions);
+      getInventoryListAxios();
     }
   }, []);
   useEffect(() => {
@@ -257,19 +192,18 @@ const AllInventory = () => {
   }, [currentPageNum, filteredCurrentPageNum]);
   useEffect(() => {
     if (isSubmitted) {
-      getFilteredInventoryData();
+      getFilteredInventoryListAxios();
       setIsSubmitted(false);
     }
   }, [isSubmitted, stockStatus, searchedStock]);
 
-  console.log(filteredAllStockData);
   return (
     <div className="mb-100 px-3 mt-3" dir="rtl">
       {isFilterPopupActive && (
         <>
           <AllStockFilterPopup
             setIsFilterPopupActive={setIsFilterPopupActive}
-            handleFilter={getFilteredInventoryData}
+            handleFilter={getFilteredInventoryListAxios}
             setIsFilter={setIsFiltered}
             setStockStatus={setStockStatus}
             stockStatus={stockStatus}
@@ -282,13 +216,13 @@ const AllInventory = () => {
       )}
       <div className="d-flex align-items-center gap-3 mb-3">
         <input
+          ref={searchField}
           onChange={handleSearchedStock}
-          value={searchedStock}
           type="text"
           className="flex-grow-1 rounded-pill p-3"
           placeholder="جستجوی نام بیمار ..."
         />
-        <span className="has-pointer" onClick={getFilteredInventoryData}>
+        <span className="has-pointer" onClick={getFilteredInventoryListAxios}>
           <SearchIcon />
         </span>
       </div>
@@ -303,8 +237,9 @@ const AllInventory = () => {
                 >
                   <span className="thin-default">
                     {cat.label === "1" && "رو به اتمام"}
-                    {cat.label == "2" && "موجود"}
+                    {cat.label === "2" && "موجود"}
                     {cat.label === "0" && "ناموجود"}
+                    {cat.value === "stockName" && cat.label}
                   </span>
                   <span onClick={() => handleCapReduction(cat)}>
                     <BLCloseBtn />
@@ -349,7 +284,6 @@ const AllInventory = () => {
         className="fixed-bottom-80 drop-shadow has-pointer"
         onClick={() => {
           setIsFilterPopupActive(true);
-          stockStatus === null && setStockStatus(2);
         }}
       >
         <FilterIcon />

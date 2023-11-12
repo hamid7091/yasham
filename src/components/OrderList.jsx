@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import AllOrders from "./AllOrders";
-import ActiveOrders from "./ActiveOrders";
-import DoneOrders from "./DoneOrders";
-import CanceledOrders from "./CanceledOrders";
-import fetchData from "../util-functions/fetchData";
 import SearchIcon from "../assets/svg-icons/SearchIcon";
 import ClientTaskCard from "./ClientTaskCard";
 import Message from "../micro-components/Message";
@@ -15,14 +10,12 @@ import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import moment from "moment-jalaali";
 import { Loading } from "notiflix";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const OrderList = ({ isDirect, fromSingleBusiness }) => {
   const navigate = useNavigate();
   const accessToken = window.localStorage.getItem("AccessToken");
   const location = useLocation();
-
-  console.log(isDirect);
-  console.log(location.state);
 
   // necessary states
   const [pageNum, setPageNum] = useState(1);
@@ -43,41 +36,16 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isSom, setIsSom] = useState(false);
 
   const filterArea = "orders";
   const isSingle = false;
-
-  const mockData = [
-    {
-      orderID: 123456,
-      patientName: "حمید قهرمانی",
-      date: "1401-06-25",
-      price: "2,500,000",
-      invoiceStatus: 1,
-    },
-    {
-      orderID: 852085,
-      patientName: "علی قناتی",
-      date: "1401-02-28",
-      price: "3,500,000",
-      invoiceStatus: 2,
-    },
-    {
-      orderID: 654321,
-      patientName: "نام بیمار",
-      date: "1401-08-26",
-      price: "4,500,000",
-      invoiceStatus: 3,
-    },
-  ];
 
   const invoiceStatusOptions = [
     { clientName: "پرداخت شده", clientID: 3 }, // به منظور همخوانی با نحوه کانورت در پاپ اپ فیلتر بدین شکل نوشته شده است
     { clientName: "در انتظار پرداخت", clientID: 1 },
     { clientName: "در انتظار قیمت گذاری", clientID: 0 },
   ];
-
-  const historyURL = "https://samane.zbbo.net/api/v1/order/history";
 
   const handleSearchedPatientName = (event) => {
     setSearchedPatientName(event.target.value);
@@ -95,20 +63,17 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       setStartDate(null);
     }
   };
-  const getFilteredHistoryData = async (event) => {
-    Loading.standard("در حال دریافت اطلاعات");
+  const getFilteredOrderList = async (event) => {
     event?.preventDefault();
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
     setFilterPageNum(1);
     setFilteredCats([]);
     setIsFiltered(true);
     setIsFilterPopupActive(false);
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
-    let filterFormdata = new FormData();
-    filterFormdata.append("pageNum", 1);
+    const formdata = new FormData();
+    formdata.append("pageNum", 1);
     if (searchedPatientName) {
-      filterFormdata.append("patientName", searchedPatientName);
+      formdata.append("patientName", searchedPatientName);
       setFilteredCats((prevStates) => [
         ...prevStates,
         { label: searchedPatientName, value: "patientName" },
@@ -116,19 +81,18 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       // setSearchedPatientName(null);
     }
     if (invoiceStatus) {
-      filterFormdata.append("invoiceStatusID", invoiceStatus.value);
+      formdata.append("invoiceStatusID", invoiceStatus.value);
       setFilteredCats((prevStates) => [
         ...prevStates,
         { label: invoiceStatus.label, value: "client" },
       ]);
     }
     if (startDate && endDate) {
-      console.log(typeof startDate);
-      filterFormdata.append(
+      formdata.append(
         "startDate",
         typeof startDate === "object" ? startDate?.toUnix() : startDate
       );
-      filterFormdata.append(
+      formdata.append(
         "endDate",
         typeof endDate === "object" ? endDate?.toUnix() : endDate
       );
@@ -149,87 +113,103 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
         },
       ]);
     }
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
 
-    const response = await fetchData(historyURL, filterRequestOptions);
-    setFilterPageNum((prevNum) => prevNum + 1);
-    setFilteredOrdersData(response.cards);
-    setFilterTotalPages(response.total_pages);
-    setSearchedPatientName("");
-    Loading.remove();
-    console.log(invoiceStatus);
-    console.log(startDate);
-    console.log(endDate);
-    console.log(response);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/order/history", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setFilterPageNum((prevNum) => prevNum + 1);
+      setFilteredOrdersData(response.data.response.cards);
+      setFilterTotalPages(response.data.response.total_pages);
+      setIsSom(true);
+      setSearchedPatientName("");
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
   // ----------------------------------------------------------------------
-  const getFilteredHistoryDataAuto = async () => {
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
-    let filterFormdata = new FormData();
-    filterFormdata.append("pageNum", filterPageNum);
+
+  const getFilteredOrderListAuto = async () => {
+    const formdata = new FormData();
+    formdata.append("pageNum", filterPageNum);
     if (invoiceStatus) {
-      filterFormdata.append("invoiceStatusID", invoiceStatus.value);
+      formdata.append("invoiceStatusID", invoiceStatus.value);
     }
     if (startDate && endDate) {
-      filterFormdata.append("startDate", startDate?.toUnix());
-      filterFormdata.append("endDate", endDate?.toUnix());
+      formdata.append("startDate", startDate?.toUnix());
+      formdata.append("endDate", endDate?.toUnix());
     }
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
-    const response = await fetchData(historyURL, filterRequestOptions);
-    setFilterPageNum((prevNum) => prevNum + 1);
-    setFilteredOrdersData((prevItems) => [...prevItems, ...response.cards]);
-    setFilterTotalPages(response.total_pages);
+    try {
+      const response = await axiosInstance.post("/order/history", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setFilterPageNum((prevNum) => prevNum + 1);
+      setFilteredOrdersData((prevItems) => [
+        ...prevItems,
+        ...response.data.response.cards,
+      ]);
+      setFilterTotalPages(response.data.response.total_pages);
+    } catch (error) {
+      console.error(error);
+    }
   };
-
-  const historyHeaders = new Headers();
-  historyHeaders.append("Authorization", `Bearer ${accessToken}`);
-  const historyFormdata = new FormData();
-  historyFormdata.append("pageNum", pageNum);
-
-  const historyRequestOptions = {
-    method: "POST",
-    headers: historyHeaders,
-    body: historyFormdata,
-    redirect: "follow",
-  };
-
-  async function getHistoryData(url, options) {
+  const getOrderList = async () => {
     setIsLoading(true);
-    const historyData = await fetchData(url, options);
-    setOrdersData((prevItems) => [...prevItems, ...historyData?.cards]);
-    setTotalPages(historyData.total_pages);
-    setPageNum((prevPage) => prevPage + 1);
-    setIsLoading(false);
-    console.log(historyData);
-  }
+    try {
+      Loading.standard("درحال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/order/history",
+        {
+          pageNum,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setOrdersData((prevItems) => [
+        ...prevItems,
+        ...response.data.response?.cards,
+      ]);
+      setTotalPages(response.data.response.total_pages);
+      setPageNum((prevPage) => prevPage + 1);
+      setIsLoading(false);
+      setIsSom(true);
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
   const handleScroll = () => {
     if (
       !isFiltered &&
       document.documentElement.offsetHeight -
         window.innerHeight -
         document.documentElement.scrollTop <
-        1
+        1 &&
+      isSom
     ) {
-      getHistoryData(historyURL, historyRequestOptions);
+      getOrderList();
     } else if (
       isFiltered &&
       document.documentElement.offsetHeight -
         window.innerHeight -
         document.documentElement.scrollTop <
-        1
+        1 &&
+      isSom
     ) {
-      getFilteredHistoryDataAuto();
+      getFilteredOrderListAuto();
     }
   };
   const handleCapReduction = (cat) => {
@@ -254,13 +234,12 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       navigate("/");
     }
     if (!isFiltered) {
-      getHistoryData(historyURL, historyRequestOptions);
+      getOrderList();
     }
     if (isFiltered) {
-      getFilteredHistoryData();
+      getFilteredOrderList();
     }
   }, [isFiltered]);
-
   useEffect(() => {
     // console.log("second useEffect fired");
     if (totalPages >= pageNum && !isFiltered) {
@@ -272,19 +251,16 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
     }
     return () => window.removeEventListener("scroll", handleScroll);
   }, [pageNum, filterPageNum]);
-
   useEffect(() => {
     // console.log("newuseeffectfired");
     if (isSubmitted) {
-      getFilteredHistoryData();
+      getFilteredOrderList();
       setIsSubmitted(false);
     }
   }, [isSubmitted, invoiceStatus, startDate, endDate]);
 
   const today = moment().format("jYYYY/jMM/jDD");
   const todatUnix = moment().unix();
-  console.log(today);
-  console.log(todatUnix);
 
   useEffect(() => {
     if (location.state === "searchToday") {
@@ -305,7 +281,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
             handleEndDateChange={handleEndDateChange}
             startDate={startDate}
             endDate={endDate}
-            handleFilter={getFilteredHistoryData}
+            handleFilter={getFilteredOrderList}
             clientName={invoiceStatus}
             setClientName={setInvoiceStatus}
             setIsFilter={setIsFiltered}
@@ -333,7 +309,6 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
         <div className="d-flex align-items-center gap-3">
           <input
             onChange={handleSearchedPatientName}
-            value={searchedPatientName}
             type="text"
             className="flex-grow-1 rounded-pill p-3"
             placeholder={`${
@@ -342,7 +317,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
                 : "جستجوی نام بیمار ..."
             }`}
           />
-          <span className="has-pointer" onClick={getFilteredHistoryData}>
+          <span className="has-pointer" onClick={getFilteredOrderList}>
             <SearchIcon />
           </span>
         </div>

@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import EditPen from "../assets/svg-icons/EditPen";
 import Select from "react-select";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import axiosInstance from "../util-functions/axiosInstance";
+import { Notify } from "notiflix/build/notiflix-notify-aio";
 
 const AddNewStockItem = () => {
+  const navigate = useNavigate();
   // ---------------states------------------
   const [itemPicture, setItemPicture] = useState();
   const [itemName, setItemName] = useState();
@@ -190,7 +192,14 @@ const AddNewStockItem = () => {
         },
       });
       console.log(response.data.response);
-      Loading.remove();
+      if (response.data.response.message) {
+        Loading.remove();
+        Notify.success(response.data.response.message);
+        navigate("/");
+      } else {
+        Loading.remove();
+        Notify.failure("خطا! مجددا تلاش کنید");
+      }
     } catch (error) {
       console.error(error);
       Loading.remove();

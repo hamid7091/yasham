@@ -5,7 +5,6 @@ import LeftArrow from "../assets/svg-icons/LeftArrow";
 import { Link } from "react-router-dom";
 
 const InvoiceCard = (factor) => {
-  console.log(factor.factor);
   const newDate = useDate(factor.factor.date);
   return (
     <div className="bg-white rounded-4 p-4 mb-3 d-flex flex-column">
