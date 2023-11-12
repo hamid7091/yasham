@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import { Loading } from "notiflix/build/notiflix-aio";
 import moment from "moment-jalaali";
-import fetchData from "../util-functions/fetchData";
 import InvoiceCard from "./InvoiceCard";
 import FilterIcon from "../assets/svg-icons/FilterIcon";
 import FilterPopup from "./FilterPopup";
@@ -161,7 +160,6 @@ const Invoices = ({ fromSingleBusiness }) => {
       Loading.remove();
     }
   };
-
   const handleScroll = () => {
     if (
       !isFiltered &&
@@ -222,7 +220,7 @@ const Invoices = ({ fromSingleBusiness }) => {
   }, [isSubmitted, invoiceStatus, startDate, endDate]);
 
   return (
-    <div className="container" dir="rtl">
+    <div className="container px-4" dir="rtl">
       {isFilterPopupActive && (
         <>
           <FilterPopup
@@ -293,7 +291,6 @@ const Invoices = ({ fromSingleBusiness }) => {
           className="footer-container px-4 py-3 fixed-bottom bottom-0 d-flex justify-content-between align-items-center single-footer-bg has-pointer"
           onClick={() => {
             setIsFilterPopupActive(true);
-            // setIsFilter(true);
           }}
         >
           <FilterIcon />

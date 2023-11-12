@@ -18,6 +18,8 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
   const location = useLocation();
 
   // necessary states
+  const [userRole, setUserRole] = useState();
+
   const [pageNum, setPageNum] = useState(1);
   const [filterPageNum, setFilterPageNum] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -191,6 +193,15 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       Loading.remove();
     }
   };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleScroll = () => {
     if (
       !isFiltered &&
@@ -235,6 +246,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
     }
     if (!isFiltered) {
       getOrderList();
+      getUser();
     }
     if (isFiltered) {
       getFilteredOrderList();
@@ -270,125 +282,138 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
     }
   });
 
-  return (
-    <div className="px-3 mb-100 container" dir="rtl">
-      {isFilterPopupActive && (
-        <>
-          <FilterPopup
-            setIsFilterPopupActive={setIsFilterPopupActive}
-            clientsList={invoiceStatusOptions}
-            handleStartDateChange={handleStartDateChange}
-            handleEndDateChange={handleEndDateChange}
-            startDate={startDate}
-            endDate={endDate}
-            handleFilter={getFilteredOrderList}
-            clientName={invoiceStatus}
-            setClientName={setInvoiceStatus}
-            setIsFilter={setIsFiltered}
-            setIsSubmitted={setIsSubmitted}
-            filterArea={filterArea}
-            isDirect={isDirect}
-          />
-          <PopupBackground
-            isPopupActive={setIsFilterPopupActive}
-            handleStartDateChange={handleStartDateChange}
-            handleEndDateChange={handleEndDateChange}
-            setStatusField={setInvoiceStatus}
-          />
-        </>
-      )}
-      {isDirect === undefined && (
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
-          <div className="bold-xlarge">لیست سفارشات</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
-      )}
-      {fromSingleBusiness !== true && (
-        <div className="d-flex align-items-center gap-3">
-          <input
-            onChange={handleSearchedPatientName}
-            type="text"
-            className="flex-grow-1 rounded-pill p-3"
-            placeholder={`${
-              isDirect === undefined
-                ? "جستجوی نام پزشک ..."
-                : "جستجوی نام بیمار ..."
-            }`}
-          />
-          <span className="has-pointer" onClick={getFilteredOrderList}>
-            <SearchIcon />
-          </span>
-        </div>
-      )}
-      {filteredCats.length > 0 && (
-        <>
-          <div className="d-flex ">
-            {filteredCats.map((cat, i) => {
-              return (
-                <div
-                  key={i}
-                  className="bg-white py-1 px-3 mt-3 rounded-pill has-pointer ms-1"
-                >
-                  <span className="thin-default">{cat.label}</span>
-                  <span onClick={() => handleCapReduction(cat)}>
-                    <BLCloseBtn />
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <hr className="text-primary" />
-        </>
-      )}
-      <div>
-        {!isFiltered &&
-          (ordersData ? (
-            ordersData.map((order, index) => {
-              return (
-                <ClientTaskCard
-                  key={index}
-                  order={order}
-                  isSingle={isSingle}
-                  isDirect={isDirect}
-                />
-              );
-            })
-          ) : (
-            <Message>موردی یافت نشد</Message>
-          ))}
+  const [isClient, setIsClient] = useState();
+  useEffect(() => {
+    if (userRole) {
+      userRole.forEach((role) => {
+        role === "client" && setIsClient(true);
+      });
+    }
+  }, [userRole]);
 
-        {isFiltered &&
-          (filteredOrdersData ? (
-            filteredOrdersData.map((order, index) => {
-              return (
-                <ClientTaskCard
-                  key={index}
-                  order={order}
-                  isSingle={isSingle}
-                  isDirect={isDirect}
-                />
-              );
-            })
-          ) : (
-            <Message>موردی یافت نشد</Message>
-          ))}
+  console.log(userRole);
+  console.log(isClient);
+  return (
+    userRole && (
+      <div className="px-3 mb-100 container" dir="rtl">
+        {isFilterPopupActive && (
+          <>
+            <FilterPopup
+              setIsFilterPopupActive={setIsFilterPopupActive}
+              clientsList={invoiceStatusOptions}
+              handleStartDateChange={handleStartDateChange}
+              handleEndDateChange={handleEndDateChange}
+              startDate={startDate}
+              endDate={endDate}
+              handleFilter={getFilteredOrderList}
+              clientName={invoiceStatus}
+              setClientName={setInvoiceStatus}
+              setIsFilter={setIsFiltered}
+              setIsSubmitted={setIsSubmitted}
+              filterArea={filterArea}
+              userRole={userRole}
+              isDirect={isDirect}
+            />
+            <PopupBackground
+              isPopupActive={setIsFilterPopupActive}
+              handleStartDateChange={handleStartDateChange}
+              handleEndDateChange={handleEndDateChange}
+              setStatusField={setInvoiceStatus}
+            />
+          </>
+        )}
+        {isDirect === undefined && (
+          <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
+            <div className="bold-xlarge">لیست سفارشات</div>
+            <Link to="/">
+              <BackArrow />
+            </Link>
+          </header>
+        )}
+        {fromSingleBusiness !== true && (
+          <div className="d-flex align-items-center gap-3">
+            <input
+              onChange={handleSearchedPatientName}
+              type="text"
+              className="flex-grow-1 rounded-pill p-3"
+              placeholder={`${
+                isClient ? "جستجوی نام بیمار ..." : "جستجوی نام پزشک ..."
+              }`}
+            />
+            <span className="has-pointer" onClick={getFilteredOrderList}>
+              <SearchIcon />
+            </span>
+          </div>
+        )}
+        {filteredCats.length > 0 && (
+          <>
+            <div className="d-flex ">
+              {filteredCats.map((cat, i) => {
+                return (
+                  <div
+                    key={i}
+                    className="bg-white py-1 px-3 mt-3 rounded-pill has-pointer ms-1"
+                  >
+                    <span className="thin-default">{cat.label}</span>
+                    <span onClick={() => handleCapReduction(cat)}>
+                      <BLCloseBtn />
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <hr className="text-primary" />
+          </>
+        )}
+        <div>
+          {!isFiltered &&
+            (ordersData ? (
+              ordersData.map((order, index) => {
+                return (
+                  <ClientTaskCard
+                    key={index}
+                    order={order}
+                    isSingle={isSingle}
+                    isClient={isClient}
+                    userRole={userRole}
+                  />
+                );
+              })
+            ) : (
+              <Message>موردی یافت نشد</Message>
+            ))}
+
+          {isFiltered &&
+            (filteredOrdersData ? (
+              filteredOrdersData.map((order, index) => {
+                return (
+                  <ClientTaskCard
+                    key={index}
+                    order={order}
+                    isSingle={isSingle}
+                    isClient={isClient}
+                    userRole={userRole}
+                  />
+                );
+              })
+            ) : (
+              <Message>موردی یافت نشد</Message>
+            ))}
+        </div>
+        {fromSingleBusiness !== true && (
+          <span
+            className={`drop-shadow has-pointer ${
+              isDirect === undefined ? "fixed-bottom-30" : "fixed-bottom-80"
+            }`}
+            onClick={() => {
+              setIsFilterPopupActive(true);
+            }}
+          >
+            <FilterIcon />
+          </span>
+        )}
       </div>
-      {fromSingleBusiness !== true && (
-        <span
-          className={`drop-shadow has-pointer ${
-            isDirect === undefined ? "fixed-bottom-30" : "fixed-bottom-80"
-          }`}
-          onClick={() => {
-            setIsFilterPopupActive(true);
-            // setIsFilter(true);
-          }}
-        >
-          <FilterIcon />
-        </span>
-      )}
-    </div>
+    )
   );
 };
 

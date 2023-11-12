@@ -9,6 +9,11 @@ const ProjectManagerDashboard = ({
   employeeStatus,
   customerSatisfaction,
 }) => {
+  console.log(dailyOrders);
+  console.log(dailyTaskReport);
+  console.log(employeeStatus);
+  console.log(customerSatisfaction);
+
   const navigate = useNavigate();
   // chart data -------------------------
   const RADIAN = Math.PI / 180;

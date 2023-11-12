@@ -5,7 +5,7 @@ import ClientAssignedCard from "./ClientAssignedCard";
 import ClientTaskCard from "./ClientTaskCard";
 import Message from "../micro-components/Message";
 
-const ClientDashboard = ({ ongoingOrders, assignedTasks }) => {
+const ClientDashboard = ({ ongoingOrders, assignedTasks, isClient }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <>
@@ -77,7 +77,9 @@ const ClientDashboard = ({ ongoingOrders, assignedTasks }) => {
         <p className="bold-xxlarge mt-4 pe-4 mb-0">سفارش های اخیر</p>
         {ongoingOrders ? (
           ongoingOrders.map((order, index) => {
-            return <ClientTaskCard key={index} order={order} />;
+            return (
+              <ClientTaskCard key={index} order={order} isClient={isClient} />
+            );
           })
         ) : (
           <Message>سفارش فعال وجود ندارد</Message>

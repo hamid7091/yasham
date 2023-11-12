@@ -94,40 +94,44 @@ const Dashboard = () => {
     ],
   };
   const mockProjectManagerDashboardData = {
-    userInfo: {
-      mobile: "9360390090",
-      userAvatar:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      userCaps: {
-        رضایتمندی: true,
-        "گزارش وظایف": true,
-        "گزارش کارکرد": true,
-        اطلاعیه: true,
-        پروفایل: true,
-        "لیست سفارشات": true,
-        "لیست کارمندان": true,
+    data: {
+      response: {
+        userInfo: {
+          mobile: "9360390090",
+          userAvatar:
+            "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+          userCaps: {
+            رضایتمندی: true,
+            "گزارش وظایف": true,
+            "گزارش کارکرد": true,
+            اطلاعیه: true,
+            پروفایل: true,
+            "لیست سفارشات": true,
+            "لیست کارمندان": true,
+          },
+          userFirstName: "حمید",
+          userID: 122,
+          userLastName: "مدیرپروژه",
+          userRole: ["project_manager"],
+        },
+        dailyOrders: { ordersCount: 5 },
+        dailyTaskReport: {
+          pending: 5,
+          ongoing: 6,
+          done: 7,
+        },
+        employeeStatus: {
+          busiestEmployee: { employeeName: "علی قنات منش", employeeID: 69 },
+          mostHardworkingEmployee: {
+            employeeName: "علی قنات پور",
+            employeeID: 6969,
+          },
+        },
+        customerSatisfaction: {
+          rate: 3.8,
+          voteCount: 650,
+        },
       },
-      userFirstName: "حمید",
-      userID: 122,
-      userLastName: "مدیرپروژه",
-      userRole: ["project_manager"],
-    },
-    dailyOrders: { ordersCount: 5 },
-    dailyTaskReport: {
-      pending: 5,
-      ongoing: 6,
-      done: 7,
-    },
-    employeeStatus: {
-      busiestEmployee: { employeeName: "علی قنات منش", employeeID: 69 },
-      mostHardworkingEmployee: {
-        employeeName: "علی قنات پور",
-        employeeID: 6969,
-      },
-    },
-    customerSatisfaction: {
-      rate: 3.8,
-      voteCount: 650,
     },
   };
   const mockFinancialManagerDashboardData = {
@@ -319,6 +323,9 @@ const Dashboard = () => {
   const getDataWithAxios = async () => {
     try {
       const response = await axiosInstance.post("/task/dashboard");
+      // const response = mockProjectManagerDashboardData;
+      console.log(response.data.response);
+
       setUserInfo(response.data.response.userInfo); // اطلاعات کاربر مشترک تمامی رول ها
       setActiveTasks(response.data.response.activeTasks); //تسک های فعال مخصوص کارمند
       setAssingedTasks(response.data.response.assignedTasks); // تسکهای اساین شده کارمند و کلاینت
@@ -343,7 +350,7 @@ const Dashboard = () => {
       //Reception sets
       setOrders(response.data.response?.dashboardInfo?.recentOrders);
       // setPackages(response.data.response?.dashboardInfo?.packages);
-      setDailyOrders(response.data.response?.dashboardInfo?.dailyOrders);
+      //setDailyOrders(response.data.response?.dashboardInfo?.dailyOrders);
 
       console.log(response.data.response);
       Loading.remove();
@@ -423,8 +430,7 @@ const Dashboard = () => {
   }, [userRole]);
 
   // console.log(userInfo);
-  console.log(packagesArray);
-  console.log(packages);
+  console.log(dailyOrders);
 
   return userInfo ? (
     <div className="container" dir="rtl">
@@ -494,6 +500,7 @@ const Dashboard = () => {
             <ClientDashboard
               assignedTasks={assignedTasks}
               ongoingOrders={ongoingOrders}
+              isClient={isClient}
             />
           )}
           {location === "totalTasks" && <OrderList isDirect={true} />}

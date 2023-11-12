@@ -7,7 +7,7 @@ import WalletIcon from "../assets/svg-icons/WalletIcon";
 import OrderListIcon from "../assets/svg-icons/OrderListIcon";
 import { Link, useNavigate } from "react-router-dom";
 
-const ClientTaskCard = ({ order, isSingle, isDirect }) => {
+const ClientTaskCard = ({ order, isSingle, isDirect, userRole, isClient }) => {
   const newDate = useDate(order.date);
   const navigate = useNavigate();
 
@@ -44,7 +44,7 @@ const ClientTaskCard = ({ order, isSingle, isDirect }) => {
                 <span className="grey-default-bold500">{newDate}</span>
               </div>
             </div>
-            {isDirect && (
+            {isClient && (
               <div className="d-flex align-items-center justify-content-between">
                 <div className="royal-default-bold my-2">
                   <span className="ms-2">مبلغ</span>
@@ -69,9 +69,7 @@ const ClientTaskCard = ({ order, isSingle, isDirect }) => {
                     <span>در انتظار پرداخت</span>
                   </div>
                 )}
-                {((order.invoiceStatus == null &&
-                  !isSingle &&
-                  order.price == 0) ||
+                {((order.invoiceStatus == null && order.price == 0) ||
                   (order.status == 0 && order.price == 0)) && (
                   <div
                     className={`lroyal-default-bold my-3 py-2 px-3 badge-waiting`}
@@ -92,26 +90,24 @@ const ClientTaskCard = ({ order, isSingle, isDirect }) => {
           <hr />
         </Link>
         <div className="d-flex">
-          {isDirect && <hr />}
-          {!isSingle && order.invoiceStatus === "3" && isDirect && (
+          {isClient && <hr />}
+          {order.invoiceStatus === "3" && (
             <span
               className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
             >
               مشاهده فاکتور
             </span>
           )}
-          {!isSingle &&
-            isDirect &&
-            (order.invoiceStatus === "1" ||
-              (order.invoiceStatus === null && order.price !== 0)) && (
-              <span
-                className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
-                onClick={() => handleRedirect(order)}
-              >
-                پرداخت
-              </span>
-            )}
-          {!isSingle && order.price == 0 && isDirect && (
+          {(order.invoiceStatus === "1" ||
+            (order.invoiceStatus === null && order.price !== 0)) && (
+            <span
+              className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+              onClick={() => handleRedirect(order)}
+            >
+              پرداخت
+            </span>
+          )}
+          {order.price == 0 && (
             <span
               className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer disabled`}
             >

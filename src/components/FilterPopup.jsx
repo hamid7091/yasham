@@ -18,6 +18,7 @@ const FilterPopup = ({
   setClientName,
   filterArea,
   isDirect,
+  userRole,
 }) => {
   const handleClosePopup = () => {
     setIsFilterPopupActive(false);
@@ -172,7 +173,7 @@ const FilterPopup = ({
                   نام کارفرما
                 </label>
               )}
-              {filterArea === "orders" && (
+              {userRole[0] === "client" && (
                 <label
                   htmlFor="clients-name"
                   className="bold500-large my-3 pe-3"
