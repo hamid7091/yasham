@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import Overall from "./Overall";
 import SingleTaskTimeline from "./SingleTaskTimeline";
@@ -12,10 +12,31 @@ import PopupBackground from "./PopupBackground";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const SingleTask = () => {
+  const navigate = useNavigate();
+
   const [userInfo, setUserInfo] = useState();
   const [taskInfo, setTaskInfo] = useState();
+
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userInfo?.Role);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isLoading) {
+      isShipping && navigate("/unauthorized");
+    }
+  }, [isShipping]);
 
   const [isCommentPopupActive, setIsCommentPopupActive] = useState(false);
   const [isAssignPopupActive, setIsAssignPopupActive] = useState(false);
@@ -38,22 +59,15 @@ const SingleTask = () => {
   const getSingleTaskData = async () => {
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post(
-        "/task/get_task",
-        {
-          taskID: param.id,
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axiosInstance.post("/task/get_task", {
+        taskID: param.id,
+      });
       setUserInfo(response.data.response.userInfo);
       setTaskInfo(response.data.response.taskInfo);
       setIsTaskStarted(response.data.response.taskInfo.footer.isTaskStarted);
       setIsAssignedToMe(response.data.response.userInfo.isAssignedToMe);
       setCommentsData(response.data.response.taskInfo.comments);
+      setIsLoading(false);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -127,9 +141,13 @@ const SingleTask = () => {
   };
 
   useEffect(() => {
-    getSingleTaskData();
-    getEmployees();
-    getSteps();
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getSingleTaskData();
+      getEmployees();
+      getSteps();
+    }
   }, []);
 
   const handleTabChange = (e) => {
@@ -168,6 +186,8 @@ const SingleTask = () => {
   const [selectedItem, setSelectedItem] = useState([]);
   const [selectedValue, setSelectedValue] = useState();
   // ============================================================================
+
+  console.log(isShipping);
 
   return userInfo ? (
     <div className="container px-4" dir="rtl">

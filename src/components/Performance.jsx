@@ -10,6 +10,7 @@ import { Loading } from "notiflix/build/notiflix-loading-aio";
 import Message from "../micro-components/Message";
 import moment from "moment-jalaali";
 import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const Performance = () => {
   const navigate = useNavigate();
@@ -30,6 +31,36 @@ const Performance = () => {
 
   const [filteredCats, setFilteredCats] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isLoading) {
+      !isEmployee && !isShipping && navigate("/unauthorized");
+    }
+  }, [isEmployee, isShipping]);
+
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
@@ -177,6 +208,7 @@ const Performance = () => {
     }
     if (!isFilter) {
       getActivityDataAxios();
+      getUser();
     }
   }, []);
   useEffect(() => {
@@ -198,6 +230,8 @@ const Performance = () => {
     }
   }, [isSubmitted, clientName, startDate, endDate]);
 
+  console.log(isEmployee);
+  console.log(isSupervisor);
   return (
     performanceData && (
       <div className="container px-3" dir="rtl">

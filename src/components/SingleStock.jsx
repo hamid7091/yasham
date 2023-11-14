@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import StockEditBtn54 from "../assets/svg-icons/StockEditBtn54";
 import ThunderIcon54 from "../assets/svg-icons/ThunderIcon54";
@@ -14,202 +14,11 @@ import RestockPopup from "./RestockPopup";
 import PopupBackground from "./PopupBackground";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const SingleStock = () => {
   const param = useParams();
-  console.log(param.id);
-  const singleStockMockDataInsufficient = {
-    overallStockData: {
-      stockID: 1,
-      stockName: "گچ",
-      stockStatus: 1,
-      stockAmount: 1,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-    },
-    detailStockData: {
-      restockHistory: [
-        {
-          restockAmount: 200,
-          restockDate: "1402-06-27",
-          inventoryID: "#2514568",
-          restockCost: 25000000,
-        },
-        {
-          restockAmount: 500,
-          restockDate: "1402-08-27",
-          inventoryID: "#2554568",
-          restockCost: 85000000,
-        },
-      ],
-      usageHistory: [
-        {
-          usageAmount: 12,
-          usageDate: "1402-07-30",
-          inventoryID: "#256584",
-          orderID: 2,
-          operator: "باقرعلی محمدعلی نژادوندیان اصل",
-        },
-        {
-          usageAmount: 60,
-          usageDate: "1402-08-21",
-          inventoryID: "#256584",
-          orderID: 1,
-          operator: "عیسی مسیح",
-        },
-        {
-          usageAmount: 52,
-          usageDate: "1402-09-02",
-          inventoryID: "#256504",
-          orderID: 8,
-          operator: "باقرعلی اصل",
-        },
-        {
-          usageAmount: 23,
-          usageDate: "1402-09-15",
-          inventoryID: "#295584",
-          orderID: 5,
-          operator: "رحیم علی",
-        },
-        {
-          usageAmount: 46,
-          usageDate: "1402-10-6",
-          inventoryID: "#659865",
-          orderID: 2,
-          operator: "ولی عل قلی رضی",
-        },
-      ],
-    },
-  };
-  const singleStockMockDataEmpty = {
-    overallStockData: {
-      stockID: 1,
-      stockName: "گچ",
-      stockStatus: 0,
-      stockAmount: 1,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-    },
-    detailStockData: {
-      restockHistory: [
-        {
-          restockAmount: 200,
-          restockDate: "1402-06-27",
-          inventoryID: "#2514568",
-          restockCost: 25000000,
-        },
-        {
-          restockAmount: 500,
-          restockDate: "1402-08-27",
-          inventoryID: "#2554568",
-          restockCost: 85000000,
-        },
-      ],
-      usageHistory: [
-        {
-          usageAmount: 12,
-          usageDate: "1402-07-30",
-          inventoryID: "#256584",
-          orderID: 2,
-          operator: "باقرعلی محمدعلی نژادوندیان اصل",
-        },
-        {
-          usageAmount: 60,
-          usageDate: "1402-08-21",
-          inventoryID: "#256584",
-          orderID: 1,
-          operator: "عیسی مسیح",
-        },
-        {
-          usageAmount: 52,
-          usageDate: "1402-09-02",
-          inventoryID: "#256504",
-          orderID: 8,
-          operator: "باقرعلی اصل",
-        },
-        {
-          usageAmount: 23,
-          usageDate: "1402-09-15",
-          inventoryID: "#295584",
-          orderID: 5,
-          operator: "رحیم علی",
-        },
-        {
-          usageAmount: 46,
-          usageDate: "1402-10-6",
-          inventoryID: "#659865",
-          orderID: 2,
-          operator: "ولی عل قلی رضی",
-        },
-      ],
-    },
-  };
-  const singleStockMockData = {
-    overallStockData: {
-      stockID: 1,
-      stockName: "گچ",
-      stockStatus: 2,
-      stockAmount: 1,
-      stockUnit: "کیلوگرم",
-      stockPicture:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-    },
-    detailStockData: {
-      restockHistory: [
-        {
-          restockAmount: 200,
-          restockDate: "1402-06-27",
-          inventoryID: "#2514568",
-          restockCost: 25000000,
-        },
-        {
-          restockAmount: 500,
-          restockDate: "1402-08-27",
-          inventoryID: "#2554568",
-          restockCost: 85000000,
-        },
-      ],
-      usageHistory: [
-        {
-          usageAmount: 12,
-          usageDate: "1402-07-30",
-          inventoryID: "#256584",
-          orderID: 2,
-          operator: "باقرعلی محمدعلی نژادوندیان اصل",
-        },
-        {
-          usageAmount: 60,
-          usageDate: "1402-08-21",
-          inventoryID: "#256584",
-          orderID: 1,
-          operator: "عیسی مسیح",
-        },
-        {
-          usageAmount: 52,
-          usageDate: "1402-09-02",
-          inventoryID: "#256504",
-          orderID: 8,
-          operator: "باقرعلی اصل",
-        },
-        {
-          usageAmount: 23,
-          usageDate: "1402-09-15",
-          inventoryID: "#295584",
-          orderID: 5,
-          operator: "رحیم علی",
-        },
-        {
-          usageAmount: 46,
-          usageDate: "1402-10-6",
-          inventoryID: "#659865",
-          orderID: 2,
-          operator: "ولی عل قلی رضی",
-        },
-      ],
-    },
-  };
+  const navigate = useNavigate();
   const [isRestockPopupOpen, setIsRestockPopupOpen] = useState(false);
   const [singleStockData, setSingleStockData] = useState();
   const [tabState, setTabState] = useState("purchase");
@@ -218,6 +27,25 @@ const SingleStock = () => {
   const [restockAmount, setRestockAmount] = useState();
   const [restockCost, setRestockCost] = useState();
   const [inventoryID, setInventoryID] = useState();
+
+  const [userRole, setUserRole] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+  useEffect(() => {
+    console.log("ue1");
+    if (!isLoading) {
+      !isInventory && navigate("/unauthorized");
+    }
+  }, [isInventory]);
 
   const getItemData = async () => {
     try {
@@ -241,7 +69,6 @@ const SingleStock = () => {
       Loading.remove();
     }
   };
-  //data: "{\"pageNum\":1}"
   const handleRestock = async () => {};
 
   const handleTabChange = (e) => {
@@ -263,10 +90,24 @@ const SingleStock = () => {
       setTabState("purchase");
     }
   };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
-    // setSingleStockData(singleStockMockDataEmpty);
-    getItemData();
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getItemData();
+      getUser();
+    }
   }, []);
   return (
     singleStockData && (

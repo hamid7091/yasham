@@ -12,7 +12,6 @@ import FilterIcon from "../assets/svg-icons/FilterIcon";
 import axiosInstance from "../util-functions/axiosInstance";
 
 const AllTasksLoader = ({ isDirect }) => {
-  const accessToken = window.localStorage.getItem("AccessToken");
   const navigate = useNavigate();
 
   const [userRole, setUserRole] = useState();
@@ -202,11 +201,10 @@ const AllTasksLoader = ({ isDirect }) => {
   };
 
   useEffect(() => {
-    if (accessToken === null) {
+    if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
     }
     if (!isFiltered) {
-      //getTotalTasksData(totalTasksURL, totalTasksRequestOptions);
       getTaskListAxios();
       getUser();
     }

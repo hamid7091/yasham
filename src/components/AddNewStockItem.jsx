@@ -46,9 +46,9 @@ const AddNewStockItem = () => {
     console.log("ue1");
 
     if (!isLoading) {
-      !isShipping && navigate("/unauthorized");
+      !isInventory && navigate("/unauthorized");
     }
-  }, [isShipping]);
+  }, [isInventory]);
 
   const avatarInput = useRef(null);
   const avatar = useRef(null);
@@ -262,7 +262,8 @@ const AddNewStockItem = () => {
       getUser();
     }
   }, []);
-  console.log(isItemNameValid);
+
+  console.log(isInventory);
   return (
     <div className="container px-2" dir="rtl">
       <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3 px-2">

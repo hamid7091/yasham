@@ -198,6 +198,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       Loading.remove();
     } catch (error) {
       console.error(error);
+      error.response.status === 403 && navigate("/unauthorized");
       Loading.remove();
     }
   };

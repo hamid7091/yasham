@@ -45,8 +45,6 @@ const Invoices = ({ fromSingleBusiness }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log(isClient);
-    console.log("ue1");
     if (!isLoading) {
       !isClient && navigate("/unauthorized");
     }
@@ -179,7 +177,7 @@ const Invoices = ({ fromSingleBusiness }) => {
       console.log(response.data.response);
       Loading.remove();
     } catch (error) {
-      console.error(error);
+      error.response.status === 403 && navigate("/unauthorized");
       Loading.remove();
     }
   };
@@ -255,6 +253,7 @@ const Invoices = ({ fromSingleBusiness }) => {
     }
   }, [isSubmitted, invoiceStatus, startDate, endDate]);
 
+  console.log(isClient);
   return (
     <div className="container px-4" dir="rtl">
       {isFilterPopupActive && (
