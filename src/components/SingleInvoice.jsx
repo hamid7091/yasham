@@ -4,81 +4,104 @@ import BackArrow from "../assets/svg-icons/BackArrow";
 import InvoiceSuccessIcon from "../assets/svg-icons/InvoiceSuccessIcon";
 import InvoiceSinglePendingIcon from "../assets/svg-icons/InvoiceSinglePendingIcon";
 import InvoiceSingleFailIcon from "../assets/svg-icons/InvoiceSingleFailIcon";
-import fetchData from "../util-functions/fetchData";
 import useDate from "../micro-components/useDate2";
 import ClientTaskCard from "./ClientTaskCard";
 import { Loading } from "notiflix";
+import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const SingleInvoice = () => {
   const navigate = useNavigate();
-  const accessToken = window.localStorage.getItem("AccessToken");
   const param = useParams();
-  console.log(param);
   const [invoiceData, setInvoiceData] = useState([]);
   const [cards, setCards] = useState([]);
-  const [isPortalReceived, setIsPortalReceived] = useState(false);
-  const [portalAddress, setPortalAddress] = useState();
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+  // const [isPortalReceived, setIsPortalReceived] = useState(false);
+  // const [portalAddress, setPortalAddress] = useState();
   const isSingle = true;
   // -----------------------------------------------------------------------
-  const InvoiceSingleURL = "https://samane.zbbo.net/api/v1/invoice/get_invoice";
-  const InvoiceSingleHeader = new Headers();
-  InvoiceSingleHeader.append("Authorization", `Bearer ${accessToken}`);
-  const InvoiceSingleFormdata = new FormData();
-  InvoiceSingleFormdata.append("invoiceID", param.id);
-  const InvoiceSingleRequestOptions = {
-    method: "POST",
-    headers: InvoiceSingleHeader,
-    body: InvoiceSingleFormdata,
-    redirect: "follow",
-  };
-  // -----------------------------------------------------------------------
-  const paymentPortalURL = "https://samane.zbbo.net/api/v1/payment/init";
-  const callbackURL = `http://localhost:3000/invoice_result/`;
-  const paymentFormdata = new FormData();
-  paymentFormdata.append("invoiceID", param.id);
-  paymentFormdata.append("callbackUrl", callbackURL);
-  const paymentRequestOptions = {
-    method: "POST",
-    headers: InvoiceSingleHeader,
-    body: paymentFormdata,
-    redirect: "follow",
-  };
+
   // -----------------------------------------------------------------------
 
-  async function getInvoice(url, options) {
-    const response = await fetchData(url, options);
-    console.log(response);
-    setInvoiceData(response.invoice);
-    setCards(response?.cards);
-  }
+  // -----------------------------------------------------------------------
+
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getInvoiceAxios = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/invoice/get_invoice",
+        {
+          invoiceID: param.id,
+        },
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      console.log(response.data.response);
+      setInvoiceData(response.data.response.invoice);
+      setCards(response.data.response?.cards);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
   const handleRedirectToInvoiceUpdate = () => {
     navigate(`/invoiceUpdate/${param.id}`, {
       state: { idata: invoiceData, cards: cards },
     });
   };
-
   useEffect(() => {
-    getInvoice(InvoiceSingleURL, InvoiceSingleRequestOptions);
+    getInvoiceAxios();
+    getUser();
   }, []);
 
   const paymentDate = useDate(invoiceData.paymentDate);
   const createDate = useDate(invoiceData.createDate);
 
-  const handlePaymentInit = async () => {
-    Loading.standard("در حال اتصال به درگاه پرداخت");
-    const response = await fetchData(paymentPortalURL, paymentRequestOptions);
-    Loading.remove();
-    console.log(response);
-    console.log(response.message);
-    Loading.remove();
-    window.location.href = response;
+  const handlePaymentInitAxios = async () => {
+    const formdata = new FormData();
+    formdata.append("invoiceID", param.id);
+    formdata.append("callbackUrl", "http://localhost:3000/invoice_result/");
+    try {
+      Loading.standard("در حال اتصال");
+      const response = await axiosInstance.post("/payment/init", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data.response);
+      window.location.href = response.data.response;
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-  useEffect(() => {
-    isPortalReceived && navigate(portalAddress);
-  }, [isPortalReceived, portalAddress]);
 
-  // console.log(invoiceData);
-  // console.log(cards);
+  // useEffect(() => {
+  //   isPortalReceived && navigate(portalAddress);
+  // }, [isPortalReceived, portalAddress]);
+
   return (
     <div className="container px-4" dir="rtl">
       <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3 mb-4">
@@ -141,7 +164,7 @@ const SingleInvoice = () => {
             <div className="d-flex justify-content-between align-items-center px-1 py-2 mt-3">
               <span
                 className="btn-royal-bold rounded-pill flex-grow-1 py-3 text-center has-pointer"
-                onClick={handlePaymentInit}
+                onClick={handlePaymentInitAxios}
               >
                 پرداخت ({invoiceData.price?.toLocaleString()} تومان)
               </span>
@@ -169,7 +192,7 @@ const SingleInvoice = () => {
       <hr />
       <div className="pe-2">
         <span className="grey-xlarge-bold">لیست سفارشات این فاکتور</span>
-        {invoiceData.status === 1 && (
+        {invoiceData.invoiceStatus === 1 && (
           <span
             className="grey-thin-bold float-start has-pointer"
             onClick={handleRedirectToInvoiceUpdate}
@@ -182,7 +205,12 @@ const SingleInvoice = () => {
         {cards &&
           cards.map((card, index) => {
             return (
-              <ClientTaskCard order={card} isSingle={isSingle} key={index} />
+              <ClientTaskCard
+                order={card}
+                isClient={isClient}
+                key={index}
+                loadedFrom={"invoiceList"}
+              />
             );
           })}
       </section>

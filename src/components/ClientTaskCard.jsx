@@ -1,13 +1,9 @@
-import React, { useEffect, useRef } from "react";
-import ClientTaskCardUserIcon from "../assets/svg-icons/ClientTaskCardUserIcon";
-import GrayCalander from "../assets/svg-icons/GrayCalander";
-import Calendar20 from "../assets/svg-icons/Calendar20";
+import React from "react";
 import useDate from "../micro-components/useDate2";
-import WalletIcon from "../assets/svg-icons/WalletIcon";
 import OrderListIcon from "../assets/svg-icons/OrderListIcon";
 import { Link, useNavigate } from "react-router-dom";
 
-const ClientTaskCard = ({ order, isSingle, isDirect, userRole, isClient }) => {
+const ClientTaskCard = ({ order, loadedFrom, isClient }) => {
   const newDate = useDate(order.date);
   const navigate = useNavigate();
 
@@ -87,34 +83,37 @@ const ClientTaskCard = ({ order, isSingle, isDirect, userRole, isClient }) => {
               </div>
             )}
           </div>
-          <hr />
+          {(loadedFrom === "orderList" || loadedFrom === "dashboard") && <hr />}
         </Link>
-        <div className="d-flex">
-          {isClient && <hr />}
-          {order.invoiceStatus === "3" && (
-            <span
-              className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
-            >
-              مشاهده فاکتور
-            </span>
-          )}
-          {(order.invoiceStatus === "1" ||
-            (order.invoiceStatus === null && order.price !== 0)) && (
-            <span
-              className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
-              onClick={() => handleRedirect(order)}
-            >
-              پرداخت
-            </span>
-          )}
-          {order.price == 0 && (
-            <span
-              className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer disabled`}
-            >
-              پرداخت
-            </span>
-          )}
-        </div>
+        {(loadedFrom === "orderList" || loadedFrom === "dashboard") && (
+          <div className="d-flex">
+            {order.invoiceStatus === "3" && (
+              <span
+                className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+                onClick={() => handleRedirect(order)}
+              >
+                مشاهده فاکتور
+              </span>
+            )}
+            {(order.invoiceStatus === "1" ||
+              order.invoiceStatus === 1 ||
+              (order.invoiceStatus === null && order.price !== 0)) && (
+              <span
+                className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+                onClick={() => handleRedirect(order)}
+              >
+                پرداخت
+              </span>
+            )}
+            {order.price == 0 && (
+              <span
+                className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer disabled`}
+              >
+                پرداخت
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import fetchData from "../util-functions/fetchData";
 import InvoiceSuccessIcon from "../assets/svg-icons/InvoiceSuccessIcon";
 
 const CallBackPayment = () => {
   const accessToken = window.localStorage.getItem("AccessToken");
-  const navigate = useNavigate();
   const [invoiceID, setInvoiceID] = useState();
   const href = window.location.href;
   const urlParams = new URLSearchParams(window.location.search);
@@ -32,14 +30,7 @@ const CallBackPayment = () => {
     const response = await fetchData(verifyURL, verifyRequestOptions);
     console.log(response);
     setInvoiceID(response.invoiceID);
-    // setResponseCame(true);
-    // navigate(`invoice/${invoiceID}`);
   };
-  //   const param = useParams();
-  // const [searchParams, setSearchParams] = useSearchParams();
-  // useEffect(() => {
-  //   verifyTransaction();
-  // }, []);
 
   useEffect(() => {
     console.log("fired");
@@ -69,9 +60,6 @@ const CallBackPayment = () => {
 
   return (
     <div className="container px-2 pt-5" dir="rtl">
-      {/* <div>{id}</div>
-      <div>{auth}</div>
-      <div>{stat}</div> */}
       {stat === "OK" && (
         <section>
           <div

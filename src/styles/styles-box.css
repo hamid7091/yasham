@@ -263,3 +263,12 @@ button.fliper {
   padding: 1rem 1.5rem 2rem 1.5rem;
   border-radius: 1rem;
 }
+
+/* unauth */
+
+.unauth-message-box {
+  border-bottom: "8px solid var(--red)";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}

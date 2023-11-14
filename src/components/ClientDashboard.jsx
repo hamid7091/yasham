@@ -78,7 +78,12 @@ const ClientDashboard = ({ ongoingOrders, assignedTasks, isClient }) => {
         {ongoingOrders ? (
           ongoingOrders.map((order, index) => {
             return (
-              <ClientTaskCard key={index} order={order} isClient={isClient} />
+              <ClientTaskCard
+                key={index}
+                order={order}
+                isClient={isClient}
+                loadedFrom={"dashboard"}
+              />
             );
           })
         ) : (

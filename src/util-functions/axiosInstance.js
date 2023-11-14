@@ -2,6 +2,7 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "https://samane.zbbo.net/api/v1",
+  headers: { "Content-Type": "multipart/form-data" },
 });
 
 axiosInstance.interceptors.request.use(
@@ -31,7 +32,7 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     // Handle response errors here
-    console.log(error);
+    console.log(error.response.data.response);
     return Promise.reject(error);
   }
 );

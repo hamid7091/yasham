@@ -1,6 +1,5 @@
 import React from "react";
 import CloseIcon from "../assets/svg-icons/CloseIcon";
-import InputIcon from "react-multi-date-picker/components/input_icon";
 import DatePicker from "react-multi-date-picker";
 import SolarHijri from "react-date-object/calendars/persian";
 import SolarHijriFa from "react-date-object/locales/persian_fa";
@@ -16,9 +15,7 @@ const FilterPopup = ({
   handleFilter,
   clientName,
   setClientName,
-  filterArea,
-  isDirect,
-  userRole,
+  renderedFrom,
 }) => {
   const handleClosePopup = () => {
     setIsFilterPopupActive(false);
@@ -140,8 +137,6 @@ const FilterPopup = ({
               calendar={SolarHijri}
               locale={SolarHijriFa}
               placeholder="انتخاب کنید"
-              // range
-              // required={true}
             />
           </div>
           <div className="mt-3">
@@ -161,19 +156,19 @@ const FilterPopup = ({
               locale={SolarHijriFa}
               minDate={startDate}
               placeholder="انتخاب کنید"
-              // required={true}
             />
 
             <>
-              {filterArea === "performance" && (
+              {renderedFrom === "Performance" && (
                 <label
                   htmlFor="clients-name"
                   className="bold500-large my-3 pe-3"
                 >
-                  نام کارفرما
+                  کارفرما
                 </label>
               )}
-              {userRole[0] === "client" && (
+              {(renderedFrom === "OrderList" ||
+                renderedFrom === "Invoices") && (
                 <label
                   htmlFor="clients-name"
                   className="bold500-large my-3 pe-3"
@@ -181,7 +176,7 @@ const FilterPopup = ({
                   وضعیت پرداخت
                 </label>
               )}
-              {filterArea === "allTasks" && (
+              {renderedFrom === "AllTasksLoader" && (
                 <label
                   htmlFor="clients-name"
                   className="bold500-large my-3 pe-3"
@@ -199,13 +194,11 @@ const FilterPopup = ({
                 placeholder="انتخاب کنید"
                 styles={customStyles}
                 isClearable
-                // isMulti
-                // hideSelectedOptions={false}
               />
             </>
           </div>
           <button
-            className="btn-royal-bold rounded-pill flex-grow-1 py-3 mt-3"
+            className="btn-royal-bold rounded-pill flex-grow-1 py-3 mt-4"
             disabled={startDate & endDate || clientName ? false : true}
           >
             اعمال فیلتر

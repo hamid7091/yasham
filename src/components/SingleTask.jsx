@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
-import fetchData from "../util-functions/fetchData";
 import Overall from "./Overall";
 import SingleTaskTimeline from "./SingleTaskTimeline";
 import Comments from "./Comments";
 import SingleTaskFooter from "./SingleTaskFooter";
 import CommentsPopup from "./CommentsPopup";
 import AssignPopup from "./AssignPopup";
+import EndTaskPopup from "./EndTaskPopup";
 import PopupBackground from "./PopupBackground";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const SingleTask = () => {
   const [userInfo, setUserInfo] = useState();
@@ -18,6 +19,7 @@ const SingleTask = () => {
 
   const [isCommentPopupActive, setIsCommentPopupActive] = useState(false);
   const [isAssignPopupActive, setIsAssignPopupActive] = useState(false);
+  const [isEndTaskPopupActive, setIsEndTaskPoupActive] = useState(false);
 
   const [commentsData, setCommentsData] = useState();
   const [tabState, setTabState] = useState("overall");
@@ -31,68 +33,103 @@ const SingleTask = () => {
   const [isAssignedToMe, setIsAssignedToMe] = useState(
     userInfo?.isAssignedToMe
   );
-
-  const accessToken = window.localStorage.getItem("AccessToken");
-
-  const navigate = useNavigate();
   const param = useParams();
 
-  const singleTaskHeader = new Headers();
-  const singleTaskFormdata = new FormData();
-  const singleTaskURL = "https://samane.zbbo.net/api/v1/task/get_task";
-  const getEmployeesURL = "https://samane.zbbo.net/api/v1/user/get_employees";
-  const getStepsURL = "https://samane.zbbo.net/api/v1/task/get_steps";
-  const updateTaskURL = "https://samane.zbbo.net/api/v1/task/update_task";
-
-  singleTaskHeader.append("Authorization", `Bearer ${accessToken}`);
-  singleTaskFormdata.append("taskID", param.id);
-  const singleTaskOptions = {
-    method: "POST",
-    headers: singleTaskHeader,
-    body: singleTaskFormdata,
-    redirect: "follow",
+  const getSingleTaskData = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/task/get_task",
+        {
+          taskID: param.id,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setUserInfo(response.data.response.userInfo);
+      setTaskInfo(response.data.response.taskInfo);
+      setIsTaskStarted(response.data.response.taskInfo.footer.isTaskStarted);
+      setIsAssignedToMe(response.data.response.userInfo.isAssignedToMe);
+      setCommentsData(response.data.response.taskInfo.comments);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-  async function fetchSingleTaskData(url, options) {
-    const response = await fetchData(url, options);
-    if (response.message) {
-      Loading.remove();
-      navigate("/");
-    } else {
-      setUserInfo(response.userInfo);
-      setTaskInfo(response.taskInfo);
-      setIsTaskStarted(response.taskInfo.footer.isTaskStarted);
-      setIsAssignedToMe(response.userInfo.isAssignedToMe);
-      setCommentsData(response.taskInfo.comments);
-      console.log(response);
-      Loading.remove();
+  const getEmployees = async () => {
+    try {
+      const response = await axiosInstance.post(
+        "/user/get_employees",
+        {
+          taskID: param.id,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setEmployees(response.data.response);
+    } catch (error) {
+      console.error(error);
     }
-  }
-  async function fetchEmployees(url, options) {
-    const response = await fetchData(url, options);
-    if (response) {
-      setEmployees(response);
+  };
+  const getSteps = async () => {
+    try {
+      const response = await axiosInstance.post(
+        "/task/get_steps",
+        {
+          taskID: param.id,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setTaskSteps(response.data.response);
+    } catch (error) {
+      console.error(error);
     }
-  }
-  async function fetchSteps(url, options) {
-    const response = await fetchData(url, options);
-    if (response) {
-      setTaskSteps(response);
-    }
-  }
-  const handleStartTask = async () => {
-    Loading.standard("در حال ارسال درخواست");
-    const response = await fetchData(updateTaskURL, singleTaskOptions);
-    if (response.started) {
+  };
+  const handleUpdateTask = async () => {
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post(
+        "/task/update_task",
+        { taskID: param.id },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       Loading.remove();
-      Notify.success("تسک شروع شد");
-      setIsTaskStarted(true);
+      console.log(response.data.response);
+      if (response.data.response.started) {
+        Notify.success("تسک با موفقیت شروع شد");
+        setIsTaskStarted(true);
+        window.location.reload();
+      }
+      if (response.data.response.finished) {
+        Notify.success("تسک با موفقیت به اتمام رسید");
+        setIsTaskStarted(true);
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
     }
   };
 
   useEffect(() => {
-    fetchSingleTaskData(singleTaskURL, singleTaskOptions);
-    fetchEmployees(getEmployeesURL, singleTaskOptions);
-    fetchSteps(getStepsURL, singleTaskOptions);
+    getSingleTaskData();
+    getEmployees();
+    getSteps();
   }, []);
 
   const handleTabChange = (e) => {
@@ -165,6 +202,20 @@ const SingleTask = () => {
           />
         </>
       )}
+      {isEndTaskPopupActive && (
+        <>
+          <EndTaskPopup
+            setIsEndTaskPopupActive={setIsEndTaskPoupActive}
+            handleEndTask={handleUpdateTask}
+          />
+          <PopupBackground
+            isPopupActive={setIsEndTaskPoupActive}
+            handleStartDateChange={() => {}}
+            handleEndDateChange={() => {}}
+            setStatusField={() => {}}
+          />
+        </>
+      )}
 
       <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
         <div className="bold-xlarge">{taskInfo.overAll.taskType}</div>
@@ -209,7 +260,8 @@ const SingleTask = () => {
         isAssignedToMe={isAssignedToMe}
         setIsCommentPopupActive={setIsCommentPopupActive}
         setIsAssignPopupActive={setIsAssignPopupActive}
-        handleStartTask={handleStartTask}
+        setIsEndTaskPoupActive={setIsEndTaskPoupActive}
+        handleStartTask={handleUpdateTask}
       />
     </div>
   ) : (

@@ -353,7 +353,6 @@ const Dashboard = () => {
       // setPackages(response.data.response?.dashboardInfo?.packages);
       //setDailyOrders(response.data.response?.dashboardInfo?.dailyOrders);
 
-      console.log(response.data.response);
       Loading.remove();
     } catch (e) {
       console.error(e);

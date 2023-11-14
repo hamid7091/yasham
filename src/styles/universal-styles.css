@@ -370,6 +370,11 @@ hr {
   font-size: var(--font-large);
   font-weight: var(--font-bold500);
 }
+.red-xlarge-bold {
+  color: var(--red);
+  font-size: var(--font-xlarge);
+  font-weight: var(--font-bold);
+}
 .yellow-xlarge-bold {
   color: var(--yellow);
   font-size: var(--font-xlarge);

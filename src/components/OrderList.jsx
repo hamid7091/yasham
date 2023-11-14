@@ -21,8 +21,8 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
   // necessary states
   const [userRole, setUserRole] = useState();
   const [
-    isEmployeeQ,
-    isClientQ,
+    isEmployee,
+    isClient,
     isSupervisor,
     isShipping,
     isInventory,
@@ -50,9 +50,6 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSom, setIsSom] = useState(false);
-
-  const filterArea = "orders";
-  const isSingle = false;
 
   const invoiceStatusOptions = [
     { clientName: "پرداخت شده", clientID: 3 }, // به منظور همخوانی با نحوه کانورت در پاپ اپ فیلتر بدین شکل نوشته شده است
@@ -292,19 +289,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       setIsFiltered(true);
     }
   });
-
-  const [isClient, setIsClient] = useState();
-  useEffect(() => {
-    if (userRole) {
-      userRole.forEach((role) => {
-        role === "client" && setIsClient(true);
-      });
-    }
-  }, [userRole]);
-
-  console.log(isClientQ);
-  console.log(isEmployeeQ);
-
+  console.log(fromSingleBusiness);
   return (
     userRole && (
       <div className="px-3 mb-100 container" dir="rtl">
@@ -322,9 +307,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
               setClientName={setInvoiceStatus}
               setIsFilter={setIsFiltered}
               setIsSubmitted={setIsSubmitted}
-              filterArea={filterArea}
-              userRole={userRole}
-              isDirect={isDirect}
+              renderedFrom={"OrderList"}
             />
             <PopupBackground
               isPopupActive={setIsFilterPopupActive}
@@ -334,7 +317,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
             />
           </>
         )}
-        {isDirect === undefined && (
+        {isPManager && (
           <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
             <div className="bold-xlarge">لیست سفارشات</div>
             <Link to="/">
@@ -342,7 +325,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
             </Link>
           </header>
         )}
-        {fromSingleBusiness !== true && (
+        {(isClient || isPManager) && (
           <div className="d-flex align-items-center gap-3">
             <input
               onChange={handleSearchedPatientName}
@@ -385,9 +368,8 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
                   <ClientTaskCard
                     key={index}
                     order={order}
-                    isSingle={isSingle}
                     isClient={isClient}
-                    userRole={userRole}
+                    loadedFrom={"orderList"}
                   />
                 );
               })
@@ -402,9 +384,8 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
                   <ClientTaskCard
                     key={index}
                     order={order}
-                    isSingle={isSingle}
                     isClient={isClient}
-                    userRole={userRole}
+                    loadedFrom={"orderList"}
                   />
                 );
               })
@@ -412,10 +393,10 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
               <Message>موردی یافت نشد</Message>
             ))}
         </div>
-        {fromSingleBusiness !== true && (
+        {(isClient || isPManager) && (
           <span
             className={`drop-shadow has-pointer ${
-              isDirect === undefined ? "fixed-bottom-30" : "fixed-bottom-80"
+              isPManager ? "fixed-bottom-30" : "fixed-bottom-80"
             }`}
             onClick={() => {
               setIsFilterPopupActive(true);

@@ -15,6 +15,8 @@ const AllTasksLoader = ({ isDirect }) => {
   const accessToken = window.localStorage.getItem("AccessToken");
   const navigate = useNavigate();
 
+  const [userRole, setUserRole] = useState();
+
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
   const [currentFilteredPageNumber, setCurrentFilteredPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -32,8 +34,6 @@ const AllTasksLoader = ({ isDirect }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSom, setIsSom] = useState(false);
-
-  const filterArea = "allTasks";
 
   const invoiceStatusOptions = [
     { clientName: "حمید قهرمانی", clientID: 3 }, // به منظور همخوانی با نحوه کانورت در پاپ اپ فیلتر بدین شکل نوشته شده است
@@ -120,11 +120,7 @@ const AllTasksLoader = ({ isDirect }) => {
 
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post("/task/all_tasks", formdata, {
-        headers: {
-          "Content-Type": "multipart/fomr-data",
-        },
-      });
+      const response = await axiosInstance.post("/task/all_tasks", formdata);
       setCurrentFilteredPageNumber((prevNum) => prevNum + 1);
       setFilteredTotalTasksData(response.data.response.Tasks);
       setFilteredTotalPages(response.data.response.total_pages);
@@ -145,11 +141,7 @@ const AllTasksLoader = ({ isDirect }) => {
     }
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post("/task/all_tasks", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post("/task/all_tasks", formdata);
       setCurrentFilteredPageNumber((prevNum) => prevNum + 1);
       setFilteredTotalTasksData((prevItems) => [
         ...prevItems,
@@ -199,6 +191,15 @@ const AllTasksLoader = ({ isDirect }) => {
     }
     console.log(filteredCats.length);
   };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     if (accessToken === null) {
@@ -207,6 +208,7 @@ const AllTasksLoader = ({ isDirect }) => {
     if (!isFiltered) {
       //getTotalTasksData(totalTasksURL, totalTasksRequestOptions);
       getTaskListAxios();
+      getUser();
     }
     if (isFiltered) {
       getFilteredTaskListAxios();
@@ -248,8 +250,7 @@ const AllTasksLoader = ({ isDirect }) => {
               setClientName={setAssignedEmployeeID}
               setIsFilter={setIsFiltered}
               setIsSubmitted={setIsSubmitted}
-              filterArea={filterArea}
-              // isDirect={isDirect}
+              renderedFrom={"AllTasksLoader"}
             />
             <PopupBackground
               isPopupActive={setIsFilterPopupActive}

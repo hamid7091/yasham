@@ -38,6 +38,7 @@ import SingleUser from "./components/SingleUser";
 import AddUser from "./components/AddUser";
 import EditUser from "./components/EditUser";
 import EndTask from "./components/EndTask";
+import Unauthorized from "./components/Unauthorized";
 
 const App = () => {
   return (
@@ -90,11 +91,11 @@ const App = () => {
         <Route path="/addBusiness" element={<AddBusiness />} />
         <Route path="/userList" element={<UserList />} />
         <Route path="/addUser" element={<AddUser />} />
-
         <Route
           path="/allBusinessesReception"
           element={<AllBusinessesReceptionVersion />}
         />
+        <Route path="/unauthorized" element={<Unauthorized />} />
       </Routes>
     </>
   );

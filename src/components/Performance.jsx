@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import { Link, useNavigate } from "react-router-dom";
 import PerformanceCard from "./PerformanceCard";
-import fetchData from "../util-functions/fetchData";
 import FilterIcon from "../assets/svg-icons/FilterIcon";
 import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
 import PopupBackground from "./PopupBackground";
@@ -13,9 +12,8 @@ import moment from "moment-jalaali";
 import axiosInstance from "../util-functions/axiosInstance";
 
 const Performance = () => {
-  Loading.remove();
   const navigate = useNavigate();
-  const accessToken = window.localStorage.getItem("AccessToken");
+
   const [pageNum, setPageNum] = useState(1);
   const [filterPageNum, setFilterPageNum] = useState(1);
   const [maxPages, setMaxPages] = useState(1);
@@ -32,9 +30,6 @@ const Performance = () => {
 
   const [filteredCats, setFilteredCats] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const filterArea = "performance";
-
-  //const performanceURL = "https://samane.zbbo.net/api/v1/activity/report";
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
@@ -48,82 +43,6 @@ const Performance = () => {
       setStartDate(null);
     }
   };
-
-  // const handleFilterAuto = async () => {
-  //   const filterHeader = new Headers();
-  //   filterHeader.append("Authorization", `Bearer ${accessToken}`);
-
-  //   let filterFormdata = new FormData();
-  //   filterFormdata.append("pageNum", filterPageNum);
-  //   if (clientName) {
-  //     filterFormdata.append("clientID", clientName.value);
-  //   }
-  //   if (startDate && endDate) {
-  //     filterFormdata.append("startDate", startDate?.toUnix());
-  //     filterFormdata.append("endDate", endDate?.toUnix());
-  //   }
-
-  //   const filterRequestOptions = {
-  //     method: "POST",
-  //     headers: filterHeader,
-  //     body: filterFormdata,
-  //     redirect: "follow",
-  //   };
-
-  //   const response = await fetchData(performanceURL, filterRequestOptions);
-  //   console.log(response);
-  //   setFilterPageNum((prevNum) => prevNum + 1);
-  //   setFilteredData((prevItems) => [...prevItems, ...response.cards]);
-  // };
-  // const handleFilter = async (event) => {
-  //   event?.preventDefault();
-  //   window.scrollTo(0, 0);
-  //   setFilterPageNum(1);
-  //   setFilteredCats([]);
-  //   setIsFilter(true);
-  //   setIsFilterPopupActive(false);
-  //   const filterHeader = new Headers();
-  //   filterHeader.append("Authorization", `Bearer ${accessToken}`);
-
-  //   let filterFormdata = new FormData();
-  //   filterFormdata.append("pageNum", 1);
-
-  //   if (clientName) {
-  //     filterFormdata.append("clientID", clientName.value);
-  //     setFilteredCats((prevStates) => [
-  //       ...prevStates,
-  //       { label: clientName.label, value: "client" },
-  //     ]);
-  //   }
-  //   if (startDate && endDate) {
-  //     filterFormdata.append("startDate", startDate?.toUnix());
-  //     filterFormdata.append("endDate", endDate?.toUnix());
-  //     setFilteredCats((prevStates) => [
-  //       ...prevStates,
-  //       {
-  //         label: `${moment
-  //           .unix(startDate?.toUnix())
-  //           .format("jYYYY/jM/jD")} تا ${moment
-  //           .unix(endDate?.toUnix())
-  //           .format("jYYYY/jM/jD")}`,
-  //         value: "date",
-  //       },
-  //     ]);
-  //   }
-
-  //   const filterRequestOptions = {
-  //     method: "POST",
-  //     headers: filterHeader,
-  //     body: filterFormdata,
-  //     redirect: "follow",
-  //   };
-
-  //   const response = await fetchData(performanceURL, filterRequestOptions);
-  //   setFilterPageNum((prevNum) => prevNum + 1);
-  //   setFilteredData(response.cards);
-  //   setFilterMaxPage(response.total_pages);
-  // };
-
   const getFilteredActivityAxios = async (event) => {
     event?.preventDefault();
     window.scrollTo(0, 0);
@@ -158,11 +77,7 @@ const Performance = () => {
     try {
       Loading.standard("در حال دریافت اطلاعات");
       Loading.remove();
-      const response = await axiosInstance.post("/activity/report", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post("/activity/report", formdata);
       console.log(response.data.response);
       setFilterPageNum((prevNum) => prevNum + 1);
       setFilteredData(response.data.response?.cards);
@@ -185,11 +100,7 @@ const Performance = () => {
     }
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post("/activity/report", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post("/activity/report", formdata);
       setFilterPageNum((prevNum) => prevNum + 1);
       setFilteredData((prevItems) => [
         ...prevItems,
@@ -201,46 +112,14 @@ const Performance = () => {
       Loading.remove();
     }
   };
-  //const performanceHeader = new Headers();
-  //const performanceFormdata = new FormData();
-  //performanceHeader.append("Authorization", `Bearer ${accessToken}`);
-  // performanceFormdata.append("pageNum", pageNum);
-  // const performanceRequestOptions = {
-  //   method: "POST",
-  //   headers: performanceHeader,
-  //   body: performanceFormdata,
-  //   redirect: "follow",
-  // };
-  // async function getPerformanceData(url, options) {
-  //   setIsFilterPopupActive(false);
-
-  //   const performanceRawData = await fetchData(url, options);
-  //   console.log(performanceRawData);
-  //   console.log(performanceRawData.cards);
-  //   setMaxPages(performanceRawData.total_pages);
-  //   if (performanceRawData.cards) {
-  //     setPerformanceData((prevItems) => [
-  //       ...prevItems,
-  //       ...performanceRawData?.cards,
-  //     ]);
-  //   }
-
-  //   setPageNum((prevNum) => prevNum + 1);
-  //   setClientList(performanceRawData.clients);
-  // }
-
   const getActivityDataAxios = async () => {
     setIsFilterPopupActive(false);
 
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post(
-        "/activity/report",
-        {
-          pageNum,
-        },
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const response = await axiosInstance.post("/activity/report", {
+        pageNum,
+      });
       setMaxPages(response.data.response.total_pages);
       if (response.data.response.cards) {
         setPerformanceData((prevItems) => [
@@ -293,12 +172,10 @@ const Performance = () => {
   };
 
   useEffect(() => {
-    // console.log("first useEffect fired");
-    if (accessToken === null) {
+    if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
     }
     if (!isFilter) {
-      //getPerformanceData(performanceURL, performanceRequestOptions);
       getActivityDataAxios();
     }
   }, []);
@@ -338,7 +215,7 @@ const Performance = () => {
               setClientName={setClientName}
               setIsFilter={setIsFilter}
               setIsSubmitted={setIsSubmitted}
-              filterArea={filterArea}
+              renderedFrom={"Performance"}
             />
             <PopupBackground
               isPopupActive={setIsFilterPopupActive}

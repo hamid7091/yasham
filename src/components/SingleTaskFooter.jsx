@@ -1,6 +1,7 @@
 import React from "react";
 import CommentIcon from "../assets/svg-icons/CommentIcon";
 import { useNavigate } from "react-router-dom";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const SingleTaskFooter = ({
   userInfo,
@@ -8,21 +9,22 @@ const SingleTaskFooter = ({
   isAssignedToMe,
   setIsCommentPopupActive,
   setIsAssignPopupActive,
+  setIsEndTaskPoupActive,
   handleStartTask,
   taskID,
 }) => {
   const navigate = useNavigate();
 
-  var isSupervisor = false;
-  userInfo.Role.forEach((role) => {
-    if (
-      role == "administrator" ||
-      role == "supervisor" ||
-      role == "supper_administrator"
-    ) {
-      isSupervisor = true;
-    }
-  });
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userInfo.Role);
 
   const handleCommentPopup = () => {
     setIsCommentPopupActive(true);
@@ -31,73 +33,43 @@ const SingleTaskFooter = ({
     setIsAssignPopupActive(true);
   };
   const handleEndTaskPopup = () => {
-    navigate(`/endTask/${taskID}`);
+    !isClient && navigate(`/endTask/${taskID}`);
+    isClient && setIsEndTaskPoupActive(true);
   };
 
-  console.log(isAssignedToMe);
+  console.log(userInfo);
   return (
     <div>
       <footer className="footer-container px-4 py-3 fixed-bottom bottom-0 d-flex justify-content-between align-items-center single-footer-bg">
+        <div
+          className="footer-comment-btn ms-3 has-pointer"
+          onClick={handleCommentPopup}
+        >
+          <CommentIcon />
+        </div>
         {isAssignedToMe && !isTaskStarted && (
-          <>
-            {" "}
-            <div
-              className="footer-comment-btn ms-3 has-pointer"
-              onClick={handleCommentPopup}
-            >
-              <CommentIcon />
-            </div>
-            <button
-              className="task-ender btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer"
-              onClick={handleStartTask}
-            >
-              شروع تسک
-            </button>{" "}
-          </>
+          <button
+            className="task-ender btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer"
+            onClick={handleStartTask}
+          >
+            شروع تسک
+          </button>
         )}
         {isAssignedToMe && isTaskStarted && (
-          <>
-            {" "}
-            <div
-              className="footer-comment-btn ms-3 has-pointer"
-              onClick={handleCommentPopup}
-            >
-              <CommentIcon />
-            </div>
-            <button
-              className="task-ender btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer"
-              onClick={handleEndTaskPopup}
-            >
-              اتمام تسک
-            </button>{" "}
-          </>
+          <button
+            className="task-ender btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer"
+            onClick={handleEndTaskPopup}
+          >
+            اتمام تسک
+          </button>
         )}
         {isSupervisor && !isTaskStarted && !isAssignedToMe && (
-          <>
-            {" "}
-            <div
-              className="footer-comment-btn ms-3 has-pointer"
-              onClick={handleCommentPopup}
-            >
-              <CommentIcon />
-            </div>
-            <button
-              className="task-ender btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer"
-              onClick={handleAssignPopup}
-            >
-              اساین
-            </button>{" "}
-          </>
-        )}
-        {!isAssignedToMe && !isSupervisor && (
-          <>
-            <div
-              className="footer-comment-btn ms-3 has-pointer"
-              onClick={handleCommentPopup}
-            >
-              <CommentIcon />
-            </div>
-          </>
+          <button
+            className="task-ender btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer"
+            onClick={handleAssignPopup}
+          >
+            اساین
+          </button>
         )}
       </footer>
     </div>

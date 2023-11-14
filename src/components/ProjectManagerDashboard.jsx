@@ -25,7 +25,7 @@ const ProjectManagerDashboard = ({
   const cy = 110;
   const iR = 50;
   const oR = 100;
-  const value = customerSatisfaction.rate * 20;
+  const value = customerSatisfaction?.rate * 20;
   const needle = (value, data, cx, cy, iR, oR, color) => {
     let total = 0;
     data.forEach((v) => {
@@ -75,7 +75,7 @@ const ProjectManagerDashboard = ({
         <div className="bg-white rounded-5 p-3 text-center dborder-thick-royal">
           <div className="mb-2">
             <span className="grey-xxlarge-bold">سفارشات امروز :</span>
-            <span className="bold-xxlarge">{dailyOrders.ordersCount}</span>
+            <span className="bold-xxlarge">{dailyOrders?.ordersCount}</span>
           </div>
           <span className="has-pointer" onClick={handleNavgate}>
             <span className="royal-large-bold ms-2">مشاهده سفارشات</span>
@@ -103,7 +103,7 @@ const ProjectManagerDashboard = ({
                 در انتظار
               </span>
               <span className="grey-xlarge-bold">
-                {dailyTaskReport.pending}
+                {dailyTaskReport?.pending}
               </span>
             </div>
             <div className="d-flex flex-column">
@@ -111,14 +111,14 @@ const ProjectManagerDashboard = ({
                 در حال انجام
               </span>
               <span className="grey-xlarge-bold">
-                {dailyTaskReport.ongoing}
+                {dailyTaskReport?.ongoing}
               </span>
             </div>
             <div className="d-flex flex-column">
               <span className="royal-xlarge-bold dborder-thin-ulgrey">
                 انجام شده{" "}
               </span>
-              <span className="grey-xlarge-bold">{dailyTaskReport.done}</span>
+              <span className="grey-xlarge-bold">{dailyTaskReport?.done}</span>
             </div>
           </div>
         </div>
@@ -140,30 +140,31 @@ const ProjectManagerDashboard = ({
           className="bg-white rounded-pill p-4 drop-shadow mb-3 has-pointer"
           onClick={() => {
             navigate("/allEmployees", {
-              state: employeeStatus.busiestEmployee,
+              state: employeeStatus?.busiestEmployee,
             });
           }}
         >
           <span className="royal-large">پر مشغله ترین فرد </span>
           <span className="grey-large-bold500">
-            {employeeStatus.busiestEmployee.employeeName}
+            {employeeStatus?.busiestEmployee.employeeName}
           </span>
         </div>
         <div
           className="bg-white rounded-pill p-4 drop-shadow has-pointer"
           onClick={() => {
             navigate("/allEmployees", {
-              state: employeeStatus.mostHardworkingEmployee,
+              state: employeeStatus?.mostHardworkingEmployee,
             });
           }}
         >
           <span className="royal-large">پرکارترین فرد </span>
           <span className="grey-large-bold500">
-            {employeeStatus.mostHardworkingEmployee.employeeName}
+            {employeeStatus?.mostHardworkingEmployee.employeeName}
           </span>
         </div>
       </div>
-      <hr className="my-4" />
+      {/* DO NOT DELETE */}
+      {/* <hr className="my-4" />
       <div>
         <div className="bg-white p-3 rounded-5">
           <div className="d-flex align-items-center justify-content-between mb-4 px-4">
@@ -215,48 +216,15 @@ const ProjectManagerDashboard = ({
           </div>
           <div className="text-center">
             <span className="royal-xxlarge-bold500">
-              {customerSatisfaction.rate}
+              {customerSatisfaction?.rate}
             </span>
           </div>
           <div className="text-center">
             <span className="grey-default-thin">از 600 رای ثبت شده</span>
           </div>
         </div>
-      </div>
-      {/* <div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
-        <div>daas</div>
       </div> */}
+      {/* DO NOT DELETE */}
     </div>
   );
 };

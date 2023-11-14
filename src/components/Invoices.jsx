@@ -10,9 +10,21 @@ import PopupBackground from "./PopupBackground";
 import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
 import Message from "../micro-components/Message";
 import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const Invoices = ({ fromSingleBusiness }) => {
   const navigate = useNavigate();
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
 
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [currentFPageNum, setCurrentFPageNum] = useState(1);
@@ -28,7 +40,17 @@ const Invoices = ({ fromSingleBusiness }) => {
   const [isFiltered, setIsFiltered] = useState(false);
   const [filteredCats, setFilteredCats] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const filterArea = "orders";
+  const [isSom, setIsSom] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    console.log(isClient);
+    console.log("ue1");
+    if (!isLoading) {
+      !isClient && navigate("/unauthorized");
+    }
+  }, [isClient]);
 
   const invoiceStatusOptions = [
     { clientName: "پرداخت شده", clientID: 3 }, // به منظور همخوانی با نحوه کانورت در پاپ اپ فیلتر بدین شکل نوشته شده است
@@ -153,11 +175,22 @@ const Invoices = ({ fromSingleBusiness }) => {
       ]);
       setTotalPages(response.data.response.total_pages);
       setCurrentPageNum((prevPage) => prevPage + 1);
+      setIsSom(true);
       console.log(response.data.response);
       Loading.remove();
     } catch (error) {
       console.error(error);
       Loading.remove();
+    }
+  };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
     }
   };
   const handleScroll = () => {
@@ -166,7 +199,8 @@ const Invoices = ({ fromSingleBusiness }) => {
       document.documentElement.offsetHeight -
         window.innerHeight -
         document.documentElement.scrollTop <
-        1
+        1 &&
+      isSom
     ) {
       getInvoicesList();
     } else if (
@@ -174,7 +208,8 @@ const Invoices = ({ fromSingleBusiness }) => {
       document.documentElement.offsetHeight -
         window.innerHeight -
         document.documentElement.scrollTop <
-        1
+        1 &&
+      isSom
     ) {
       getFilteredInvoicesAuto();
     }
@@ -199,6 +234,7 @@ const Invoices = ({ fromSingleBusiness }) => {
     }
     if (!isFiltered) {
       getInvoicesList();
+      getUser();
     }
   }, []);
   useEffect(() => {
@@ -235,7 +271,7 @@ const Invoices = ({ fromSingleBusiness }) => {
             setClientName={setInvoiceStatus}
             setIsFilter={setIsFiltered}
             setIsSubmitted={setIsSubmitted}
-            filterArea={filterArea}
+            renderedFrom={"Invoices"}
           />
           <PopupBackground
             isPopupActive={setIsFilterPopupActive}

@@ -37,23 +37,22 @@ const AllInventory = () => {
     setSearchedStock(event.target.value);
   };
   const handleCapReduction = (cat) => {
-    console.log(cat);
-    console.log(isFiltered);
     if (isFiltered) {
       if (cat.value == "stockStatus") {
         setIsSubmitted(true);
         setStockStatus(null);
-      } else if (cat.value === "stockName") {
+      } else if (cat.value === "itemName") {
         setIsSubmitted(true);
         setSearchedStock(null);
       }
     }
-    console.log(filteredCats.length);
   };
   const getFilteredInventoryListAutoAxios = async () => {
     const formdata = new FormData();
+    console.log(stockStatus);
     formdata.append("pageNum", filteredCurrentPageNum);
     if (stockStatus) {
+      console.log("fired");
       formdata.append("stockStatus", stockStatus);
     }
     if (searchedStock) {
@@ -61,17 +60,47 @@ const AllInventory = () => {
     }
     try {
       Loading.standard("درحال دریافت اطلاعات");
-      const response = await axiosInstance.post("/item/all_items", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post("/item/all_items", formdata);
       setFilteredCurrentPageNum((prevNum) => prevNum + 1);
       setFilteredAllStockData((prevItems) => [
         ...prevItems,
         ...response.data.response.cards,
       ]);
       setFilteredTotalPages(response.data.response.total_pages);
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getSearchedInventoryListAxios = async (event) => {
+    event?.preventDefault();
+    window.scrollTo({ top: 0, behavior: "instant" });
+    setFilteredCurrentPageNum(1);
+    setFilteredCats([]);
+    setIsFiltered(true);
+    setIsFilterPopupActive(false);
+    setStockStatus(null);
+    const formdata = new FormData();
+    formdata.append("pageNum", 1);
+    if (searchedStock) {
+      formdata.append("itemName", searchedStock);
+      setFilteredCats((prevStates) => [
+        ...prevStates,
+        { label: searchedStock, value: "itemName" },
+      ]);
+      searchField.current.value = null;
+    }
+    try {
+      Loading.standard("درحال دریافت اطلاعات");
+      const response = await axiosInstance.post("/item/all_items", formdata);
+      setFilteredCurrentPageNum((prevNum) => prevNum + 1);
+      setFilteredAllStockData(response.data.response.cards);
+      setFilteredTotalPages(response.data.response.total_pages);
+      //setSearchedStock(null);
+      //setStockStatus(null);
+      console.log(response.data.response);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -85,17 +114,10 @@ const AllInventory = () => {
     setFilteredCats([]);
     setIsFiltered(true);
     setIsFilterPopupActive(false);
-
+    setSearchedStock(null);
     const formdata = new FormData();
     formdata.append("pageNum", 1);
-    if (searchedStock) {
-      formdata.append("stockName", searchedStock);
-      setFilteredCats((prevStates) => [
-        ...prevStates,
-        { label: searchedStock, value: "stockName" },
-      ]);
-      searchField.current.value = null;
-    }
+
     if (stockStatus) {
       console.log(stockStatus);
       formdata.append("stockStatus", stockStatus);
@@ -106,16 +128,13 @@ const AllInventory = () => {
     }
     try {
       Loading.standard("درحال دریافت اطلاعات");
-      const response = await axiosInstance.post("/item/all_items", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post("/item/all_items", formdata);
       setFilteredCurrentPageNum((prevNum) => prevNum + 1);
       setFilteredAllStockData(response.data.response.cards);
       setFilteredTotalPages(response.data.response.total_pages);
-      setSearchedStock(null);
-      setStockStatus(null);
+      //setSearchedStock(null);
+      //setStockStatus(null);
+      console.log(response.data.response);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -126,17 +145,9 @@ const AllInventory = () => {
     setIsLoading(true);
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post(
-        "/item/all_items",
-        {
-          pageNum: currentPageNum,
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axiosInstance.post("/item/all_items", {
+        pageNum: currentPageNum,
+      });
       setAllStockData((prevCards) => [
         ...prevCards,
         ...response.data.response.cards,
@@ -168,7 +179,8 @@ const AllInventory = () => {
       document.documentElement.offsetHeight -
         window.innerHeight -
         document.documentElement.scrollTop <
-        1
+        1 &&
+      isSom
     ) {
       getFilteredInventoryListAutoAxios();
     }
@@ -180,7 +192,7 @@ const AllInventory = () => {
     if (!isFiltered) {
       getInventoryListAxios();
     }
-  }, []);
+  }, [isFiltered]);
   useEffect(() => {
     if (totalPages >= currentPageNum && !isFiltered) {
       window.addEventListener("scroll", handleScroll);
@@ -222,7 +234,7 @@ const AllInventory = () => {
           className="flex-grow-1 rounded-pill p-3"
           placeholder="جستجوی نام بیمار ..."
         />
-        <span className="has-pointer" onClick={getFilteredInventoryListAxios}>
+        <span className="has-pointer" onClick={getSearchedInventoryListAxios}>
           <SearchIcon />
         </span>
       </div>
@@ -239,7 +251,7 @@ const AllInventory = () => {
                     {cat.label === "1" && "رو به اتمام"}
                     {cat.label === "2" && "موجود"}
                     {cat.label === "0" && "ناموجود"}
-                    {cat.value === "stockName" && cat.label}
+                    {cat.value === "itemName" && cat.label}
                   </span>
                   <span onClick={() => handleCapReduction(cat)}>
                     <BLCloseBtn />

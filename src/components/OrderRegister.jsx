@@ -11,6 +11,8 @@ import Message from "../micro-components/Message";
 import MinusButton from "../assets/svg-icons/MinusButton";
 import EditButton from "../assets/svg-icons/EditButton";
 import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
+import Unauthorizaed from "../components/Unauthorized";
 
 const OrderRegister = () => {
   const location = useLocation();
@@ -19,6 +21,17 @@ const OrderRegister = () => {
   const mobileRadio = useRef(null);
   const maleRadio = useRef(null);
   const femaleRadio = useRef(null);
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
 
   const [firstname, setFirstname] = useState();
   const [lastname, setLastname] = useState();
@@ -34,11 +47,18 @@ const OrderRegister = () => {
 
   const [isAddDetailPopupActive, setIsAddDetailPopupActive] = useState(false);
   const [details, setDetails] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    console.log(isClient);
+    console.log("ue1");
+    if (!isLoading) {
+      !isClient && !isSupervisor && navigate("/unauthorized");
+    }
+  }, [isClient, isSupervisor]);
 
-  const fixedServices = location.state.serviceType[1].serviceTaskTypes;
-  const mobileServices = location.state.serviceType[2].serviceTaskTypes;
-  const clients = location.state.clientsList;
-  const isSupervisor = location.state.isSupervisor;
+  const fixedServices = location.state?.serviceType[1].serviceTaskTypes;
+  const mobileServices = location.state?.serviceType[2].serviceTaskTypes;
+  const clients = location.state?.clientsList;
 
   const customStyles = {
     option: (defaultStyles, state) => ({
@@ -249,13 +269,25 @@ const OrderRegister = () => {
     console.log(value);
     setClientID(value?.value);
   };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
-    if (!location.state) {
+    if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
+    } else {
+      getUser();
     }
   }, []);
 
-  return location.state ? (
+  return (
     <div className="container bg-default" dir="rtl">
       {isAddDetailPopupActive && (
         <>
@@ -313,7 +345,7 @@ const OrderRegister = () => {
           </>
         )}
 
-        <label htmlFor="patient-firstname" className="bold500-large my-3 pe-3">
+        <label htmlFor="patient-firstname" className="bold500-large mb-3 pe-3">
           نام بیمار
         </label>
         <input
@@ -325,7 +357,7 @@ const OrderRegister = () => {
           id="patient-firstname"
           placeholder="نام بیمار وارد کنید"
         />
-        <label htmlFor="patient-lastname" className="bold500-large my-3 pe-3">
+        <label htmlFor="patient-lastname" className="bold500-large mb-3 pe-3">
           نام خانوادگی بیمار
         </label>
         <input
@@ -337,7 +369,7 @@ const OrderRegister = () => {
           id="patient-lastname"
           placeholder="نام خانوادگی بیمار را وارد کنید"
         />
-        <label htmlFor="patient-age" className="bold500-large my-3 pe-3">
+        <label htmlFor="patient-age" className="bold500-large mb-3 pe-3">
           سن بیمار
         </label>
         <input
@@ -474,8 +506,6 @@ const OrderRegister = () => {
         </div>
       </form>
     </div>
-  ) : (
-    Loading.standard("درحال دریافت اطلاعات")
   );
 };
 

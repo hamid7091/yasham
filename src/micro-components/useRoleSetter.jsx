@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 
 const useRoleSetter = (userRole) => {
-  const [isEmployee, setIsEmployee] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [isSupervisor, setIsSupervisor] = useState(false);
-  const [isShipping, setIsShipping] = useState(false);
-  const [isInventory, setIsInventory] = useState(false);
-  const [isPManager, setIsPManager] = useState(false);
-  const [isFManager, setIsFManager] = useState(false);
-  const [isReception, setIsReception] = useState(false);
+  const [isEmployee, setIsEmployee] = useState();
+  const [isClient, setIsClient] = useState();
+  const [isSupervisor, setIsSupervisor] = useState();
+  const [isShipping, setIsShipping] = useState();
+  const [isInventory, setIsInventory] = useState();
+  const [isPManager, setIsPManager] = useState();
+  const [isFManager, setIsFManager] = useState();
+  const [isReception, setIsReception] = useState();
   useEffect(() => {
     userRole?.forEach((role) => {
       if (
@@ -21,15 +21,22 @@ const useRoleSetter = (userRole) => {
         !isFManager &&
         !isReception
       ) {
-        role === "employee" && setIsEmployee(true);
-        role === "shipping" && setIsShipping(true);
-        role === "client" && setIsClient(true);
-        role === "supper_administrator" && setIsSupervisor(true);
-        role === "administrator" && setIsSupervisor(true);
-        role === "inventory_manager" && setIsInventory(true);
-        role === "project_manager" && setIsPManager(true);
-        role === "financial_manager" && setIsFManager(true);
-        role === "reception" && setIsReception(true);
+        role === "employee" ? setIsEmployee(true) : setIsEmployee(false);
+        role === "shipping" ? setIsShipping(true) : setIsShipping(false);
+        role === "client" ? setIsClient(true) : setIsClient(false);
+        role === "supper_administrator" ||
+        role === "administrator" ||
+        role === "supervisor"
+          ? setIsSupervisor(true)
+          : setIsSupervisor(false);
+        role === "inventory_manager"
+          ? setIsInventory(true)
+          : setIsInventory(false);
+        role === "project_manager" ? setIsPManager(true) : setIsPManager(false);
+        role === "financial_manager"
+          ? setIsFManager(true)
+          : setIsFManager(false);
+        role === "reception" ? setIsReception(true) : setIsReception(false);
       }
     });
   }, [userRole]);

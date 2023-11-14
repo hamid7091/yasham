@@ -6,10 +6,13 @@ import Select from "react-select";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import axiosInstance from "../util-functions/axiosInstance";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
+import img from "../assets/svg-pics/asd.jpg";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const AddNewStockItem = () => {
   const navigate = useNavigate();
   // ---------------states------------------
+
   const [itemPicture, setItemPicture] = useState();
   const [itemName, setItemName] = useState();
   const [inventoryCode, setInventoryCode] = useState();
@@ -24,6 +27,28 @@ const AddNewStockItem = () => {
   const [isPurchaseCostValid, setIsPurchaseCostValid] = useState(null);
   const [isWarningLimitValid, setIsWarningLimitValid] = useState(null);
   const [isAvatarSet, setIsAvatarSet] = useState(false);
+
+  const [userRole, setUserRole] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+
+  useEffect(() => {
+    console.log("ue1");
+
+    if (!isLoading) {
+      !isShipping && navigate("/unauthorized");
+    }
+  }, [isShipping]);
 
   const avatarInput = useRef(null);
   const avatar = useRef(null);
@@ -219,8 +244,23 @@ const AddNewStockItem = () => {
       Loading.remove();
     }
   };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
-    getUnits();
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getUnits();
+      getUser();
+    }
   }, []);
   console.log(isItemNameValid);
   return (
@@ -233,7 +273,7 @@ const AddNewStockItem = () => {
       </header>
       <div className="text-center d-flex flex-column justify-content-center align-items-center">
         <div>
-          <img className="avatar-svg-image" ref={avatar} src="" alt="" />
+          <img className="avatar-svg-image" ref={avatar} src={img} alt="" />
         </div>
         <div>
           <input
