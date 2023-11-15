@@ -39,6 +39,7 @@ import AddUser from "./components/AddUser";
 import EditUser from "./components/EditUser";
 import EndTask from "./components/EndTask";
 import Unauthorized from "./components/Unauthorized";
+import AllTasksLoader from "./components/AllTasksLoader";
 
 const App = () => {
   return (
@@ -96,6 +97,7 @@ const App = () => {
           element={<AllBusinessesReceptionVersion />}
         />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/allTaskLoader" element={<AllTasksLoader />} />
       </Routes>
     </>
   );

@@ -16,6 +16,7 @@ const FilterPopup = ({
   clientName,
   setClientName,
   renderedFrom,
+  isPManager,
 }) => {
   const handleClosePopup = () => {
     setIsFilterPopupActive(false);
@@ -158,44 +159,46 @@ const FilterPopup = ({
               placeholder="انتخاب کنید"
             />
 
-            <>
-              {renderedFrom === "Performance" && (
-                <label
-                  htmlFor="clients-name"
-                  className="bold500-large my-3 pe-3"
-                >
-                  کارفرما
-                </label>
-              )}
-              {(renderedFrom === "OrderList" ||
-                renderedFrom === "Invoices") && (
-                <label
-                  htmlFor="clients-name"
-                  className="bold500-large my-3 pe-3"
-                >
-                  وضعیت پرداخت
-                </label>
-              )}
-              {renderedFrom === "AllTasksLoader" && (
-                <label
-                  htmlFor="clients-name"
-                  className="bold500-large my-3 pe-3"
-                >
-                  واگذاری شده به
-                </label>
-              )}
+            {!isPManager && (
+              <>
+                {renderedFrom === "Performance" && (
+                  <label
+                    htmlFor="clients-name"
+                    className="bold500-large my-3 pe-3"
+                  >
+                    کارفرما
+                  </label>
+                )}
+                {(renderedFrom === "OrderList" ||
+                  renderedFrom === "Invoices") && (
+                  <label
+                    htmlFor="clients-name"
+                    className="bold500-large my-3 pe-3"
+                  >
+                    وضعیت پرداخت
+                  </label>
+                )}
+                {renderedFrom === "AllTasksLoader" && (
+                  <label
+                    htmlFor="clients-name"
+                    className="bold500-large my-3 pe-3"
+                  >
+                    واگذاری شده به
+                  </label>
+                )}
 
-              <Select
-                id="clients-name"
-                name="cliens-name"
-                value={clientName}
-                onChange={setClientName}
-                options={clientOptions}
-                placeholder="انتخاب کنید"
-                styles={customStyles}
-                isClearable
-              />
-            </>
+                <Select
+                  id="clients-name"
+                  name="cliens-name"
+                  value={clientName}
+                  onChange={setClientName}
+                  options={clientOptions}
+                  placeholder="انتخاب کنید"
+                  styles={customStyles}
+                  isClearable
+                />
+              </>
+            )}
           </div>
           <button
             className="btn-royal-bold rounded-pill flex-grow-1 py-3 mt-4"

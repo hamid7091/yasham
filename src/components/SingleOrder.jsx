@@ -1,41 +1,57 @@
 import React, { useEffect, useState } from "react";
 import BackArrow from "../assets/svg-icons/BackArrow";
-import SingleOrderIcon from "../assets/svg-icons/SingleOrderIcon";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import fetchData from "../util-functions/fetchData";
 import useDate from "../micro-components/useDate2";
 import ClientAssignedCard from "./ClientAssignedCard";
+import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const SingleOrder = () => {
   const navigate = useNavigate();
   const param = useParams();
   const [orderData, setOrderData] = useState();
   const [tasks, setTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+
   const date = useDate(orderData?.date);
-  const accessToken = window.localStorage.getItem("AccessToken");
-  const singleOrderURL = "https://samane.zbbo.net/api/v1/order/get_order";
-  const singleOrderHeader = new Headers();
-  singleOrderHeader.append("Authorization", `Bearer ${accessToken}`);
-  const singleOrderFormdata = new FormData();
-  singleOrderFormdata.append("orderID", param.id);
-  const singleOrderOptions = {
-    method: "POST",
-    headers: singleOrderHeader,
-    body: singleOrderFormdata,
-    redirect: "follow",
+
+  const getOrderAxios = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/order/get_order", {
+        orderID: param.id,
+      });
+      setOrderData(response.data.response.details);
+      setTasks(response.data.response?.details?.tasks);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-
-  async function getOrder(url, options) {
-    const response = await fetchData(url, options);
-    console.log(response);
-    setOrderData(response.details);
-    setTasks(response?.details?.tasks);
-  }
-
-  useEffect(() => {
-    getOrder(singleOrderURL, singleOrderOptions);
-  }, []);
-
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleRedirect = (id) => {
     if (id.invoiceID != 0) {
       navigate(`/invoice/${id.invoiceID}`);
@@ -43,31 +59,37 @@ const SingleOrder = () => {
       navigate("/checkout", { state: id });
     }
   };
+  useEffect(() => {
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("login");
+    } else {
+      getOrderAxios();
+      getUser();
+    }
+  }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      (isShipping || isEmployee || isSupervisor || isInventory) && navigate("/unauthorized");
+    }
+  }, [isShipping, isEmployee, isSupervisor,isInventory]);
 
-  console.log(orderData);
-  console.log(orderData?.patientName == " ");
-  console.log(tasks);
-  console.log(param.id);
   return (
     orderData && (
       <div className="container px-4" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
-          <div className="bold-xlarge">
-            <span className="ms-2">{/* <SingleOrderIcon /> */}</span>
-            شماره سفارش {param.id}
-          </div>
+        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
+          <div className="bold-xlarge">شماره سفارش {param.id}</div>
           <Link to="/">
             <BackArrow />
           </Link>
         </header>
-        <section>
+        <section className="my-4">
           <div className="bg-white rounded-5 py-4 px-4">
             <div className=" d-flex align-items-center gap-4">
               <div className="d-flex flex-column gap-3">
                 <span className="royal-large ms-3">نام بیمار</span>
                 <span className="royal-large ms-3">سن بیمار</span>
                 <span className="royal-large ms-3">تاریخ</span>
-                <span className="royal-large ms-3">مبلغ</span>
+                {!isPManager && <span className="royal-large ms-3">مبلغ</span>}
               </div>
               <div className="d-flex flex-column gap-3">
                 <span className="bold500-default">
@@ -83,62 +105,71 @@ const SingleOrder = () => {
                   {orderData?.patientAge}
                 </span>
                 <span className="bold500-default pb-0">{date}</span>
-                <span className="bold500-default pb-0">
-                  {orderData?.price.toLocaleString()} تومان
-                </span>
+                {!isPManager && (
+                  <span className="bold500-default pb-0">
+                    {orderData?.price.toLocaleString()} تومان
+                  </span>
+                )}
               </div>
             </div>
-            <hr />
-            <div className="d-flex justify-content-between align-items-center">
-              <span className="ms-4 royal-large">وضعیت پرداخت</span>
-              {orderData?.invoiceStatus == 3 && (
-                <div className={`lroyal-default-bold py-2 px-3 badge-done`}>
-                  <span>پرداخت شده</span>
+            {!isPManager && (
+              <>
+                <hr />
+                <div className="d-flex justify-content-between align-items-center">
+                  <span className="ms-4 royal-large">وضعیت پرداخت</span>
+                  {orderData?.invoiceStatus == 3 && (
+                    <div className={`lroyal-default-bold py-2 px-3 badge-done`}>
+                      <span>پرداخت شده</span>
+                    </div>
+                  )}
+                  {(orderData?.invoiceStatus == 1 ||
+                    (orderData?.price !== 0 &&
+                      orderData?.invoiceStatus === null)) && (
+                    <div
+                      className={`lroyal-default-bold py-2 px-3 badge-in-process`}
+                    >
+                      <span>در انتظار پرداخت</span>
+                    </div>
+                  )}
+                  {orderData?.invoiceStatus == 0 && orderData?.price == 0 && (
+                    <div
+                      className={`lroyal-default-bold py-2 px-3 badge-waiting`}
+                    >
+                      <span>در انتظار قیمت گذاری</span>
+                    </div>
+                  )}
                 </div>
-              )}
-              {(orderData?.invoiceStatus == 1 ||
-                (orderData?.price !== 0 &&
-                  orderData?.invoiceStatus === null)) && (
-                <div
-                  className={`lroyal-default-bold py-2 px-3 badge-in-process`}
-                >
-                  <span>در انتظار پرداخت</span>
+                <div className="d-flex mt-3">
+                  {orderData?.invoiceStatus == 3 && (
+                    <span
+                      className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+                    >
+                      مشاهده فاکتور
+                    </span>
+                  )}
+                  {(orderData?.invoiceStatus == 1 ||
+                    (orderData?.price !== 0 &&
+                      orderData?.invoiceStatus === null)) && (
+                    <span
+                      className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+                      onClick={() => handleRedirect(orderData)}
+                    >
+                      پرداخت
+                    </span>
+                  )}
+                  {orderData?.price == 0 && (
+                    <span
+                      className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer disabled`}
+                    >
+                      پرداخت
+                    </span>
+                  )}
                 </div>
-              )}
-              {orderData?.invoiceStatus == 0 && orderData?.price == 0 && (
-                <div className={`lroyal-default-bold py-2 px-3 badge-waiting`}>
-                  <span>در انتظار قیمت گذاری</span>
-                </div>
-              )}
-            </div>
-            <div className="d-flex mt-3">
-              {orderData?.invoiceStatus == 3 && (
-                <span
-                  className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
-                >
-                  مشاهده فاکتور
-                </span>
-              )}
-              {(orderData?.invoiceStatus == 1 ||
-                (orderData?.price !== 0 &&
-                  orderData?.invoiceStatus === null)) && (
-                <span
-                  className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
-                  onClick={() => handleRedirect(orderData)}
-                >
-                  پرداخت
-                </span>
-              )}
-              {orderData?.price == 0 && (
-                <span
-                  className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer disabled`}
-                >
-                  پرداخت
-                </span>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </section>
+        <hr />
         <p className="bold-xlarge mb-0 mt-4 mb-2 me-2">جزئیات سفارش</p>
         <section>
           {tasks.map((task, index) => {

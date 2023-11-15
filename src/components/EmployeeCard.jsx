@@ -1,11 +1,20 @@
 import React from "react";
 import BackIcon from "../assets/svg-icons/BackIcon";
-import GreenUpArrow from "../assets/svg-icons/GreenUpArrow";
-import BlueDownArrow from "../assets/svg-icons/BlueDownArrow";
+import { useNavigate } from "react-router-dom";
 
 const EmployeeCard = ({ employee }) => {
+  const navigate = useNavigate();
+  console.log(employee);
+  const navigateToAllTaskLoader = () => {
+    navigate("/allTaskLoader", {
+      state: { label: employee.employeeName, value: employee.employeeID },
+    });
+  };
   return (
-    <div className="bg-white mb-3 rounded-5 p-4">
+    <div
+      className="bg-white mb-3 rounded-5 p-4 has-pointer"
+      onClick={navigateToAllTaskLoader}
+    >
       <div className="d-flex align-items-center">
         <div className="d-flex align-items-center flex-grow-1">
           <img

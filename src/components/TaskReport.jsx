@@ -7,11 +7,12 @@ import Calendar30C from "../assets/svg-icons/Calendar30C";
 import FilterDatePopup from "./FilterDatePopup";
 import PopupBackground from "./PopupBackground";
 import usePredefinedDats from "../micro-components/usePredefinedDates";
-import fetchData from "../util-functions/fetchData";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
+import ClientAssignedCard from "./ClientAssignedCard";
 
 const TaskReport = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
   const navigate = useNavigate();
   const {
     ts,
@@ -47,6 +48,65 @@ const TaskReport = () => {
   const [endDate, setEndDate] = useState();
   const [startDateFront, setStartDateFront] = useState();
   const [endDateFront, setEndtDateFront] = useState();
+
+  const [reportData, setReportData] = useState();
+
+  const Report = {
+    data: {
+      response: {
+        generalReport: { done: 10, ongoing: 15, pending: 20 },
+        departmentTasks: { fixed: 10, mobile: 15, total: 25 },
+        departmentDetail: {
+          fixed: { done: 10, ongoing: 15, pending: 20 },
+          mobile: { done: 20, ongoing: 25, pending: 45 },
+        },
+        cards: [
+          {
+            taskID: 454,
+            taskType: "Direct Implant PFZ",
+            client: "دکتر نسیم  خسرونژاد",
+            date: "1402-8-18",
+            step: "گچ",
+            percentage: 4,
+            patientFullName: "نیما  ولی نژاد",
+          },
+          {
+            taskID: 454,
+            taskType: "Direct Implant PFZ",
+            client: "دکتر نسیم  خسرونژاد",
+            date: "1402-8-18",
+            step: "گچ",
+            percentage: 4,
+            patientFullName: "نیما  ولی نژاد",
+          },
+        ],
+      },
+    },
+  };
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
@@ -118,38 +178,99 @@ const TaskReport = () => {
     event?.preventDefault();
     window.scrollTo(0, 0);
     setIsFilterPopupActive(false);
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
-    const filterFormdata = new FormData();
+    const formdata = new FormData();
     if (typeof startDate === "object") {
-      filterFormdata.append("startDate", startDate?.toUnix());
-      filterFormdata.append("endDate", endDate?.toUnix());
+      formdata.append("startDate", startDate?.toUnix());
+      formdata.append("endDate", endDate?.toUnix());
       setStartDateFront(moment.unix(startDate?.toUnix()).format("jYYYY/jM/jD"));
       setEndtDateFront(moment.unix(endDate?.toUnix()).format("jYYYY/jM/jD"));
     } else {
-      filterFormdata.append("startDate", startDate);
-      filterFormdata.append("endDate", endDate);
+      formdata.append("startDate", startDate);
+      formdata.append("endDate", endDate);
     }
-
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
-
-    const response = await fetchData(URL, filterRequestOptions);
-    Loading.remove();
-    console.log(response);
+    try {
+      const response = await axiosInstance.post("/task/report", formdata);
+      Loading.remove();
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getReportData = async () => {
     console.log(startDate);
-    // console.log(startDate.toUnix());
     console.log(endDate);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      // const response = await axiosInstance.post("/task/report", {
+      //   startDate,
+      //   endDate,
+      // });
+      const response = {
+        data: {
+          response: {
+            generalReport: { done: 10, ongoing: 15, pending: 20 },
+            departmentTasks: { fixed: 10, mobile: 15, total: 25 },
+            departmentDetail: {
+              fixed: { done: 10, ongoing: 15, pending: 20 },
+              mobile: { done: 20, ongoing: 25, pending: 45 },
+            },
+            cards: [
+              {
+                taskID: 454,
+                taskType: "Direct Implant PFZ",
+                client: "دکتر نسیم  خسرونژاد",
+                date: "1402-8-18",
+                step: "گچ",
+                percentage: 4,
+                patientFullName: "نیما  ولی نژاد",
+              },
+              {
+                taskID: 454,
+                taskType: "Direct Implant PFZ",
+                client: "دکتر نسیم  خسرونژاد",
+                date: "1402-8-18",
+                step: "گچ",
+                percentage: 4,
+                patientFullName: "نیما  ولی نژاد",
+              },
+            ],
+          },
+        },
+      };
+      setReportData(response.data.response);
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
 
   useEffect(() => {
+    if (!isLoading) {
+      !isPManager && navigate("/unauthorized");
+    }
+  }, [isPManager]);
+  useEffect(() => {
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getUser();
+    }
+  }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      getReportData();
+    }
+  }, [isLoading]);
+  useEffect(() => {
     setStartDateFront(tms);
     setEndtDateFront(te);
+    setStartDate(tmsu);
+    setEndDate(teu);
   }, [te, tms]);
+
   // ----------------------------------------------------------------
 
   // ----------------------------------------------------------------
@@ -157,24 +278,22 @@ const TaskReport = () => {
   const data = [
     {
       name: "انجام شده",
-      value: parseInt("40"),
+      value: reportData?.generalReport.done,
     },
     {
       name: "در انتظار",
-      value: parseInt("10"),
+      value: reportData?.generalReport.pending,
     },
     {
       name: "در حال انجام",
-      value: parseInt("30"),
+      value: reportData?.generalReport.ongoing,
     },
   ];
-  // const p = (parseInt("40") / (parseInt("40") + parseInt("60"))) * 100;
-
-  // const roundedNum = useMathRound(p);
-  // console.log(roundedNum);
   const COLORS = ["var(--green)", "var(--gray)", "var(--yellow)"];
 
   // ----------------------------------------------------------------
+
+  console.log(te, tms);
   return (
     <div className="container px-3" dir="rtl">
       {isFilterPopupActive && (
@@ -272,19 +391,25 @@ const TaskReport = () => {
           <span className="dborder-thin-ulgrey royal-xlarge-bold pb-2 mb-2">
             کل
           </span>
-          <span className="grey-xlarge-bold">100</span>
+          <span className="grey-xlarge-bold">
+            {reportData?.departmentTasks.total}
+          </span>
         </div>
         <div className="d-flex flex-column align-items-center ">
           <span className="dborder-thin-ulgrey royal-xlarge-bold pb-2 mb-2">
             ثابت
           </span>
-          <span className="grey-xlarge-bold">30</span>
+          <span className="grey-xlarge-bold">
+            {reportData?.departmentTasks.fixed}
+          </span>
         </div>
         <div className="d-flex flex-column align-items-center ">
           <span className="dborder-thin-ulgrey royal-xlarge-bold pb-2 mb-2">
             متحرک
           </span>
-          <span className="grey-xlarge-bold">70</span>
+          <span className="grey-xlarge-bold">
+            {reportData?.departmentTasks.mobile}
+          </span>
         </div>
       </div>
       <div className="bg-white rounded-5 p-4 d-flex flex-column gap-3 mb-3">
@@ -304,15 +429,15 @@ const TaskReport = () => {
             <tbody>
               <tr className="">
                 <td className="bg-ulroyal royal-default-bold500">ثابت</td>
-                <td>10</td>
-                <td>10</td>
-                <td>10</td>
+                <td>{reportData?.departmentDetail.fixed.done}</td>
+                <td>{reportData?.departmentDetail.fixed.ongoing}</td>
+                <td>{reportData?.departmentDetail.fixed.pending}</td>
               </tr>
               <tr className="">
                 <td className="bg-ulroyal royal-default-bold500">متحرک</td>
-                <td>20</td>
-                <td>20</td>
-                <td>20</td>
+                <td>{reportData?.departmentDetail.mobile.done}</td>
+                <td>{reportData?.departmentDetail.mobile.ongoing}</td>
+                <td>{reportData?.departmentDetail.mobile.pending}</td>
               </tr>
             </tbody>
           </table>
@@ -321,6 +446,9 @@ const TaskReport = () => {
       <div>
         <div>
           <span className="bold-xlarge pe-2">لیست وظیفه‌ها</span>
+          {reportData?.cards.map((card, index) => {
+            return <ClientAssignedCard key={index} order={card} />;
+          })}
         </div>
       </div>
     </div>

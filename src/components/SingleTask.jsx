@@ -34,9 +34,9 @@ const SingleTask = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      isShipping && navigate("/unauthorized");
+      (isShipping || isInventory) && navigate("/unauthorized");
     }
-  }, [isShipping]);
+  }, [isShipping, isInventory]);
 
   const [isCommentPopupActive, setIsCommentPopupActive] = useState(false);
   const [isAssignPopupActive, setIsAssignPopupActive] = useState(false);

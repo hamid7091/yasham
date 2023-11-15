@@ -83,9 +83,11 @@ const ClientTaskCard = ({ order, loadedFrom, isClient }) => {
               </div>
             )}
           </div>
-          {(loadedFrom === "orderList" || loadedFrom === "dashboard") && <hr />}
+          {((loadedFrom === "orderList" && isClient) ||
+            loadedFrom === "dashboard") && <hr />}
         </Link>
-        {(loadedFrom === "orderList" || loadedFrom === "dashboard") && (
+        {((loadedFrom === "orderList" && isClient) ||
+          loadedFrom === "dashboard") && (
           <div className="d-flex">
             {order.invoiceStatus === "3" && (
               <span

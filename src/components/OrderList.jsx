@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import SearchIcon from "../assets/svg-icons/SearchIcon";
 import ClientTaskCard from "./ClientTaskCard";
@@ -13,10 +13,11 @@ import { Loading } from "notiflix";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
 
-const OrderList = ({ isDirect, fromSingleBusiness }) => {
+const OrderList = () => {
   const navigate = useNavigate();
-  const accessToken = window.localStorage.getItem("AccessToken");
   const location = useLocation();
+  const searchField = useRef(null);
+  console.log(location.state);
 
   // necessary states
   const [userRole, setUserRole] = useState();
@@ -30,6 +31,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
     isFManager,
     isReception,
   ] = useRoleSetter(userRole);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [pageNum, setPageNum] = useState(1);
   const [filterPageNum, setFilterPageNum] = useState(1);
@@ -48,7 +50,6 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
   const [filteredCats, setFilteredCats] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false);
   const [isSom, setIsSom] = useState(false);
 
   const invoiceStatusOptions = [
@@ -73,13 +74,16 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       setStartDate(null);
     }
   };
-  const getFilteredOrderList = async (event) => {
+  const getSearchedOrderList = async (event) => {
     event?.preventDefault();
     window.scrollTo({ top: 0, behavior: "instant" });
     setFilterPageNum(1);
     setFilteredCats([]);
     setIsFiltered(true);
     setIsFilterPopupActive(false);
+    setInvoiceStatus(null);
+    setEndDate(null);
+    setEndDate(null);
     const formdata = new FormData();
     formdata.append("pageNum", 1);
     if (searchedPatientName) {
@@ -90,6 +94,36 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       ]);
       // setSearchedPatientName(null);
     }
+
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/order/history", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setFilterPageNum((prevNum) => prevNum + 1);
+      setFilteredOrdersData(response.data.response.cards);
+      setFilterTotalPages(response.data.response.total_pages);
+      setIsSom(true);
+      searchField.current.value = null;
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getFilteredOrderList = async (event) => {
+    event?.preventDefault();
+    window.scrollTo({ top: 0, behavior: "instant" });
+    setFilterPageNum(1);
+    setFilteredCats([]);
+    setIsFiltered(true);
+    setIsFilterPopupActive(false);
+    setSearchedPatientName(null);
+    const formdata = new FormData();
+    formdata.append("pageNum", 1);
     if (invoiceStatus) {
       formdata.append("invoiceStatusID", invoiceStatus.value);
       setFilteredCats((prevStates) => [
@@ -135,7 +169,8 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       setFilteredOrdersData(response.data.response.cards);
       setFilterTotalPages(response.data.response.total_pages);
       setIsSom(true);
-      setSearchedPatientName("");
+      searchField.current.value = null;
+
       console.log(response.data.response);
       Loading.remove();
     } catch (error) {
@@ -172,7 +207,6 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
     }
   };
   const getOrderList = async () => {
-    setIsLoading(true);
     try {
       Loading.standard("درحال دریافت اطلاعات");
       const response = await axiosInstance.post(
@@ -192,7 +226,6 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
       ]);
       setTotalPages(response.data.response.total_pages);
       setPageNum((prevPage) => prevPage + 1);
-      setIsLoading(false);
       setIsSom(true);
       console.log(response.data.response);
       Loading.remove();
@@ -206,6 +239,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
     try {
       const response = await axiosInstance.post("/user/check_access_token");
       setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
       console.log(response.data.response);
     } catch (error) {
       console.error(error);
@@ -250,7 +284,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
   };
 
   useEffect(() => {
-    if (accessToken === null) {
+    if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
     }
     if (!isFiltered) {
@@ -282,15 +316,23 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
 
   const today = moment().format("jYYYY/jMM/jDD");
   const todatUnix = moment().unix();
+  console.log(todatUnix);
 
   useEffect(() => {
     if (location.state === "searchToday") {
       setStartDate(todatUnix);
       setEndDate(todatUnix);
       setIsFiltered(true);
+      location.state = null;
     }
-  });
-  console.log(fromSingleBusiness);
+  }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      (isShipping || isEmployee || isSupervisor || isInventory) &&
+        navigate("/unauthorized");
+    }
+  }, [isShipping, isEmployee, isSupervisor, isInventory]);
+
   return (
     userRole && (
       <div className="px-3 mb-100 container" dir="rtl">
@@ -309,6 +351,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
               setIsFilter={setIsFiltered}
               setIsSubmitted={setIsSubmitted}
               renderedFrom={"OrderList"}
+              isPManager={isPManager}
             />
             <PopupBackground
               isPopupActive={setIsFilterPopupActive}
@@ -329,6 +372,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
         {(isClient || isPManager) && (
           <div className="d-flex align-items-center gap-3">
             <input
+              ref={searchField}
               onChange={handleSearchedPatientName}
               type="text"
               className="flex-grow-1 rounded-pill p-3"
@@ -336,7 +380,7 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
                 isClient ? "جستجوی نام بیمار ..." : "جستجوی نام پزشک ..."
               }`}
             />
-            <span className="has-pointer" onClick={getFilteredOrderList}>
+            <span className="has-pointer" onClick={getSearchedOrderList}>
               <SearchIcon />
             </span>
           </div>
@@ -401,6 +445,8 @@ const OrderList = ({ isDirect, fromSingleBusiness }) => {
             }`}
             onClick={() => {
               setIsFilterPopupActive(true);
+              setEndDate(null);
+              setStartDate(null);
             }}
           >
             <FilterIcon />

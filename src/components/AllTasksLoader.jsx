@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ClientAssignedCard from "./ClientAssignedCard";
 import Message from "../micro-components/Message";
-import fetchData from "../util-functions/fetchData";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import moment from "moment-jalaali";
 import FilterPopup from "./FilterPopup";
@@ -10,16 +9,32 @@ import PopupBackground from "./PopupBackground";
 import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
 import FilterIcon from "../assets/svg-icons/FilterIcon";
 import axiosInstance from "../util-functions/axiosInstance";
+import BackArrow from "../assets/svg-icons/BackArrow";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const AllTasksLoader = ({ isDirect }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  console.log(location.state);
 
   const [userRole, setUserRole] = useState();
+
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
 
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
   const [currentFilteredPageNumber, setCurrentFilteredPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filteredTotalPage, setFilteredTotalPages] = useState(1);
+  const [employees, setEmployees] = useState();
 
   const [totalTasksData, setTotalTasksData] = useState([]);
   const [filteredTotalTasksData, setFilteredTotalTasksData] = useState([]);
@@ -40,6 +55,14 @@ const AllTasksLoader = ({ isDirect }) => {
     { clientName: "نیره بوستانی", clientID: 0 },
   ];
 
+  const employeeOptions = [];
+  employees?.forEach((employee) => {
+    employeeOptions.push({
+      clientName: employee.fullName,
+      clientID: employee.user_id,
+    });
+  });
+
   // ===============================================
   const getTaskListAxios = async () => {
     Loading.standard("در حال دریافت اطلاعات");
@@ -57,6 +80,17 @@ const AllTasksLoader = ({ isDirect }) => {
     console.log(response.data.response);
 
     Loading.remove();
+  };
+  const getEmployees = async () => {
+    try {
+      const response = await axiosInstance.post("/user/get_employees", {
+        taskID: 1,
+      });
+      setEmployees(response.data.response);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
   };
   // ===============================================
 
@@ -207,6 +241,7 @@ const AllTasksLoader = ({ isDirect }) => {
     if (!isFiltered) {
       getTaskListAxios();
       getUser();
+      getEmployees();
     }
     if (isFiltered) {
       getFilteredTaskListAxios();
@@ -231,14 +266,22 @@ const AllTasksLoader = ({ isDirect }) => {
     }
   }, [isSubmitted, assignedEmployeeID, startDate, endDate]);
 
+  useEffect(() => {
+    if (location.state) {
+      setAssignedEmployeeID(location.state);
+      setIsFiltered(true);
+      location.state = null;
+    }
+  }, []);
+
   return (
     totalTasksData.length > 0 && (
-      <div className="px-3 mb-100">
+      <div className="container px-3 mb-100" dir="rtl">
         {isFilterPopupActive && (
           <>
             <FilterPopup
               setIsFilterPopupActive={setIsFilterPopupActive}
-              clientsList={invoiceStatusOptions}
+              clientsList={employeeOptions}
               handleStartDateChange={handleStartDateChange}
               handleEndDateChange={handleEndDateChange}
               startDate={startDate}
@@ -258,7 +301,17 @@ const AllTasksLoader = ({ isDirect }) => {
             />
           </>
         )}
-        {filteredCats.length > 0 ? (
+
+        {isDirect === undefined && (
+          <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
+            <div className="bold-xlarge">لیست وظیفه ها</div>
+            <Link to="/">
+              <BackArrow />
+            </Link>
+          </header>
+        )}
+
+        {filteredCats.length > 0 && (
           <>
             <div className="d-flex ">
               {filteredCats.map((cat, i) => {
@@ -277,10 +330,7 @@ const AllTasksLoader = ({ isDirect }) => {
             </div>
             <hr className="text-primary" />
           </>
-        ) : (
-          <h4 className="bold-xxlarge m-3 px-2">وظیفه‌ها</h4>
         )}
-
         <div>
           {!isFiltered &&
             (totalTasksData ? (

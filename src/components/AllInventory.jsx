@@ -98,8 +98,6 @@ const AllInventory = () => {
       setFilteredCurrentPageNum((prevNum) => prevNum + 1);
       setFilteredAllStockData(response.data.response.cards);
       setFilteredTotalPages(response.data.response.total_pages);
-      //setSearchedStock(null);
-      //setStockStatus(null);
       console.log(response.data.response);
       Loading.remove();
     } catch (error) {
@@ -132,8 +130,6 @@ const AllInventory = () => {
       setFilteredCurrentPageNum((prevNum) => prevNum + 1);
       setFilteredAllStockData(response.data.response.cards);
       setFilteredTotalPages(response.data.response.total_pages);
-      //setSearchedStock(null);
-      //setStockStatus(null);
       console.log(response.data.response);
       Loading.remove();
     } catch (error) {

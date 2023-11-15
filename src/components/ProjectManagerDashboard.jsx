@@ -137,12 +137,13 @@ const ProjectManagerDashboard = ({
           </span>
         </div>
         <div
-          className="bg-white rounded-pill p-4 drop-shadow mb-3 has-pointer"
-          onClick={() => {
-            navigate("/allEmployees", {
-              state: employeeStatus?.busiestEmployee,
-            });
-          }}
+          className="bg-white rounded-pill p-4 drop-shadow mb-3"
+          // DO NOT DELETE
+          // onClick={() => {
+          //   navigate("/allEmployees", {
+          //     state: employeeStatus?.busiestEmployee,
+          //   });
+          // }}
         >
           <span className="royal-large">پر مشغله ترین فرد </span>
           <span className="grey-large-bold500">
@@ -150,12 +151,13 @@ const ProjectManagerDashboard = ({
           </span>
         </div>
         <div
-          className="bg-white rounded-pill p-4 drop-shadow has-pointer"
-          onClick={() => {
-            navigate("/allEmployees", {
-              state: employeeStatus?.mostHardworkingEmployee,
-            });
-          }}
+          className="bg-white rounded-pill p-4 drop-shadow"
+          // DO NOT DELETE
+          // onClick={() => {
+          //   navigate("/allEmployees", {
+          //     state: employeeStatus?.mostHardworkingEmployee,
+          //   });
+          // }}
         >
           <span className="royal-large">پرکارترین فرد </span>
           <span className="grey-large-bold500">
