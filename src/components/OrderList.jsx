@@ -87,7 +87,7 @@ const OrderList = () => {
     const formdata = new FormData();
     formdata.append("pageNum", 1);
     if (searchedPatientName) {
-      formdata.append("patientName", searchedPatientName);
+      formdata.append("clientName", searchedPatientName);
       setFilteredCats((prevStates) => [
         ...prevStates,
         { label: searchedPatientName, value: "patientName" },
