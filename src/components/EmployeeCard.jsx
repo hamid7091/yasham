@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 const EmployeeCard = ({ employee }) => {
   const navigate = useNavigate();
-  console.log(employee);
   const navigateToAllTaskLoader = () => {
     navigate("/allTaskLoader", {
       state: { label: employee.employeeName, value: employee.employeeID },

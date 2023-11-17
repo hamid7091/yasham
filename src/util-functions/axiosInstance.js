@@ -28,6 +28,7 @@ axiosInstance.interceptors.response.use(
   (response) => {
     // Modify the response data here (e.g., parse, transform)
     console.log(response);
+    //console.log(Object?.fromEntries(response?.config?.data)); => to see what im sending
     return response;
   },
   (error) => {

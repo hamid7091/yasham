@@ -3,6 +3,7 @@ import CloseIcon from "../assets/svg-icons/CloseIcon";
 import fetchData from "../util-functions/fetchData";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const CommentsPopup = ({
   setIsCommentPopupActive,
@@ -10,10 +11,6 @@ const CommentsPopup = ({
   taskID,
 }) => {
   const [commentContent, setCommentContent] = useState("");
-  const sendCommentURL = "https://samane.zbbo.net/api/v1/task/comment_insert";
-  const accessToken = window.localStorage.getItem("AccessToken");
-  const sendCommentFromdata = new FormData();
-  const sendCommentHeader = new Headers();
 
   const handleClosePopup = () => {
     setIsCommentPopupActive(false);
@@ -22,39 +19,29 @@ const CommentsPopup = ({
     setCommentContent(event.target.value);
   };
 
-  const hanldeSendNewComment = async () => {
-    if (commentContent) {
+  const handleComment = async () => {
+    const formdata = new FormData();
+    formdata.append("taskID", taskID);
+    formdata.append("commentContent", commentContent);
+    try {
       Loading.standard("درحال ارسال نظر شما");
-      sendCommentHeader.append("Authorization", `Bearer ${accessToken}`);
-      sendCommentFromdata.append("taskID", taskID);
-      sendCommentFromdata.append("commentContent", commentContent);
-
-      const sendCommentRequestOptions = {
-        method: "POST",
-        headers: sendCommentHeader,
-        body: sendCommentFromdata,
-        redirect: "follow",
-      };
-      const response = await fetchData(
-        sendCommentURL,
-        sendCommentRequestOptions
+      const response = await axiosInstance.post(
+        "/task/comment_insert",
+        formdata
       );
-      if (response.success) {
+      if (response.data.response.success) {
         Loading.remove();
         Notify.success("نظر شما با موفقیت ارسال شد");
         setIsCommentPopupActive(false);
-        setCommentsData(response.Comments);
+        setCommentsData(response.data.response.Comments);
       } else {
         Loading.remove();
         Notify.failure("خطا ! لطفا مجددا تلاش کنید");
       }
-    } else {
-      Notify.failure("فیلد کامنت خالی است", {
-        width: "200px",
-        failure: {
-          notiflixIconColor: "#fff",
-        },
-      });
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
     }
   };
 
@@ -81,8 +68,13 @@ const CommentsPopup = ({
       </div>
       <div className="d-flex justify-content-center">
         <button
-          onClick={hanldeSendNewComment}
+          onClick={handleComment}
           className="btn-royal-bold border-0 flex-grow-1 rounded-pill py-3 mx-3"
+          style={
+            commentContent
+              ? { pointerEvents: "" }
+              : { pointerEvents: "none", color: "var(--blue-royal-very-light)" }
+          }
         >
           ارسال نظر
         </button>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import ClientAssignedCard from "./ClientAssignedCard";
 import Message from "../micro-components/Message";
 import { useNavigate, Link, useLocation } from "react-router-dom";
@@ -15,7 +15,6 @@ import useRoleSetter from "../micro-components/useRoleSetter";
 const AllTasksLoader = ({ isDirect }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log(location.state);
 
   const [userRole, setUserRole] = useState();
 
@@ -55,14 +54,14 @@ const AllTasksLoader = ({ isDirect }) => {
     { clientName: "نیره بوستانی", clientID: 0 },
   ];
 
-  const employeeOptions = [];
-  employees?.forEach((employee) => {
-    employeeOptions.push({
+  const employeeOptions = useMemo(() => {
+    if (!employees) return [];
+
+    return employees.map((employee) => ({
       clientName: employee.fullName,
       clientID: employee.user_id,
-    });
-  });
-
+    }));
+  }, [employees]);
   // ===============================================
   const getTaskListAxios = async () => {
     Loading.standard("در حال دریافت اطلاعات");
@@ -81,31 +80,6 @@ const AllTasksLoader = ({ isDirect }) => {
 
     Loading.remove();
   };
-  const getEmployees = async () => {
-    try {
-      const response = await axiosInstance.post("/user/get_employees", {
-        taskID: 1,
-      });
-      setEmployees(response.data.response);
-      console.log(response.data.response);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  // ===============================================
-
-  const handleStartDateChange = (date) => {
-    setStartDate(date);
-    if (!endDate) {
-      setEndDate(null);
-    }
-  };
-  const handleEndDateChange = (date) => {
-    setEndDate(date);
-    if (!startDate) {
-      setStartDate(null);
-    }
-  };
   const getFilteredTaskListAxios = async (e) => {
     e?.preventDefault();
     window.scrollTo(0, 0);
@@ -115,8 +89,8 @@ const AllTasksLoader = ({ isDirect }) => {
     setIsFilterPopupActive(false);
 
     const formdata = new FormData();
+
     if (assignedEmployeeID) {
-      console.log(assignedEmployeeID);
       formdata.append("employeeID", assignedEmployeeID.value);
       setFilteredCats((prevStates) => [
         ...prevStates,
@@ -163,6 +137,32 @@ const AllTasksLoader = ({ isDirect }) => {
       Loading.remove();
     }
   };
+  // ===============================================
+
+  const getEmployees = async () => {
+    try {
+      const response = await axiosInstance.post("/user/get_employees", {
+        taskID: 1,
+      });
+      setEmployees(response.data.response);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+    if (!endDate) {
+      setEndDate(null);
+    }
+  };
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+    if (!startDate) {
+      setStartDate(null);
+    }
+  };
+
   const getAutoFilteredTaskListAxios = async () => {
     const formdata = new FormData();
     if (assignedEmployeeID) {
@@ -187,7 +187,32 @@ const AllTasksLoader = ({ isDirect }) => {
       Loading.remove();
     }
   };
-  const handleScroll = () => {
+
+  // const handleScroll = () => {
+  //   if (
+  //     !isFiltered &&
+  //     document.documentElement.offsetHeight -
+  //       window.innerHeight -
+  //       document.documentElement.scrollTop <
+  //       1 &&
+  //     isSom
+  //   ) {
+  //     //getTotalTasksData(totalTasksURL, totalTasksRequestOptions);
+  //     getTaskListAxios();
+  //   } else if (
+  //     isFiltered &&
+  //     document.documentElement.offsetHeight -
+  //       window.innerHeight -
+  //       document.documentElement.scrollTop <
+  //       1 &&
+  //     isSom
+  //   ) {
+  //     //getFilteredTotalTasksDataAuto();
+  //     getAutoFilteredTaskListAxios();
+  //   }
+  // };
+
+  const handleScroll = useCallback(() => {
     if (
       !isFiltered &&
       document.documentElement.offsetHeight -
@@ -196,7 +221,6 @@ const AllTasksLoader = ({ isDirect }) => {
         1 &&
       isSom
     ) {
-      //getTotalTasksData(totalTasksURL, totalTasksRequestOptions);
       getTaskListAxios();
     } else if (
       isFiltered &&
@@ -206,10 +230,10 @@ const AllTasksLoader = ({ isDirect }) => {
         1 &&
       isSom
     ) {
-      //getFilteredTotalTasksDataAuto();
       getAutoFilteredTaskListAxios();
     }
-  };
+  }, [isFiltered, isSom]);
+
   const handleCapReduction = (cat) => {
     if (isFiltered) {
       console.log(cat);
@@ -235,13 +259,16 @@ const AllTasksLoader = ({ isDirect }) => {
   };
 
   useEffect(() => {
+    getUser();
+    getEmployees();
+  }, []);
+
+  useEffect(() => {
     if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
     }
     if (!isFiltered) {
       getTaskListAxios();
-      getUser();
-      getEmployees();
     }
     if (isFiltered) {
       getFilteredTaskListAxios();
@@ -289,7 +316,6 @@ const AllTasksLoader = ({ isDirect }) => {
               handleFilter={getFilteredTaskListAxios}
               clientName={assignedEmployeeID}
               setClientName={setAssignedEmployeeID}
-              setIsFilter={setIsFiltered}
               setIsSubmitted={setIsSubmitted}
               renderedFrom={"AllTasksLoader"}
             />
@@ -331,6 +357,7 @@ const AllTasksLoader = ({ isDirect }) => {
             <hr className="text-primary" />
           </>
         )}
+
         <div>
           {!isFiltered &&
             (totalTasksData ? (

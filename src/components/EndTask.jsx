@@ -3,14 +3,17 @@ import Select from "react-select";
 import MinusButton from "../assets/svg-icons/MinusButton";
 import MinusButtonGray from "../assets/svg-icons/MinusButtonGray";
 import PlusButton from "../assets/svg-icons/PlusButton";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
-import colors from "react-multi-date-picker/plugins/colors";
+import { Loading } from "notiflix/build/notiflix-loading-aio";
+import { Notify } from "notiflix/build/notiflix-notify-aio";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const EndTask = () => {
   const accessToken = window.localStorage.getItem("AccessToken");
   const param = useParams();
+  const navigate = useNavigate();
   const endTaskHeader = new Headers();
   endTaskHeader.append("Authorization", `Bearer ${accessToken}`);
   const endTaskFormdata = new FormData();
@@ -160,7 +163,26 @@ const EndTask = () => {
   //   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post("/task/update_task", {
+        taskID: param.id,
+      });
+      const responseData = response.data.response
+      Loading.remove();
+      if (responseData.started) {
+        Notify.success("تسک با موفقیت شروع شد");
+        //setIsTaskStarted(true);
+        window.location.reload();
+      }else if (responseData.finished) {
+        Notify.success("تسک با موفقیت به اتمام رسید");
+        //setIsTaskStarted(true);
+        navigate(`/task/${param.id}`);
+      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
     // const detail = {
     //   toothColors,
     //   toothNumbers,
@@ -252,7 +274,7 @@ const EndTask = () => {
                     کد انبار
                   </label>
                   <Select
-                    required
+                    // required
                     className=""
                     id="color-option"
                     name="color-option"
@@ -281,7 +303,7 @@ const EndTask = () => {
                     <div key={i}>
                       {index === i && (
                         <input
-                          required
+                          //required
                           type="text"
                           name="last-name"
                           className={`form-control rounded-pill mb-3 py-2`}
@@ -317,7 +339,7 @@ const EndTask = () => {
             className="btn-royal-bold rounded-pill py-3 text-center has-pointer"
             type="submit"
           >
-            ثبت جزئیات سفارش
+            اتمام وظیفه
           </button>
         </div>
       </form>

@@ -79,103 +79,103 @@ const Package = () => {
           <PopupBackground isPopupActive={setIsEndTaskPopupActive} />
         </>
       )}
-      <header className="d-flex bg-light rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
-        <div className="bold-xlarge">سفارشات در حال ارسال</div>
+      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3 mb-4">
+        <div className="bold-xlarge"></div>
         <Link to={"/"}>
           <BackArrow />
         </Link>
       </header>
-
-      <div className="deliverer-card-wrapper text-center bg-white rounded-5 drop-shadow px-3 pt-4 pb-3 position-relative">
-        <div className="doc-avatar  position-absolute">
-          <img
-            className="rounded-circle"
-            width={"120px"}
-            src={state.packages.clientDetails.clientAvatar}
-            alt=""
-          />
+      <section className="mt-5">
+        <div className="deliverer-card-wrapper text-center bg-white rounded-5 drop-shadow px-3 pt-4 pb-3 position-relative">
+          <div className="doc-avatar  position-absolute">
+            <img
+              className="rounded-circle"
+              width={"120px"}
+              src={state.packages.clientDetails.clientAvatar}
+              alt=""
+            />
+          </div>
+          <p className="bold-xxlarge mt-5 mb-1">
+            {state.packages.clientDetails.clientName}
+          </p>
+          <hr className="message-separator-ulgrey" />
+          <p className="bold500-default">
+            <LocationIcon />
+            {state.packages.clientDetails.clientAddress}
+          </p>
+          <hr className="message-separator-ulgrey" />
+          <a
+            href={`tel:+98${state.packages.clientDetails.clientPhone}`}
+            className="btn-royal-bold form-control py-3 mt-4 mb-3"
+          >
+            تماس با پزشک
+          </a>
         </div>
-        <p className="bold-xxlarge mt-5 mb-1">
-          {state.packages.clientDetails.clientName}
-        </p>
-        <hr className="message-separator-ulgrey" />
-        <p className="bold500-default">
-          <LocationIcon />
-          {state.packages.clientDetails.clientAddress}
-        </p>
-        <hr className="message-separator-ulgrey" />
-        <a
-          href={`tel:+98${state.packages.clientDetails.clientPhone}`}
-          className="btn-royal-bold form-control py-3 mt-4 mb-3"
-        >
-          تماس با پزشک
-        </a>
-      </div>
-      <div className="packages mt-4 shipping-cards-container">
-        <p className="bold-xxlarge me-4">مرسوله های ارسالی</p>
-        {sentPackages ? (
-          <div className="sent-packages mb-3">
-            <ul className="sent-list px-0">
-              <li className="sent-head-li d-flex align-items-center">
-                <PackagesSentIcon />
-                <span className="flex-grow-1 white-large-bold me-3">
-                  ارسالی ها
-                </span>
-                <span className="white-default-bold500">
-                  {sentPackages ? sentPackages.length : 0} عدد
-                </span>
-              </li>
-              {sentPackages.map((pkg, index) => {
-                return (
-                  <li key={index}>
-                    <GreenDot />
-                    <span className="me-2">{pkg.taskType}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ) : (
-          <Message>مرسوله ارسالی وجود ندارد</Message>
-        )}
-        <p className="bold-xxlarge me-4 pt-4">مرسوله های دریافتی</p>
-        {recievePackages ? (
-          <div className="recieved-packages mb-3">
-            <ul className="sent-list px-0">
-              <li className="recieved-head-li d-flex align-items-center">
-                <PackageRecieveIcon />
-                <span className="flex-grow-1 white-large-bold me-3">
-                  دریافتی ها
-                </span>
-                <span className="white-default-bold500">
-                  {recievePackages ? recievePackages.length : 0} عدد
-                </span>
-              </li>
-              {recievePackages.map((pkg, index) => {
-                return (
-                  <li key={index}>
-                    <YellowDot />
-                    <span className="me-2">{pkg.taskType}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ) : (
-          <Message>مرسوله دریافتی وجود ندارد</Message>
-        )}
-      </div>
-
-      <div className="footer-container fixed-bottom bottom-0 px-4 py-3 single-footer-bg">
-        <button
-          className="w-100 btn-royal-bold py-3"
-          onClick={() => {
-            setIsEndTaskPopupActive(true);
-          }}
-        >
-          تحویل سفارش
-        </button>
-      </div>
+        <div className="packages mt-4 shipping-cards-container">
+          <p className="bold-xxlarge me-4">مرسوله های ارسالی</p>
+          {sentPackages ? (
+            <div className="sent-packages mb-3">
+              <ul className="sent-list px-0">
+                <li className="sent-head-li d-flex align-items-center">
+                  <PackagesSentIcon />
+                  <span className="flex-grow-1 white-large-bold me-3">
+                    ارسالی ها
+                  </span>
+                  <span className="white-default-bold500">
+                    {sentPackages ? sentPackages.length : 0} عدد
+                  </span>
+                </li>
+                {sentPackages.map((pkg, index) => {
+                  return (
+                    <li key={index}>
+                      <GreenDot />
+                      <span className="me-2">{pkg.taskType}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : (
+            <Message>مرسوله ارسالی وجود ندارد</Message>
+          )}
+          <p className="bold-xxlarge me-4 pt-4">مرسوله های دریافتی</p>
+          {recievePackages ? (
+            <div className="recieved-packages mb-3">
+              <ul className="sent-list px-0">
+                <li className="recieved-head-li d-flex align-items-center">
+                  <PackageRecieveIcon />
+                  <span className="flex-grow-1 white-large-bold me-3">
+                    دریافتی ها
+                  </span>
+                  <span className="white-default-bold500">
+                    {recievePackages ? recievePackages.length : 0} عدد
+                  </span>
+                </li>
+                {recievePackages.map((pkg, index) => {
+                  return (
+                    <li key={index}>
+                      <YellowDot />
+                      <span className="me-2">{pkg.taskType}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : (
+            <Message>مرسوله دریافتی وجود ندارد</Message>
+          )}
+        </div>
+        <div className="footer-container fixed-bottom bottom-0 px-4 py-3 single-footer-bg">
+          <button
+            className="w-100 btn-royal-bold py-3"
+            onClick={() => {
+              setIsEndTaskPopupActive(true);
+            }}
+          >
+            تحویل سفارش
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

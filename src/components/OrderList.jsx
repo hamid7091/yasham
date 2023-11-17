@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import SearchIcon from "../assets/svg-icons/SearchIcon";
 import ClientTaskCard from "./ClientTaskCard";
@@ -61,7 +61,6 @@ const OrderList = () => {
   const handleSearchedPatientName = (event) => {
     setSearchedPatientName(event.target.value);
   };
-
   const handleStartDateChange = (date) => {
     setStartDate(date);
     if (!endDate) {
@@ -87,7 +86,11 @@ const OrderList = () => {
     const formdata = new FormData();
     formdata.append("pageNum", 1);
     if (searchedPatientName) {
-      formdata.append("clientName", searchedPatientName);
+      formdata.append(
+        `${isClient ? "patientName" : "clientName"}`,
+        searchedPatientName
+      );
+      //formdata.append("clientName", searchedPatientName);
       setFilteredCats((prevStates) => [
         ...prevStates,
         { label: searchedPatientName, value: "patientName" },
@@ -284,12 +287,14 @@ const OrderList = () => {
   };
 
   useEffect(() => {
+    getUser();
+  }, []);
+  useEffect(() => {
     if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
     }
     if (!isFiltered) {
       getOrderList();
-      getUser();
     }
     if (isFiltered) {
       getFilteredOrderList();
@@ -314,9 +319,9 @@ const OrderList = () => {
     }
   }, [isSubmitted, invoiceStatus, startDate, endDate]);
 
-  const today = moment().format("jYYYY/jMM/jDD");
-  const todatUnix = moment().unix();
-  console.log(todatUnix);
+  const todatUnix = useMemo(() => {
+    return moment().unix();
+  }, []);
 
   useEffect(() => {
     if (location.state === "searchToday") {
@@ -348,7 +353,6 @@ const OrderList = () => {
               handleFilter={getFilteredOrderList}
               clientName={invoiceStatus}
               setClientName={setInvoiceStatus}
-              setIsFilter={setIsFiltered}
               setIsSubmitted={setIsSubmitted}
               renderedFrom={"OrderList"}
               isPManager={isPManager}

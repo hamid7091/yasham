@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
 import SignInBanner from "../assets/svg-pics/signInBanner";
 import tabChanger from "../util-functions/tabChanger";
-import fetchData from "../util-functions/fetchData";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import { useNavigate } from "react-router-dom";
+import axiosInstanceLogin from "../util-functions/axiosInstanceLogin";
 
 const Login = () => {
   Loading.remove();
@@ -18,16 +18,16 @@ const Login = () => {
   const formOne = useRef(null);
   const formTwo = useRef(null);
   const passwordInput = useRef(null);
-  const disposableInput = useRef(null);
-  const disposableGetter = useRef(null);
-  const disposableSender = useRef(null);
+  const otpInput = useRef(null);
+  const otpBtn = useRef(null);
+  const otpSendBtn = useRef(null);
   const cellNumInput = useRef(null);
   // -----------------------------
 
   // -----------------------------
   const [userInfo, setUserInfo] = useState();
   const [isCellNumExists, setIsCellNumExists] = useState(null);
-  const [disposablePass, setDisposablePass] = useState("");
+  const [otp, setOtp] = useState("");
   const [password, setPassword] = useState();
   const [canLogin, setCanLogin] = useState();
   const [cellNum, setCellNum] = useState({ cellNum: 0 });
@@ -39,138 +39,137 @@ const Login = () => {
   };
   // -----------------------------
   // -----------------------------
-  async function handleDisposableSMS(e) {
+  const handleOTP = async (e) => {
     e.preventDefault();
-    Loading.standard("در حال بارگذاری");
-    var disposableFormdata = new FormData();
-    disposableFormdata.append("userID", `${userInfo.userID}`);
-    const options = {
-      method: "POST",
-      body: disposableFormdata,
-      redirect: "follow",
-    };
-    const disposableResponse = await fetchData(
-      process.env.REACT_APP_OTP_REQUEST_URL,
-      options
-    );
-
-    Loading.remove();
-    Notify.success(`${disposableResponse.message}`);
-    disposableInput.current.classList.remove("disabled");
-    disposableGetter.current.classList.add("d-none");
-    disposableGetter.current.setAttribute("disabled", true);
-    disposableSender.current.classList.remove("d-none");
-  }
-
-  // -----------------------------
-  // -----------------------------
-  function disposablePassHandler(e) {
-    setDisposablePass(e.target.value);
-  }
-  // -----------------------------
-  // -----------------------------
-  function passHandler(e) {
-    setPassword(e.target.value);
-  }
-  // -----------------------------
-  // -----------------------------
-  async function handleSubmit(e) {
-    e.preventDefault();
-    Loading.standard("در حال بارگذاری");
-    if (disposablePass) {
-      var finalLoginFormdata = new FormData();
-      finalLoginFormdata.append("userID", `${userInfo.userID}`);
-      finalLoginFormdata.append("verificationCode", `${disposablePass}`);
-      const options = {
-        method: "POST",
-        body: finalLoginFormdata,
-        redirect: "follow",
-      };
-      const disposableResponse = await fetchData(
-        process.env.REACT_APP_OTP_LOGIN_URL,
-        options
+    const formdata = new FormData();
+    formdata.append("userID", userInfo.userID);
+    try {
+      Loading.standard("درحال ارسال درخواست");
+      const response = await axiosInstanceLogin.post(
+        "/user/send_otp",
+        formdata,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
-      if (disposableResponse?.message) {
+      Notify.success(`${response.data.response.message}`);
+      otpInput.current.classList.remove("disabled");
+      otpBtn.current.classList.add("d-none");
+      otpBtn.current.setAttribute("disabled", true);
+      otpSendBtn.current.classList.remove("d-none");
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Notify.failure("خطا در ارسال درخواست !!!");
+      Loading.remove();
+    }
+  };
+  // -----------------------------
+  // -----------------------------
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    const formdata = new FormData();
+    if (otp) {
+      formdata.append("userID", userInfo.userID);
+      formdata.append("verificationCode", otp);
+    }
+    try {
+      Loading.standard("در حال ورود");
+      const response = await axiosInstanceLogin.post(
+        "/user/verify_otp",
+        formdata,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (response?.data.response.message) {
         Loading.remove();
-        Notify.failure(`${disposableResponse.message}`);
-        disposableInput.current.value = "";
+        Notify.failure(`${response.data.response.message}`);
+        otpInput.current.value = "";
       } else {
         window.localStorage.setItem(
           "AccessToken",
-          disposableResponse.AccessToken
+          response.data.response.AccessToken
         );
-        const state = disposableResponse.userInfo;
-        navigate("/", { state });
+        navigate("/");
         Loading.remove();
       }
-    } else {
       Loading.remove();
-      Notify.info("لطفا رمز دریافتی را وارد کنید");
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
     }
-  }
+  };
   // -----------------------------
   // -----------------------------
-  async function handlePasswordSubmit(e) {
+  const handlePassWordSubmit = async (e) => {
     e.preventDefault();
-    Loading.standard("در حال بارگذاری");
-    var finalLoginFormdata = new FormData();
-    finalLoginFormdata.append("userID", `${userInfo.userID}`);
-    finalLoginFormdata.append("userPassword", `${password}`);
-    const options = {
-      method: "POST",
-      body: finalLoginFormdata,
-      redirect: "follow",
-    };
-
-    const disposableResponse = await fetchData(
-      process.env.REACT_APP_PASSWORD_LOGIN_URL,
-      options
-    );
-
-    if (disposableResponse?.message) {
-      Loading.remove();
-      Notify.failure(`${disposableResponse.message}`);
-      disposableInput.current.value = "";
-    } else {
-      window.localStorage.setItem(
-        "AccessToken",
-        disposableResponse.AccessToken
+    const formdata = new FormData();
+    formdata.append("userID", userInfo.userID);
+    formdata.append("userPassword", password);
+    try {
+      Loading.standard("در حال ورود");
+      const response = await axiosInstanceLogin.post(
+        "/user/login_password",
+        formdata,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+      if (response?.data.response.message) {
+        Loading.remove();
+        Notify.failure(`${response.data.response.message}`);
+        passwordInput.current.value = "";
+      } else {
+        window.localStorage.setItem(
+          "AccessToken",
+          response.data.response.AccessToken
+        );
 
-      navigate("/");
+        navigate("/");
+        Loading.remove();
+      }
       Loading.remove();
+    } catch (error) {
+      Notify.failure(`${error.response.data.response.message}`);
+      Loading.remove();
+      passwordInput.current.value = "";
     }
-  }
+  };
   // -----------------------------
   // -----------------------------
-  const handleChangeForm = async (event) => {
-    event.preventDefault();
-    var getCellFormdata = new FormData();
-    getCellFormdata.append("userMobile", `${cellNum}`);
-    const options = {
-      method: "POST",
-      body: getCellFormdata,
-      redirect: "follow",
-    };
-    Loading.standard("در حال بارگذاری");
-
-    const userInfoData = await fetchData(
-      process.env.REACT_APP_GET_USER_URL,
-      options
-    );
-    console.log(userInfoData);
-    if (userInfoData.userInfo) {
+  const handle2SecondForm = async (e) => {
+    e.preventDefault();
+    const formdata = new FormData();
+    formdata.append("userMobile", cellNum);
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstanceLogin.post(
+        "/user/validate",
+        formdata,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       form1.current.classList.toggle("hidden");
       form2.current.classList.toggle("hidden");
       setIsCellNumExists(true);
-      setUserInfo(userInfoData.userInfo);
-    } else {
+      setUserInfo(response.data.response.userInfo);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      setCanLogin();
       setIsCellNumExists(false);
       Notify.failure("شماره وارد شده موجود نمی باشد!");
       cellNumInput.current.value = "";
-      setCanLogin();
+      Loading.remove();
     }
-    Loading.remove();
   };
   // -----------------------------
   function cellNumberValidation(event) {
@@ -197,13 +196,6 @@ const Login = () => {
     }
   }
   // -----------------------------
-  // -----------------------------
-
-  function backBtnHandler() {
-    form1.current.classList.toggle("hidden");
-    form2.current.classList.toggle("hidden");
-  }
-  // -----------------------------
 
   return (
     <div className="">
@@ -213,7 +205,7 @@ const Login = () => {
             <SignInBanner />
           </div>
           <div className="input p-3">
-            <form onSubmit={(event) => handleChangeForm(event)}>
+            <form onSubmit={(event) => handle2SecondForm(event)}>
               <label className="bold500-large pe-3 mb-3">
                 شماره تماس خود را وارد کنید{" "}
               </label>
@@ -257,8 +249,6 @@ const Login = () => {
         className="stage-two d-flex justify-content-center hidden"
       >
         <div className="container text-center pt-5" dir="rtl">
-          {/* {isCellNumExists === false &&
-            Notify.failure("شماره وارد شده موجود نمی باشد!")} */}
           {isCellNumExists === true && (
             <div className="container mt-5">
               <div className="log-in-avatar text-center d-flex flex-column justify-content-between align-items-center">
@@ -296,7 +286,7 @@ const Login = () => {
                 </div>
                 <form
                   ref={formTwo}
-                  onSubmit={(event) => handlePasswordSubmit(event)}
+                  onSubmit={(event) => handlePassWordSubmit(event)}
                   className="d-none"
                 >
                   <input
@@ -306,7 +296,7 @@ const Login = () => {
                     id="password"
                     className="active form-control rounded-pill mt-3 py-3"
                     placeholder="رمز عبور خود را وارد کنید"
-                    onKeyUp={(event) => passHandler(event)}
+                    onKeyUp={(e) => setPassword(e.target.value)}
                   />
                   <button
                     className="btn-royal-bold w-100 mt-3 rounded-pill py-3"
@@ -318,19 +308,19 @@ const Login = () => {
                 <form
                   ref={formOne}
                   className=""
-                  onSubmit={(event) => handleSubmit(event)}
+                  onSubmit={(event) => handleOtpSubmit(event)}
                 >
                   <input
-                    ref={disposableInput}
+                    ref={otpInput}
                     className="disabled form-control rounded-pill mt-3 py-3 px-4 "
                     type="text"
                     placeholder="کد دریافتی را وارد کنید ..."
                     name="disposable-pass"
                     id="disposable-pass-input"
-                    onKeyUp={(event) => disposablePassHandler(event)}
+                    onKeyUp={(e) => setOtp(e.target.value)}
                   />
                   <button
-                    ref={disposableSender}
+                    ref={otpSendBtn}
                     className="d-none btn-royal-bold w-100 mt-3 rounded-pill py-3"
                     id="disposable-pass-sender"
                     type="submit"
@@ -338,10 +328,10 @@ const Login = () => {
                     ورود
                   </button>
                   <button
-                    ref={disposableGetter}
+                    ref={otpBtn}
                     className="btn-royal-bold w-100 mt-3 rounded-pill py-3"
                     id="disposable-pass-getter"
-                    onClick={(event) => handleDisposableSMS(event)}
+                    onClick={(event) => handleOTP(event)}
                   >
                     دریافت کد
                   </button>

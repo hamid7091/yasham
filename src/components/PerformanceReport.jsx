@@ -232,8 +232,12 @@ const PerformanceReport = () => {
   const getNewFilteredData = async (event) => {
     event?.preventDefault();
     window.scrollTo(0, 0);
+    console.log("f fired");
+
     setIsFilterPopupActive(false);
     const formdata = new FormData();
+    console.log(endDate);
+    console.log(startDate);
     if (typeof startDate === "object") {
       formdata.append("startDate", startDate?.toUnix());
       formdata.append("endDate", endDate?.toUnix());
@@ -246,7 +250,11 @@ const PerformanceReport = () => {
 
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post("/activity/reports", formdata);
+      const response = await axiosInstance.post(
+        "/activity/performance-report",
+        formdata
+      );
+      setReportData(response.data.response);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -254,6 +262,7 @@ const PerformanceReport = () => {
     }
   };
   const getReportData = async () => {
+    console.log("n fired");
     const formdata = new FormData();
     if (typeof startDate === "object") {
       formdata.append("startDate", startDate?.toUnix());
@@ -266,67 +275,71 @@ const PerformanceReport = () => {
     }
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      //const response = await axiosInstance.post("/activity/reports", formdata);
-      const response = {
-        data: {
-          response: {
-            mostAssigned: [
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیفر",
-                employeeID: 6968,
-                doneTasks: 11,
-                assignedTasks: 13,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قنات لو",
-                employeeID: 6967,
-                doneTasks: 10,
-                assignedTasks: 12,
-              },
-            ],
-            mostFinished: [
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "حمیدرضا قهرمانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "شریف الدین پور علم الدین",
-                employeeID: 6968,
-                doneTasks: 11,
-                assignedTasks: 13,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "شمس السلطنه قمری",
-                employeeID: 6967,
-                doneTasks: 10,
-                assignedTasks: 12,
-              },
-            ],
-          },
-        },
-      };
+      const response = await axiosInstance.post(
+        "/activity/performance-report",
+        formdata
+      );
+
+      // const response = {
+      //   data: {
+      //     response: {
+      //       mostAssigned: [
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیفر",
+      //           employeeID: 6968,
+      //           doneTasks: 11,
+      //           assignedTasks: 13,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قنات لو",
+      //           employeeID: 6967,
+      //           doneTasks: 10,
+      //           assignedTasks: 12,
+      //         },
+      //       ],
+      //       mostFinished: [
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "حمیدرضا قهرمانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "شریف الدین پور علم الدین",
+      //           employeeID: 6968,
+      //           doneTasks: 11,
+      //           assignedTasks: 13,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "شمس السلطنه قمری",
+      //           employeeID: 6967,
+      //           doneTasks: 10,
+      //           assignedTasks: 12,
+      //         },
+      //       ],
+      //     },
+      //   },
+      // };
       setReportData(response.data.response);
-      console.log(response.data);
+      console.log(response.data.response);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -358,7 +371,7 @@ const PerformanceReport = () => {
     setEndDate(teu);
   }, [te, tms]);
 
-  console.log(reportData);
+  //console.log(reportData);
   return (
     reportData && (
       <div className="container px-3" dir="rtl">

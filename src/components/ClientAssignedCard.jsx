@@ -1,6 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import ClientTaskCardUserIcon from "../assets/svg-icons/ClientTaskCardUserIcon";
-import Calendar20 from "../assets/svg-icons/Calendar20";
 import BackIcon from "../assets/svg-icons/BackIcon";
 import { Link } from "react-router-dom";
 import useDate from "../micro-components/useDate2";
@@ -9,11 +7,9 @@ import ClientIcon from "../assets/svg-icons/ClientIcon";
 import Calendar30 from "../assets/svg-icons/Calendar30";
 
 const ClientAssignedCard = ({ order }) => {
-  // console.log(order);
   const date = useDate(order.date);
   const lineBarRef = useRef(null);
   let lineProgressbar = require("progressbar.js");
-  const percentage = order.percentage;
   useEffect(() => {
     let lineBar = new lineProgressbar.Line(lineBarRef.current, {
       strokeWidth: 1,
@@ -25,8 +21,6 @@ const ClientAssignedCard = ({ order }) => {
       svgStyle: { width: "100%", height: "8px" },
       text: {
         style: {
-          // Text color.
-          // Default: same as stroke color (options.color)
           color: "#999",
           position: "absolute",
           left: 0,
@@ -44,7 +38,7 @@ const ClientAssignedCard = ({ order }) => {
         lbar.path.setAttribute("stroke", state.color);
       },
     });
-    lineBar.animate(percentage / 100);
+    lineBar.animate(order.percentage / 100);
     return () => {
       if (lineBar) {
         lineBar.destroy();

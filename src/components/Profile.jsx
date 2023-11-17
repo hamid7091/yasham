@@ -304,7 +304,8 @@ const Profile = () => {
               />
             </div>
           </div>
-          <div className="tborder-vlroyal mt-4">
+          <hr />
+          <div className="mt-4">
             <div className="d-flex align-items-center bg-white rounded-pill p-4 drop-shadow mt-4">
               <span className="royal-large ms-2 has-pointer">نام</span>
               <span className="grey-large-bold500">{state.userFirstName}</span>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import CloseIcon from "../assets/svg-icons/CloseIcon";
 import DatePicker from "react-multi-date-picker";
 import SolarHijri from "react-date-object/calendars/persian";
@@ -104,13 +104,14 @@ const FilterPopup = ({
     }),
   };
 
-  const clientOptions = [];
-  clientsList?.forEach((client) => {
-    clientOptions.push({
+  const clientOptions = useMemo(() => {
+    if (!clientsList) return [];
+    return clientsList.map((client) => ({
       value: client.clientID,
       label: client.clientName,
-    });
-  });
+    }));
+  }, [clientsList]);
+
   return (
     <div dir="rtl" className="end-task-popup bg-light rounded-5 px-4 py-4">
       <div className="d-flex justify-content-between align-items-center">

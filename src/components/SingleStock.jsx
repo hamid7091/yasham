@@ -109,6 +109,7 @@ const SingleStock = () => {
       getUser();
     }
   }, []);
+
   return (
     singleStockData && (
       <div className="container px-2" dir="rtl">

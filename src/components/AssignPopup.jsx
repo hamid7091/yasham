@@ -2,8 +2,8 @@ import React, { useRef, useState } from "react";
 import CloseIcon from "../assets/svg-icons/CloseIcon";
 import Select from "react-select";
 import fetchData from "../util-functions/fetchData";
-import { Loading } from "notiflix";
-import { Notify } from "notiflix";
+import { Loading } from "notiflix/build/notiflix-loading-aio";
+import { Notify } from "notiflix/build/notiflix-notify-aio";
 
 const AssignPopup = ({
   employees,

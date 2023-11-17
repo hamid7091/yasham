@@ -8,7 +8,6 @@ import ClientFooter from "./ClientFooter";
 import PackageCard from "./PackageCard";
 import ActionMenu from "./ActionMenu";
 import OrderList from "./OrderList";
-import EmployeeDashboard from "./EmployeeDashboard";
 import AllTasksLoader from "./AllTasksLoader";
 import SupervisorDashboard from "./SupervisorDashboard";
 import ClientDashboard from "./ClientDashboard";
@@ -21,9 +20,9 @@ import FinancialManagerDashboard from "./FinancialManagerDashboard";
 import FManagerDashboard from "./FManagerDashboard";
 import SalesPage from "./SalesPage";
 import ReceptionDashboard from "./ReceptionDashboard";
-
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import ShippingDashboard from "./ShippingDashboard";
 
 const Dashboard = () => {
   // Define the options for the pie chart
@@ -189,8 +188,8 @@ const Dashboard = () => {
         <div>
           {location === "dashboard" && (
             <MyTasks
-              aactiveTasks={activeTasks}
-              aassignedTasks={assignedTasks}
+              activeTasks={activeTasks}
+              assignedTasks={assignedTasks}
               isDash={isEmployee}
             />
           )}
@@ -231,38 +230,11 @@ const Dashboard = () => {
       )}
       {isShipping && (
         <div>
-          {location === "dashboard" && packagesArray ? (
-            <div className="mb-100 px-3">
-              <p className="bold-xxlarge pe-4">مرسوله های ارسالی</p>
-              {packagesArray.map((pkg, index) => {
-                return (
-                  <PackageCard
-                    key={index}
-                    packageData={pkg}
-                    isFromShipping={true}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div className="px-3 mb-100">
-              <Message>در حال حاظر وظیفه ای به شما واگذار نشده است</Message>
-            </div>
+          {location === "dashboard" && (
+            <ShippingDashboard packagesArray={packagesArray} />
           )}
-          {location === "totalTasks" && packagesArray.length > 0 ? (
-            <div className="shipping-cards-container">
-              <p className="bold-xxlarge pe-4">مرسوله های ارسالی</p>
-              {packagesArray.map((pkg, index) => {
-                return <PackageCard key={index} packageData={pkg} />;
-              })}
-              {/* <div>
-                <Pie data={data} options={options} />
-              </div> */}
-            </div>
-          ) : (
-            <div className="px-3 mb-100">
-              <Message>در حال حاظر وظیفه ای به شما واگذار نشده است</Message>
-            </div>
+          {location === "totalTasks" && (
+            <ShippingDashboard packagesArray={packagesArray} />
           )}
           {location === "actionMenu" && (
             <ActionMenu

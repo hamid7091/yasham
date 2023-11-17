@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import useDate from "../micro-components/useDate2";
 import StartTimer from "../assets/svg-icons/StartTimer";
 import EndTimer from "../assets/svg-icons/EndTimer";
@@ -12,18 +12,9 @@ const TimelineCard = ({
   assignedUser,
   isClient,
 }) => {
-  // console.log(assignedUser);
-  // console.log(step);
-  // console.log(currentStepIndex);
-  // console.log(index);
-  // console.log(isClient);
-  // console.log(step.startDate);
-  // console.log(step.endDate);
-  const extraInfoSection = useRef();
   const completeDate = useDate(step.endDate);
   const startDate = useDate(step.startDate);
 
-  console.log(completeDate);
   const showExtraInfo = (event) => {
     const cardWrapper = event.currentTarget;
     const parentArray = Array.from(cardWrapper.parentElement.children);
@@ -93,10 +84,7 @@ const TimelineCard = ({
             </h5>
           )}
 
-          <div
-            className="timeline-card-extra-info align-items-center "
-            ref={extraInfoSection}
-          >
+          <div className="timeline-card-extra-info align-items-center ">
             <div className="thin-default">
               <span className="ms-2">
                 <StartTimer />

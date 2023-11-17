@@ -501,7 +501,7 @@ const OrderRegister = () => {
             type="submit"
             className="btn-royal-bold rounded-pill flex-grow-1 py-3"
           >
-            اعمال تغییرات
+            ثبت سفارش
           </button>
         </div>
       </form>

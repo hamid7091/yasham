@@ -113,17 +113,10 @@ const SingleTask = () => {
   const handleUpdateTask = async () => {
     try {
       Loading.standard("در حال ارسال درخواست");
-      const response = await axiosInstance.post(
-        "/task/update_task",
-        { taskID: param.id },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axiosInstance.post("/task/update_task", {
+        taskID: param.id,
+      });
       Loading.remove();
-      console.log(response.data.response);
       if (response.data.response.started) {
         Notify.success("تسک با موفقیت شروع شد");
         setIsTaskStarted(true);
@@ -186,8 +179,6 @@ const SingleTask = () => {
   const [selectedItem, setSelectedItem] = useState([]);
   const [selectedValue, setSelectedValue] = useState();
   // ============================================================================
-
-  console.log(isShipping);
 
   return userInfo ? (
     <div className="container px-4" dir="rtl">
