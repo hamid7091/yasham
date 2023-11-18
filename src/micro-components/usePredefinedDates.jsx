@@ -36,8 +36,6 @@ function usePredefinedDats() {
     );
     const ws = moment().startOf("week").format("jYYYY-jMM-jDD");
 
-    console.log(jalaliCurrentDate);
-    console.log(ws);
     setts(moment().format("jYYYY/jMM/jDD"));
     settsu(moment().startOf("day").unix());
     sette(moment().format("jYYYY/jMM/jDD"));

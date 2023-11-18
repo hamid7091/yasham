@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import moment from "moment-jalaali";
@@ -189,7 +189,13 @@ const TaskReport = () => {
       formdata.append("endDate", endDate);
     }
     try {
-      const response = await axiosInstance.post("/task/report", formdata);
+      console.log(startDate);
+      console.log(endDate);
+      const response = await axiosInstance.post(
+        "/activity/task-report",
+        formdata
+      );
+      setReportData(response.data.response);
       Loading.remove();
       console.log(response.data.response);
     } catch (error) {
@@ -202,42 +208,42 @@ const TaskReport = () => {
     console.log(endDate);
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      // const response = await axiosInstance.post("/task/report", {
-      //   startDate,
-      //   endDate,
-      // });
-      const response = {
-        data: {
-          response: {
-            generalReport: { done: 10, ongoing: 15, pending: 20 },
-            departmentTasks: { fixed: 10, mobile: 15, total: 25 },
-            departmentDetail: {
-              fixed: { done: 10, ongoing: 15, pending: 20 },
-              mobile: { done: 20, ongoing: 25, pending: 45 },
-            },
-            cards: [
-              {
-                taskID: 454,
-                taskType: "Direct Implant PFZ",
-                client: "دکتر نسیم  خسرونژاد",
-                date: "1402-8-18",
-                step: "گچ",
-                percentage: 4,
-                patientFullName: "نیما  ولی نژاد",
-              },
-              {
-                taskID: 454,
-                taskType: "Direct Implant PFZ",
-                client: "دکتر نسیم  خسرونژاد",
-                date: "1402-8-18",
-                step: "گچ",
-                percentage: 4,
-                patientFullName: "نیما  ولی نژاد",
-              },
-            ],
-          },
-        },
-      };
+      const response = await axiosInstance.post("/activity/task-report", {
+        startDate,
+        endDate,
+      });
+      // const response = {
+      //   data: {
+      //     response: {
+      //       generalReport: { done: 10, ongoing: 15, pending: 20 },
+      //       departmentTasks: { fixed: 10, mobile: 15, total: 25 },
+      //       departmentDetail: {
+      //         fixed: { done: 10, ongoing: 15, pending: 20 },
+      //         mobile: { done: 20, ongoing: 25, pending: 45 },
+      //       },
+      //       cards: [
+      //         {
+      //           taskID: 454,
+      //           taskType: "Direct Implant PFZ",
+      //           client: "دکتر نسیم  خسرونژاد",
+      //           date: "1402-8-18",
+      //           step: "گچ",
+      //           percentage: 4,
+      //           patientFullName: "نیما  ولی نژاد",
+      //         },
+      //         {
+      //           taskID: 454,
+      //           taskType: "Direct Implant PFZ",
+      //           client: "دکتر نسیم  خسرونژاد",
+      //           date: "1402-8-18",
+      //           step: "گچ",
+      //           percentage: 4,
+      //           patientFullName: "نیما  ولی نژاد",
+      //         },
+      //       ],
+      //     },
+      //   },
+      // };
       setReportData(response.data.response);
       console.log(response.data.response);
       Loading.remove();
@@ -261,6 +267,7 @@ const TaskReport = () => {
   }, []);
   useEffect(() => {
     if (!isLoading) {
+      console.log("fired");
       getReportData();
     }
   }, [isLoading]);
@@ -275,25 +282,29 @@ const TaskReport = () => {
 
   // ----------------------------------------------------------------
 
-  const data = [
-    {
-      name: "انجام شده",
-      value: reportData?.generalReport.done,
-    },
-    {
-      name: "در انتظار",
-      value: reportData?.generalReport.pending,
-    },
-    {
-      name: "در حال انجام",
-      value: reportData?.generalReport.ongoing,
-    },
-  ];
-  const COLORS = ["var(--green)", "var(--gray)", "var(--yellow)"];
+  const data = useMemo(() => {
+    console.log("fired");
+    return [
+      {
+        name: "انجام شده",
+        value: +reportData?.generalReport.done,
+      },
+      {
+        name: "در انتظار",
+        value: +reportData?.generalReport.pending,
+      },
+      {
+        name: "در حال انجام",
+        value: +reportData?.generalReport.ongoing,
+      },
+    ];
+  }, [reportData]);
+  const COLORS = useMemo(() => {
+    return ["var(--green)", "var(--gray)", "var(--yellow)"];
+  }, []);
 
   // ----------------------------------------------------------------
 
-  console.log(te, tms);
   return (
     <div className="container px-3" dir="rtl">
       {isFilterPopupActive && (

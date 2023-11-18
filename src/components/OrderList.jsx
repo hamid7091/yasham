@@ -12,13 +12,14 @@ import moment from "moment-jalaali";
 import { Loading } from "notiflix";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import useInfiniteScroll from "../micro-components/useInfiniteScroll";
 
 const OrderList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchField = useRef(null);
-  console.log(location.state);
 
+  const setter = useRef(null);
   // necessary states
   const [userRole, setUserRole] = useState();
   const [
@@ -73,6 +74,7 @@ const OrderList = () => {
       setStartDate(null);
     }
   };
+
   const getSearchedOrderList = async (event) => {
     event?.preventDefault();
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -86,25 +88,27 @@ const OrderList = () => {
     const formdata = new FormData();
     formdata.append("pageNum", 1);
     if (searchedPatientName) {
+      console.log(searchedPatientName);
+      console.log(isPManager, isClient);
       formdata.append(
-        `${isClient ? "patientName" : "clientName"}`,
+        `${isClient || isPManager ? "clientName" : "patientName"}`,
         searchedPatientName
       );
       //formdata.append("clientName", searchedPatientName);
       setFilteredCats((prevStates) => [
         ...prevStates,
-        { label: searchedPatientName, value: "patientName" },
+        {
+          label: searchedPatientName,
+          value: `${isClient || isPManager ? "clientName" : "patientName"}`,
+        },
       ]);
       // setSearchedPatientName(null);
     }
 
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post("/order/history", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      console.log(Object.fromEntries(formdata));
+      const response = await axiosInstance.post("/order/history", formdata);
       setFilterPageNum((prevNum) => prevNum + 1);
       setFilteredOrdersData(response.data.response.cards);
       setFilterTotalPages(response.data.response.total_pages);
@@ -117,7 +121,77 @@ const OrderList = () => {
       Loading.remove();
     }
   };
+  // ----------------------------------------------------------------------
+
+  const getFilteredOrderListAuto = async () => {
+    const formdata = new FormData();
+    formdata.append("pageNum", filterPageNum);
+    if (invoiceStatus) {
+      formdata.append("invoiceStatusID", invoiceStatus.value);
+    }
+    if (startDate && endDate) {
+      formdata.append("startDate", startDate?.toUnix());
+      formdata.append("endDate", endDate?.toUnix());
+    }
+    if (searchedPatientName) {
+      formdata.append(
+        `${isClient ? "patientName" : "clientName"}`,
+        searchedPatientName
+      );
+      //formdata.append("clientName", searchedPatientName);
+      // setFilteredCats((prevStates) => [
+      //   ...prevStates,
+      //   { label: searchedPatientName, value: "patientName" },
+      // ]);
+      // setSearchedPatientName(null);
+    }
+    try {
+      const response = await axiosInstance.post("/order/history", formdata, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setFilterPageNum((prevNum) => prevNum + 1);
+      setFilteredOrdersData((prevItems) => [
+        ...prevItems,
+        ...response.data.response.cards,
+      ]);
+      setFilterTotalPages(response.data.response.total_pages);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getOrderList = async () => {
+    try {
+      Loading.standard("درحال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/order/history",
+        {
+          pageNum,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setOrdersData((prevItems) => [
+        ...prevItems,
+        ...response.data.response?.cards,
+      ]);
+      setTotalPages(response.data.response.total_pages);
+      setPageNum((prevPage) => prevPage + 1);
+      setIsSom(true);
+      console.log(response.data.response);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      // error.response.status === 403 && navigate("/unauthorized");
+      Loading.remove();
+    }
+  };
   const getFilteredOrderList = async (event) => {
+    console.log("fired with state");
     event?.preventDefault();
     window.scrollTo({ top: 0, behavior: "instant" });
     setFilterPageNum(1);
@@ -181,63 +255,7 @@ const OrderList = () => {
       Loading.remove();
     }
   };
-  // ----------------------------------------------------------------------
 
-  const getFilteredOrderListAuto = async () => {
-    const formdata = new FormData();
-    formdata.append("pageNum", filterPageNum);
-    if (invoiceStatus) {
-      formdata.append("invoiceStatusID", invoiceStatus.value);
-    }
-    if (startDate && endDate) {
-      formdata.append("startDate", startDate?.toUnix());
-      formdata.append("endDate", endDate?.toUnix());
-    }
-    try {
-      const response = await axiosInstance.post("/order/history", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setFilterPageNum((prevNum) => prevNum + 1);
-      setFilteredOrdersData((prevItems) => [
-        ...prevItems,
-        ...response.data.response.cards,
-      ]);
-      setFilterTotalPages(response.data.response.total_pages);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  const getOrderList = async () => {
-    try {
-      Loading.standard("درحال دریافت اطلاعات");
-      const response = await axiosInstance.post(
-        "/order/history",
-        {
-          pageNum,
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      setOrdersData((prevItems) => [
-        ...prevItems,
-        ...response.data.response?.cards,
-      ]);
-      setTotalPages(response.data.response.total_pages);
-      setPageNum((prevPage) => prevPage + 1);
-      setIsSom(true);
-      console.log(response.data.response);
-      Loading.remove();
-    } catch (error) {
-      console.error(error);
-      error.response.status === 403 && navigate("/unauthorized");
-      Loading.remove();
-    }
-  };
   const getUser = async () => {
     try {
       const response = await axiosInstance.post("/user/check_access_token");
@@ -248,7 +266,9 @@ const OrderList = () => {
       console.error(error);
     }
   };
+
   const handleScroll = () => {
+    console.log("scroll fired");
     if (
       !isFiltered &&
       document.documentElement.offsetHeight -
@@ -269,6 +289,7 @@ const OrderList = () => {
       getFilteredOrderListAuto();
     }
   };
+
   const handleCapReduction = (cat) => {
     if (isFiltered) {
       if (cat.value == "client") {
@@ -278,7 +299,7 @@ const OrderList = () => {
         setIsSubmitted(true);
         setStartDate(null);
         setEndDate(null);
-      } else if (cat.value === "patientName") {
+      } else if (cat.value === "patientName" || cat.value === "clientName") {
         setIsSubmitted(true);
         setSearchedPatientName(null);
       }
@@ -297,20 +318,21 @@ const OrderList = () => {
       getOrderList();
     }
     if (isFiltered) {
-      getFilteredOrderList();
+      console.log("triggered");
+      location.state && getFilteredOrderList();
     }
   }, [isFiltered]);
+
   useEffect(() => {
-    // console.log("second useEffect fired");
     if (totalPages >= pageNum && !isFiltered) {
       window.addEventListener("scroll", handleScroll);
     }
     if (filterTotalPages >= filterPageNum && isFiltered) {
-      // console.log("filtered fired");
       window.addEventListener("scroll", handleScroll);
     }
     return () => window.removeEventListener("scroll", handleScroll);
   }, [pageNum, filterPageNum]);
+
   useEffect(() => {
     // console.log("newuseeffectfired");
     if (isSubmitted) {
@@ -325,12 +347,13 @@ const OrderList = () => {
 
   useEffect(() => {
     if (location.state === "searchToday") {
+      console.log("triggered");
       setStartDate(todatUnix);
       setEndDate(todatUnix);
       setIsFiltered(true);
-      location.state = null;
     }
   }, []);
+
   useEffect(() => {
     if (!isLoading) {
       (isShipping || isEmployee || isSupervisor || isInventory) &&
@@ -338,126 +361,154 @@ const OrderList = () => {
     }
   }, [isShipping, isEmployee, isSupervisor, isInventory]);
 
-  return (
-    userRole && (
-      <div className="px-3 mb-100 container" dir="rtl">
-        {isFilterPopupActive && (
-          <>
-            <FilterPopup
-              setIsFilterPopupActive={setIsFilterPopupActive}
-              clientsList={invoiceStatusOptions}
-              handleStartDateChange={handleStartDateChange}
-              handleEndDateChange={handleEndDateChange}
-              startDate={startDate}
-              endDate={endDate}
-              handleFilter={getFilteredOrderList}
-              clientName={invoiceStatus}
-              setClientName={setInvoiceStatus}
-              setIsSubmitted={setIsSubmitted}
-              renderedFrom={"OrderList"}
-              isPManager={isPManager}
-            />
-            <PopupBackground
-              isPopupActive={setIsFilterPopupActive}
-              handleStartDateChange={handleStartDateChange}
-              handleEndDateChange={handleEndDateChange}
-              setStatusField={setInvoiceStatus}
-            />
-          </>
-        )}
-        {isPManager && (
-          <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
-            <div className="bold-xlarge">لیست سفارشات</div>
-            <Link to="/">
-              <BackArrow />
-            </Link>
-          </header>
-        )}
-        {(isClient || isPManager) && (
-          <div className="d-flex align-items-center gap-3">
-            <input
-              ref={searchField}
-              onChange={handleSearchedPatientName}
-              type="text"
-              className="flex-grow-1 rounded-pill p-3"
-              placeholder={`${
-                isClient ? "جستجوی نام بیمار ..." : "جستجوی نام پزشک ..."
-              }`}
-            />
-            <span className="has-pointer" onClick={getSearchedOrderList}>
-              <SearchIcon />
-            </span>
-          </div>
-        )}
-        {filteredCats.length > 0 && (
-          <>
-            <div className="d-flex ">
-              {filteredCats.map((cat, i) => {
-                return (
-                  <div
-                    key={i}
-                    className="bg-white py-1 px-3 mt-3 rounded-pill has-pointer ms-1"
-                  >
-                    <span className="thin-default">{cat.label}</span>
-                    <span onClick={() => handleCapReduction(cat)}>
-                      <BLCloseBtn />
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-            <hr className="text-primary" />
-          </>
-        )}
-        <div>
-          {!isFiltered &&
-            (ordersData ? (
-              ordersData.map((order, index) => {
-                return (
-                  <ClientTaskCard
-                    key={index}
-                    order={order}
-                    isClient={isClient}
-                    loadedFrom={"orderList"}
-                  />
-                );
-              })
-            ) : (
-              <Message>موردی یافت نشد</Message>
-            ))}
+  // Intersection Observer Implementations
 
-          {isFiltered &&
-            (filteredOrdersData ? (
-              filteredOrdersData.map((order, index) => {
-                return (
-                  <ClientTaskCard
-                    key={index}
-                    order={order}
-                    isClient={isClient}
-                    loadedFrom={"orderList"}
-                  />
-                );
-              })
-            ) : (
-              <Message>موردی یافت نشد</Message>
-            ))}
-        </div>
-        {(isClient || isPManager) && (
-          <span
-            className={`drop-shadow has-pointer ${
-              isPManager ? "fixed-bottom-30" : "fixed-bottom-80"
+  // const onIntersection = (entries) => {
+  //   console.log(entries);
+  //   const firstEntry = entries[0];
+  //   if (
+  //     firstEntry.isIntersecting &&
+  //     !isFiltered &&
+  //     totalPages >= pageNum &&
+  //     isSom
+  //   ) {
+  //     getOrderList();
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   const observer = new IntersectionObserver(onIntersection);
+  //   if (observer && setter.current) {
+  //     observer.observe(setter.current);
+  //   }
+
+  //   return () => {
+  //     if (observer) {
+  //       observer.disconnect();
+  //     }
+  //   };
+  // }, [ordersData]);
+
+  return (
+    <div className="px-3 mb-100 container" id="parent" dir="rtl">
+      {isFilterPopupActive && (
+        <>
+          <FilterPopup
+            setIsFilterPopupActive={setIsFilterPopupActive}
+            clientsList={invoiceStatusOptions}
+            handleStartDateChange={handleStartDateChange}
+            handleEndDateChange={handleEndDateChange}
+            startDate={startDate}
+            endDate={endDate}
+            handleFilter={getFilteredOrderList}
+            clientName={invoiceStatus}
+            setClientName={setInvoiceStatus}
+            setIsSubmitted={setIsSubmitted}
+            renderedFrom={"OrderList"}
+            isPManager={isPManager}
+          />
+          <PopupBackground
+            isPopupActive={setIsFilterPopupActive}
+            handleStartDateChange={handleStartDateChange}
+            handleEndDateChange={handleEndDateChange}
+            setStatusField={setInvoiceStatus}
+          />
+        </>
+      )}
+      {isPManager && (
+        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
+          <div className="bold-xlarge">لیست سفارشات</div>
+          <Link to="/">
+            <BackArrow />
+          </Link>
+        </header>
+      )}
+      {(isClient || isPManager) && (
+        <div className="d-flex align-items-center gap-3">
+          <input
+            ref={searchField}
+            onChange={handleSearchedPatientName}
+            type="text"
+            className="flex-grow-1 rounded-pill p-3"
+            placeholder={`${
+              isClient ? "جستجوی نام بیمار ..." : "جستجوی نام پزشک ..."
             }`}
-            onClick={() => {
-              setIsFilterPopupActive(true);
-              setEndDate(null);
-              setStartDate(null);
-            }}
-          >
-            <FilterIcon />
+          />
+          <span className="has-pointer" onClick={getSearchedOrderList}>
+            <SearchIcon />
           </span>
-        )}
+        </div>
+      )}
+      {filteredCats.length > 0 && (
+        <>
+          <div className="d-flex ">
+            {filteredCats.map((cat, i) => {
+              console.log(cat);
+              return (
+                <div
+                  key={i}
+                  className="bg-white py-1 px-3 mt-3 rounded-pill has-pointer ms-1"
+                >
+                  <span className="thin-default">{cat.label}</span>
+                  <span onClick={() => handleCapReduction(cat)}>
+                    <BLCloseBtn />
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <hr className="text-primary" />
+        </>
+      )}
+      <div id="watched">
+        {!isFiltered &&
+          (ordersData ? (
+            ordersData.map((order, index) => {
+              return (
+                <ClientTaskCard
+                  key={index}
+                  order={order}
+                  isClient={isClient}
+                  loadedFrom={"orderList"}
+                />
+              );
+            })
+          ) : (
+            <Message>موردی یافت نشد</Message>
+          ))}
+
+        {isFiltered &&
+          (filteredOrdersData ? (
+            filteredOrdersData.map((order, index) => {
+              return (
+                <ClientTaskCard
+                  key={index}
+                  order={order}
+                  isClient={isClient}
+                  loadedFrom={"orderList"}
+                />
+              );
+            })
+          ) : (
+            <Message>موردی یافت نشد</Message>
+          ))}
+        <div ref={setter} style={{ width: "100%", height: "100px" }}></div>
       </div>
-    )
+      {(isClient || isPManager) && (
+        <span
+          className={`drop-shadow has-pointer ${
+            isPManager ? "fixed-bottom-30" : "fixed-bottom-80"
+          }`}
+          onClick={() => {
+            setIsFilterPopupActive(true);
+            setEndDate(null);
+            setStartDate(null);
+          }}
+        >
+          <FilterIcon />
+        </span>
+      )}
+    </div>
   );
 };
 
