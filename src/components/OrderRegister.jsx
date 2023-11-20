@@ -12,7 +12,7 @@ import MinusButton from "../assets/svg-icons/MinusButton";
 import EditButton from "../assets/svg-icons/EditButton";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
-import Unauthorizaed from "../components/Unauthorized";
+import SingleHeader from "./SingleHeader";
 
 const OrderRegister = () => {
   const location = useLocation();
@@ -317,12 +317,7 @@ const OrderRegister = () => {
           />
         </>
       )}
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
-        <div className="bold-xlarge">ثبت سفارش جدید</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
+      <SingleHeader title={"ثبت سفارش جدید"} location={location.state} />
       <form
         className="edit-form form-group mt-3 p-3 tasks"
         onSubmit={handleFormSubmitAxios}

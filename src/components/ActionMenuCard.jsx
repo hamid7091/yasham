@@ -16,7 +16,7 @@ import RechargeStockIcon from "../assets/svg-icons/RechargeStockIcon";
 import InventoryManagementIcon from "../assets/svg-icons/InventoryManagementIcon";
 import ReturnIcon from "../assets/svg-icons/ReturnIcon";
 import LikeIcon from "../assets/svg-icons/LikeIcon";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import NotepadFilled from "../assets/svg-icons/NotepadFilled";
 import ClipboardFilled from "../assets/svg-icons/ClipboardFilled";
 import OrderListIcon30 from "../assets/svg-icons/OrderListIcon30";
@@ -40,6 +40,7 @@ const ActionMenuCard = ({
   console.log(isSupervisor);
   console.log(businessInfo);
   console.log(userRole);
+  const location = useLocation();
 
   const navigate = useNavigate();
 
@@ -51,11 +52,15 @@ const ActionMenuCard = ({
     }
     if (target === "ثبت سفارش") {
       navigate("/registerOrder", {
-        state: { serviceType, clientsList, isSupervisor },
+        state: {
+          serviceType,
+          clientsList,
+          isSupervisor,
+        },
       });
     }
     if (target === "کارکرد") {
-      navigate("/performance");
+      navigate("/performance", { state: location.pathname });
     }
     if (target === "کسب و کار") {
       navigate("/businessInfo", { state: { businessInfo: businessInfo } });
@@ -73,13 +78,13 @@ const ActionMenuCard = ({
       navigate("/addNewStockItem", { state: universalUnits });
     }
     if (target === "مرجوعی") {
-      navigate("/returnItem");
+      //navigate("/returnItem");
     }
     if (target === "انبارگردانی") {
-      navigate("/inventoryHandling");
+      // navigate("/inventoryHandling");
     }
     if (target === "لیست سفارشات") {
-      navigate("/orderList");
+      navigate("/orderList", { state: location.pathname });
     }
     if (target === "گزارش وظایف") {
       navigate("/taskReport");
@@ -88,7 +93,7 @@ const ActionMenuCard = ({
       navigate("/performanceReport");
     }
     if (target === "لیست کارمندان") {
-      navigate("/allEmployees");
+      navigate("/allEmployees", { state: location.pathname });
     }
     if (target === "کسب و کارها" && userRole[0] === "financial_manager") {
       navigate("/allBusinesses");

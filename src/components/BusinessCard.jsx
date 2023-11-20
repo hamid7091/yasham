@@ -5,8 +5,6 @@ import IncomeIcon from "../assets/svg-icons/IncomeIcon";
 import ProfitIcon from "../assets/svg-icons/ProfitIcon";
 import { useNavigate } from "react-router-dom";
 const BusinessCard = ({ data }) => {
-  console.log(data);
-
   const navigate = useNavigate();
   const handleNavigate = () => {
     navigate(`/business/${data.businessID}`);

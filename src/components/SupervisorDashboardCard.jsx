@@ -1,11 +1,12 @@
 import React from "react";
 import FlagRoyal30 from "../assets/svg-icons/FlagRoyal30";
 import BackIcon from "../assets/svg-icons/BackIcon";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const SupervisorDashboardCard = ({ data }) => {
+  const location = useLocation();
   return (
-    <Link to={`/group/${data.departmentID}`}>
+    <Link to={`/group/${data.departmentID}`} state={location.pathname}>
       <div className="bg-white rounded-5 p-3 mb-3 drop-shadow">
         <div className="d-flex justify-content-between align-items-center">
           <span>

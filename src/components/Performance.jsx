@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import BackArrow from "../assets/svg-icons/BackArrow";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import PerformanceCard from "./PerformanceCard";
 import FilterIcon from "../assets/svg-icons/FilterIcon";
 import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
@@ -11,9 +11,11 @@ import Message from "../micro-components/Message";
 import moment from "moment-jalaali";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import SingleHeader from "./SingleHeader";
 
 const Performance = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [pageNum, setPageNum] = useState(1);
   const [filterPageNum, setFilterPageNum] = useState(1);
@@ -259,12 +261,7 @@ const Performance = () => {
             />
           </>
         )}
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
-          <div className="bold-xlarge">کارکرد</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader title={"کارکرد"} location={location.state} />
 
         <div className="performance-cards-wrapper mt-4 px-3 shipping-cards-container">
           {filteredCats.length > 0 && (

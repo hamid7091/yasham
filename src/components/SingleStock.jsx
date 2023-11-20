@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import StockEditBtn54 from "../assets/svg-icons/StockEditBtn54";
 import ThunderIcon54 from "../assets/svg-icons/ThunderIcon54";
 import StockMangementIcon54 from "../assets/svg-icons/StockMangementIcon54";
@@ -15,10 +14,13 @@ import PopupBackground from "./PopupBackground";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import SingleHeader from "../components/SingleHeader";
 
 const SingleStock = () => {
   const param = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isRestockPopupOpen, setIsRestockPopupOpen] = useState(false);
   const [singleStockData, setSingleStockData] = useState();
   const [tabState, setTabState] = useState("purchase");
@@ -112,7 +114,7 @@ const SingleStock = () => {
 
   return (
     singleStockData && (
-      <div className="container px-2" dir="rtl">
+      <div className="container px-4" dir="rtl">
         {isRestockPopupOpen && (
           <>
             <RestockPopup
@@ -125,14 +127,10 @@ const SingleStock = () => {
             <PopupBackground isPopupActive={setIsRestockPopupOpen} />
           </>
         )}
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3 px-2">
-          <div className="bold-xlarge">
-            {singleStockData.overallStockData.stockName}
-          </div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader
+          title={singleStockData.overallStockData.stockName}
+          location={"/"}
+        />
         <div className="d-flex flex-column align-items-center gap-3 bg-white rounded-5 p-4 drop-shadow">
           <img
             src={singleStockData.overallStockData.stockPicture}
@@ -145,23 +143,28 @@ const SingleStock = () => {
             <span>{singleStockData.overallStockData.stockName}</span>
           </div>
           <div className="d-flex gap-2">
-            <Link to={`/editStock/${singleStockData.overallStockData.stockID}`}>
+            <Link
+              to={`/editStock/${singleStockData.overallStockData.stockID}`}
+              state={location.pathname}
+            >
               <StockEditBtn54 />
             </Link>
             <span
               className="has-pointer"
-              onClick={() => {
-                setIsRestockPopupOpen(true);
-              }}
+              // onClick={() => {
+              //   setIsRestockPopupOpen(true);
+              // }}
             >
               <ThunderIcon54 />
             </span>
-            <Link to={"/returnItem"}>
+            <Link //to={"/returnItem"}
+            >
               <span>
                 <ReturnStockIcon54 />
               </span>
             </Link>
-            <Link to={"/inventoryHandling"}>
+            <Link //to={"/inventoryHandling"}
+            >
               <span>
                 <StockMangementIcon54 />
               </span>

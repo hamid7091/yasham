@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import LeftArrow from "../assets/svg-icons/LeftArrow";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ProjectManagerDashboard = ({
   dailyOrders,
@@ -15,6 +15,7 @@ const ProjectManagerDashboard = ({
   console.log(customerSatisfaction);
 
   const navigate = useNavigate();
+  const location = useLocation();
   // chart data -------------------------
   const RADIAN = Math.PI / 180;
   const data = [
@@ -58,7 +59,9 @@ const ProjectManagerDashboard = ({
   // chart data -------------------------
 
   const handleNavgate = () => {
-    navigate("/orderList", { state: "searchToday" });
+    navigate("/orderList", {
+      state: { searchToday: "searchToday", location: location.pathname },
+    });
   };
   const handleNavigationToAllTask = () => {
     const second = document.getElementById("second");

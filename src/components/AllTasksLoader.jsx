@@ -11,10 +11,13 @@ import FilterIcon from "../assets/svg-icons/FilterIcon";
 import axiosInstance from "../util-functions/axiosInstance";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import SingleHeader from "./SingleHeader";
 
 const AllTasksLoader = ({ isDirect }) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  console.log(location.state);
 
   const [userRole, setUserRole] = useState();
 
@@ -297,7 +300,7 @@ const AllTasksLoader = ({ isDirect }) => {
     if (location.state) {
       setAssignedEmployeeID(location.state);
       setIsFiltered(true);
-      location.state = null;
+      //location.state = null;
     }
   }, []);
 
@@ -329,12 +332,10 @@ const AllTasksLoader = ({ isDirect }) => {
         )}
 
         {isDirect === undefined && (
-          <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
-            <div className="bold-xlarge">لیست وظیفه ها</div>
-            <Link to="/">
-              <BackArrow />
-            </Link>
-          </header>
+          <SingleHeader
+            title={"لیست وظیفه ها"}
+            location={location?.state?.location}
+          />
         )}
 
         {filteredCats.length > 0 && (

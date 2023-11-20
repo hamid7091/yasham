@@ -25,6 +25,77 @@ import useRoleSetter from "../micro-components/useRoleSetter";
 import ShippingDashboard from "./ShippingDashboard";
 
 const Dashboard = () => {
+  const mockFinancialManagerDashboardData = {
+    data: {
+      response: {
+        userInfo: {
+          mobile: "9360390099",
+          userAvatar:
+            "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+          userCaps: {
+            اطلاعیه: true,
+            پروفایل: true,
+            "لیست سفارشات": true,
+            "کسب و کارها": true,
+          },
+          userFirstName: "حمید",
+          userID: 123,
+          userLastName: "مدیر مالی",
+          userRole: ["financial_manager"],
+        },
+        dailyOrders: { ordersCount: 5, dailyIncome: 25000000 },
+        thisWeekSale: {
+          data: [
+            {
+              date: "08/07",
+              sale: 120000,
+            },
+            {
+              date: "08/08",
+              sale: 180000,
+            },
+            {
+              date: "08/09",
+              sale: 100000,
+            },
+            {
+              date: "08/10",
+              sale: 150000,
+            },
+            {
+              date: "08/11",
+              sale: 190000,
+            },
+            {
+              date: "08/12",
+              sale: 170000,
+            },
+            {
+              date: "08/13",
+              sale: 20,
+            },
+          ],
+        },
+        businessFinancialStatus: {
+          mostProfit: {
+            businessID: 1,
+            businessName: "کلینیک قناتی ها",
+            value: 250000,
+          },
+          mostOrders: {
+            businessID: 2,
+            businessName: "کلینیک قنات پور ها",
+            value: 23,
+          },
+          mostDebt: {
+            businessID: 3,
+            businessName: "کلینیک علی قناتی",
+            value: 230000,
+          },
+        },
+      },
+    },
+  };
   // Define the options for the pie chart
   const [location, setLocation] = useState("dashboard");
   const [userInfo, setUserInfo] = useState();
@@ -60,8 +131,8 @@ const Dashboard = () => {
 
   const getDataWithAxios = async () => {
     try {
-      const response = await axiosInstance.post("/task/dashboard");
-      // const response = mockProjectManagerDashboardData;
+      // const response = await axiosInstance.post("/task/dashboard");
+      const response = mockFinancialManagerDashboardData;
       console.log(response.data.response);
 
       setUserInfo(response.data.response.userInfo); // اطلاعات کاربر مشترک تمامی رول ها

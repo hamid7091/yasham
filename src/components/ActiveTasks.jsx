@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import useDate from "../micro-components/useDate2";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import CalendarActiveTask from "../assets/svg-icons/CalendarActiveTask";
 
 const ActiveTasks = (taskInfo) => {
   var ProgressBar = require("progressbar.js");
+  const location = useLocation();
   const percentage = taskInfo.taskInfo.percentage;
   const progressBarRef = useRef(null);
   const date = useDate(taskInfo.taskInfo.date);
@@ -39,7 +40,7 @@ const ActiveTasks = (taskInfo) => {
     <Link
       className="has-pointer"
       to={`/task/${taskInfo.taskInfo.taskID}`}
-      state={taskInfo}
+      state={location.pathname}
     >
       <div className="position-relative drown bg-royal rounded-5 pt-4 pb-2 px-4 mb-2">
         <div className="dborder-dashed-vlroyal d-flex justify-content-between align-items-center">

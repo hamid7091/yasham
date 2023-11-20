@@ -1,92 +1,170 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SearchIcon from "../assets/svg-icons/SearchIcon";
 import SortIcon from "../assets/svg-icons/SortIcon";
 import Select from "react-select";
 import BusinessCard from "./BusinessCard";
+import SingleHeader from "./SingleHeader";
+import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
+import Message from "../micro-components/Message";
+import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
 
 const AllBusinesses = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
   const navigate = useNavigate();
+
+  const searchField = useRef(null);
   const [searchedBusinessName, setSearchedBusinessName] = useState();
+  const [isSubmited, setIsSubmited] = useState(false);
   const [sortStatus, setSortStatus] = useState();
   const [businessData, setBusinessData] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState();
+  const [filteredCats, setFilteredCats] = useState([]);
+
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+
   const mockResponse = {
-    cards: [
-      {
-        businessAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        businessName: "کلینیک حسن",
-        businessID: "1",
-        orderCount: 25,
-        income: 25000000,
-        profit: 15000000,
+    data: {
+      response: {
+        cards: [
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک حسن",
+            businessID: "1",
+            orderCount: 25,
+            income: 25000000,
+            profit: 15000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک حسین",
+            businessID: "2",
+            orderCount: 20,
+            income: 20000000,
+            profit: 10000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک محمود",
+            businessID: "3",
+            orderCount: 18,
+            income: 19000000,
+            profit: 10000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک رضا",
+            businessID: "4",
+            orderCount: 15,
+            income: 14000000,
+            profit: 10000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک حسن",
+            businessID: "1",
+            orderCount: 25,
+            income: 25000000,
+            profit: 15000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک حسین",
+            businessID: "2",
+            orderCount: 20,
+            income: 20000000,
+            profit: 10000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک محمود",
+            businessID: "3",
+            orderCount: 18,
+            income: 19000000,
+            profit: 10000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک رضا",
+            businessID: "4",
+            orderCount: 15,
+            income: 14000000,
+            profit: 10000000,
+          },
+        ],
       },
-      {
-        businessAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        businessName: "کلینیک حسین",
-        businessID: "2",
-        orderCount: 20,
-        income: 20000000,
-        profit: 10000000,
+    },
+  };
+  const mockSearchedB = {
+    data: {
+      response: {
+        cards: [
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک رضا",
+            businessID: "1",
+            orderCount: 25,
+            income: 25000000,
+            profit: 15000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک داوود",
+            businessID: "2",
+            orderCount: 20,
+            income: 20000000,
+            profit: 10000000,
+          },
+        ],
       },
-      {
-        businessAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        businessName: "کلینیک محمود",
-        businessID: "3",
-        orderCount: 18,
-        income: 19000000,
-        profit: 10000000,
+    },
+  };
+  const mockSortedB = {
+    data: {
+      response: {
+        cards: [
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک رضا",
+            businessID: "1",
+            orderCount: 25,
+            income: 25000000,
+            profit: 15000000,
+          },
+          {
+            businessAvatar:
+              "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+            businessName: "کلینیک داوود",
+            businessID: "2",
+            orderCount: 20,
+            income: 20000000,
+            profit: 10000000,
+          },
+        ],
       },
-      {
-        businessAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        businessName: "کلینیک رضا",
-        businessID: "4",
-        orderCount: 15,
-        income: 14000000,
-        profit: 10000000,
-      },
-      {
-        businessAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        businessName: "کلینیک حسن",
-        businessID: "1",
-        orderCount: 25,
-        income: 25000000,
-        profit: 15000000,
-      },
-      {
-        businessAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        businessName: "کلینیک حسین",
-        businessID: "2",
-        orderCount: 20,
-        income: 20000000,
-        profit: 10000000,
-      },
-      {
-        businessAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        businessName: "کلینیک محمود",
-        businessID: "3",
-        orderCount: 18,
-        income: 19000000,
-        profit: 10000000,
-      },
-      {
-        businessAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        businessName: "کلینیک رضا",
-        businessID: "4",
-        orderCount: 15,
-        income: 14000000,
-        profit: 10000000,
-      },
-    ],
+    },
   };
 
   const sortOptions = [
@@ -97,16 +175,16 @@ const AllBusinesses = () => {
   const customStyles = {
     option: (defaultStyles, state) => ({
       ...defaultStyles,
-      color: state.isSelected ? "#2f66db" : "#79a3fe",
-      backgroundColor: state.isSelected ? "#b8cfff" : "#fff)",
+      color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+      backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
       padding: "8px",
       fontWeight: "bold",
       ":not(:last-child)": {
-        borderBottom: "2px solid var(--blue-royal)",
+        borderBottom: "2px solid var(--gray-ultra-light)",
       },
       ":hover": {
-        backgroundColor: "#dee7fa",
-        color: "var(--blue-royal)",
+        backgroundColor: "var(--gray-very-light)",
+        color: "#000",
       },
     }),
     control: (defaultStyles) => ({
@@ -115,13 +193,14 @@ const AllBusinesses = () => {
       borderRadius: "10rem",
       paddingInline: "8px",
       paddingBlock: "4px",
+      border: "none",
       ":hover": {
         border: "2px solid var( --blue-royal)",
       },
     }),
     singleValue: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontWeight: "bold",
     }),
     placeholder: (defaultStyles) => ({
@@ -150,12 +229,11 @@ const AllBusinesses = () => {
     }),
     menuList: (defaultStyles) => ({
       ...defaultStyles,
-      borderRadius: "8px",
-      paddingInline: "4px",
+      borderRadius: "4px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontSize: "16px",
     }),
     multiValue: (defaultStyles) => ({
@@ -174,62 +252,180 @@ const AllBusinesses = () => {
     }),
   };
 
-  const handleSearchedBusiness = () => {};
-  const getFilteredBusinessInfo = () => {};
+  const setSortingStstus = (e) => {
+    console.log(e, "fired");
+    setSortStatus(e);
+    setIsSubmited(true);
+  };
+  const handleSearchedBusinesstName = (event) => {
+    setSearchedBusinessName(event.target.value);
+  };
+  const handleCapReduction = (cat) => {
+    if (cat.value == "businessName") {
+      setSearchedBusinessName(null);
+      setIsSubmited(true);
+    }
+  };
+
+  const getSearchedBusinessList = async (event) => {
+    event?.preventDefault();
+    window.scrollTo({ top: 0, behavior: "instant" });
+    setIsSubmited(false);
+    setFilteredCats([]);
+    setSortStatus(null);
+    const formdata = new FormData();
+    if (searchedBusinessName) {
+      console.log(searchedBusinessName);
+      formdata.append("businessName", searchedBusinessName);
+      setFilteredCats((prevStates) => [
+        ...prevStates,
+        {
+          label: searchedBusinessName,
+          value: "businessName",
+        },
+      ]);
+    }
+
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      // const response = await axiosInstance.post("/order/history", formdata);
+      const response = mockSearchedB;
+      setBusinessData(response.data.response.cards);
+      searchField.current.value = null;
+
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getBusinessList = async () => {
+    setFilteredCats([]);
+    setIsSubmited(false);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      // const response = await axiosInstance.post("/order/business-list");
+      const response = mockResponse;
+      setBusinessData(response.data.response.cards);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getSortedBusinessList = async () => {
+    setFilteredCats([]);
+    setSearchedBusinessName(null);
+    setIsSubmited(false);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      // const response = await axiosInstance.post("activity/employee-list", {
+      //   sortID: sortStatus.value,
+      // });
+      const response = mockSortedB;
+      setBusinessData(response.data.response.cards);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
 
   useEffect(() => {
-    setBusinessData(mockResponse.cards);
+    getUser();
+    getBusinessList();
   }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      !isPManager && navigate("/unauthorized");
+    }
+  }, [isPManager]);
+  useEffect(() => {
+    console.log(sortStatus);
+    if (isSubmited) {
+      sortStatus ? getSortedBusinessList() : getBusinessList();
+    }
+  }, [isSubmited]);
+
+  console.log(businessData);
   return (
-    businessData && (
-      <div className="container px-3" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-          <div className="bold-xlarge">لیست کسب و کارها</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
-        <section className="d-flex align-items-center gap-3 mb-3">
-          <input
-            onChange={handleSearchedBusiness}
-            value={searchedBusinessName}
-            type="text"
-            className="flex-grow-1 rounded-pill p-3"
-            placeholder="جستجوی نام کسب و کار ..."
-          />
-          <span className="has-pointer" onClick={getFilteredBusinessInfo}>
-            <SearchIcon />
-          </span>
-        </section>
-        <section className="mt-3">
-          <div className="d-flex align-items-center justify-content-between bg-white p-3 rounded-5">
-            <span>
-              <span>
-                <SortIcon />
-              </span>
-              <span className="bold-default me-1">مرتب‌سازی:</span>
-            </span>
-            <span>
-              <Select
-                id="sort-status"
-                name="sort-status"
-                value={sortStatus}
-                onChange={(e) => setSortStatus(e)}
-                options={sortOptions}
-                placeholder="بر اساس"
-                styles={customStyles}
-                isClearable
-                // isMulti
-                // hideSelectedOptions={false}
-              />
-            </span>
+    <div className="container px-3" dir="rtl">
+      <SingleHeader title={"لیست کسب و کارها"} location={"/"} />
+      <section className="d-flex align-items-center gap-3 mb-3">
+        <input
+          ref={searchField}
+          onChange={handleSearchedBusinesstName}
+          type="text"
+          className="flex-grow-1 rounded-pill p-3"
+          placeholder="جستجوی نام کسب و کار ..."
+        />
+        <span className="has-pointer" onClick={getSearchedBusinessList}>
+          <SearchIcon />
+        </span>
+      </section>
+      {filteredCats.length > 0 && (
+        <>
+          <div className="d-flex ">
+            {filteredCats.map((cat, i) => {
+              console.log(cat);
+              return (
+                <div
+                  key={i}
+                  className="bg-white py-1 px-3 mt-3 rounded-pill has-pointer ms-1"
+                >
+                  <span className="thin-default">{cat.label}</span>
+                  <span onClick={() => handleCapReduction(cat)}>
+                    <BLCloseBtn />
+                  </span>
+                </div>
+              );
+            })}
           </div>
-        </section>
-        {businessData.map((data, index) => {
+          <hr className="text-primary" />
+        </>
+      )}
+      <section className="mt-3">
+        <div className="d-flex align-items-center justify-content-between bg-white p-3 rounded-5">
+          <span>
+            <span>
+              <SortIcon />
+            </span>
+            <span className="bold-default me-1">مرتب‌سازی:</span>
+          </span>
+          <span>
+            <Select
+              id="sort-status"
+              name="sort-status"
+              value={sortStatus}
+              onChange={(e) => setSortingStstus(e)}
+              options={sortOptions}
+              placeholder="بر اساس"
+              styles={customStyles}
+              isClearable
+              // isMulti
+              // hideSelectedOptions={false}
+            />
+          </span>
+        </div>
+      </section>
+      {businessData ? (
+        businessData.map((data, index) => {
           return <BusinessCard data={data} key={index} />;
-        })}
-      </div>
-    )
+        })
+      ) : (
+        <Message>کسب و کاری برای نمایش وجود ندارد</Message>
+      )}
+    </div>
   );
 };
 

@@ -1,33 +1,38 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 import InventoryItemCard from "./InventoryItemCard";
 import { Popover, ArrowContainer } from "react-tiny-popover";
 import QuestionIcon from "../assets/svg-icons/QuestionIcon";
 import useMathRound from "../micro-components/UseMathRound";
 
-const InventoryDashboard = ({ dashboardData, setLocation }) => {
+const InventoryDashboard = ({ dashboardData }) => {
   console.log(dashboardData);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const data = [
-    {
-      name: "موجودی کافی",
-      value: parseInt(dashboardData.overallStockStatus.sufficient),
-    },
-    {
-      name: "رو به اتمام",
-      value: parseInt(dashboardData.overallStockStatus.inSufficient),
-    },
-  ];
-  const p =
-    (parseInt(dashboardData.overallStockStatus.inSufficient) /
-      (parseInt(dashboardData.overallStockStatus.sufficient) +
-        parseInt(dashboardData.overallStockStatus.inSufficient))) *
-    100;
-  console.log(p);
 
-  const roundedNum = useMathRound(p);
-  console.log(roundedNum);
-  const COLORS = ["var(--green)", "var(--red-l)"];
+  const data = useMemo(() => {
+    return [
+      {
+        name: "موجودی کافی",
+        value: parseInt(dashboardData.overallStockStatus.sufficient),
+      },
+      {
+        name: "رو به اتمام",
+        value: parseInt(dashboardData.overallStockStatus.inSufficient),
+      },
+    ];
+  }, [dashboardData]);
+  const mean = useMemo(() => {
+    return (
+      (parseInt(dashboardData.overallStockStatus.inSufficient) /
+        (parseInt(dashboardData.overallStockStatus.sufficient) +
+          parseInt(dashboardData.overallStockStatus.inSufficient))) *
+      100
+    );
+  }, [dashboardData]);
+  const roundedMean = useMathRound(mean);
+  const COLORS = useMemo(() => {
+    return ["var(--green)", "var(--red-l)"];
+  }, []);
 
   return (
     <div className="mt-3 mb-100 px-3">
@@ -80,7 +85,6 @@ const InventoryDashboard = ({ dashboardData, setLocation }) => {
         </div>
         <ResponsiveContainer
           width="100%"
-          // height="85%"
           aspect={1.3}
           style={{ pointerEvents: "none" }}
         >
@@ -122,7 +126,7 @@ const InventoryDashboard = ({ dashboardData, setLocation }) => {
         </ResponsiveContainer>
         <div className="text-center">
           <span className="grey-default-bold500">
-            موجودی {roundedNum.roundedNum} درصد از انبار روبه اتمام است
+            موجودی {roundedMean} درصد از انبار روبه اتمام است
           </span>
         </div>
       </div>

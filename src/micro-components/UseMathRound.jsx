@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 
 function useMathRound(initialNum) {
-  console.log(initialNum);
   const [roundedNum, setRoundNum] = useState(initialNum);
 
   useEffect(() => {
+    console.log(initialNum);
     setRoundNum(Math.round(initialNum));
   }, [initialNum]);
 
-  return { roundedNum };
+  return roundedNum;
 }
 
 export default useMathRound;

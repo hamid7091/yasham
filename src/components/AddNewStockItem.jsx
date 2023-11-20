@@ -8,6 +8,7 @@ import axiosInstance from "../util-functions/axiosInstance";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import img from "../assets/svg-pics/asd.jpg";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import SingleHeader from "../components/SingleHeader";
 
 const AddNewStockItem = () => {
   const navigate = useNavigate();
@@ -265,13 +266,8 @@ const AddNewStockItem = () => {
 
   console.log(isInventory);
   return (
-    <div className="container px-2" dir="rtl">
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3 px-2">
-        <div className="bold-xlarge">ثبت آیتم جدید</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
+    <div className="container px-4" dir="rtl">
+      <SingleHeader title={"ثبت آیتم جدید"} location={"/"} />
       <div className="text-center d-flex flex-column justify-content-center align-items-center">
         <div>
           <img className="avatar-svg-image" ref={avatar} src={img} alt="" />

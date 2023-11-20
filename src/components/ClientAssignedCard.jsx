@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import BackIcon from "../assets/svg-icons/BackIcon";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import useDate from "../micro-components/useDate2";
 import ProfileIcon from "../assets/svg-icons/ProfileIcon";
 import ClientIcon from "../assets/svg-icons/ClientIcon";
@@ -8,6 +8,7 @@ import Calendar30 from "../assets/svg-icons/Calendar30";
 
 const ClientAssignedCard = ({ order }) => {
   const date = useDate(order.date);
+  const location = useLocation();
   const lineBarRef = useRef(null);
   let lineProgressbar = require("progressbar.js");
   useEffect(() => {
@@ -50,7 +51,7 @@ const ClientAssignedCard = ({ order }) => {
     <Link
       className="has-pointer py-5"
       to={`/task/${order.taskID}`}
-      state={order}
+      state={location.pathname}
     >
       <div className="posted-card drop-shadow mb-3 p-4 rounded-5">
         <div className="">

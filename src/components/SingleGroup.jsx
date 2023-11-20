@@ -1,119 +1,46 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import ClientAssignedCard from "./ClientAssignedCard";
-import fetchData from "../util-functions/fetchData";
+import SingleHeader from "./SingleHeader";
+import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const SingleGroup = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
   const param = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [tabState, setTabState] = useState("allTasksTab");
   const [departmentDetails, setDepartmentDetails] = useState();
   const [tasks, setTasks] = useState([]);
   const [orphanTasks, setOrphanTasks] = useState([]);
   const [assignedTasks, setAssignedTasks] = useState([]);
-  const responseMock = {
-    departmentDetails: { departmentID: 1, departmentName: "قالب گیری" },
-    tasks: [
-      {
-        taskID: 444,
-        taskType: "Hard Night Guard",
-        client: "دمو123",
-        date: "1402-7-22",
-        step: "گچ",
-        percentage: 10,
-        patientFullName: "معین لواری",
-        isAssigned: true,
-      },
-      {
-        taskID: 444,
-        taskType: "Hard Night Guard",
-        client: "دمو123",
-        date: "1402-7-22",
-        step: "گچ",
-        percentage: 10,
-        patientFullName: "معین لواری",
-        isAssigned: true,
-      },
-      {
-        taskID: 444,
-        taskType: "Hard Night Guard",
-        client: "دمو123",
-        date: "1402-7-22",
-        step: "گچ",
-        percentage: 10,
-        patientFullName: "معین لواری",
-        isAssigned: true,
-      },
-      {
-        taskID: 444,
-        taskType: "Hard Night Guard",
-        client: "دمو123",
-        date: "1402-7-22",
-        step: "گچ",
-        percentage: 10,
-        patientFullName: "معین لواری",
-        isAssigned: false,
-      },
-      {
-        taskID: 444,
-        taskType: "Hard Night Guard",
-        client: "دمو123",
-        date: "1402-7-22",
-        step: "گچ",
-        percentage: 10,
-        patientFullName: "معین لواری",
-        isAssigned: false,
-      },
-      {
-        taskID: 444,
-        taskType: "Hard Night Guard",
-        client: "دمو123",
-        date: "1402-7-22",
-        step: "گچ",
-        percentage: 10,
-        patientFullName: "معین لواری",
-        isAssigned: false,
-      },
-      {
-        taskID: 444,
-        taskType: "Hard Night Guard",
-        client: "دمو123",
-        date: "1402-7-22",
-        step: "گچ",
-        percentage: 10,
-        patientFullName: "معین لواری",
-        isAssigned: false,
-      },
-    ],
-  };
 
-  const singleGroupURL = "https://samane.zbbo.net/api/v1/department/single";
-  const singleGroupHeader = new Headers();
-  singleGroupHeader.append("Authorization", `Bearer ${accessToken}`);
-  const singleGroupFormdata = new FormData();
-  singleGroupFormdata.append("departmentID", param.id);
-  const singleGroupRequestOptions = {
-    method: "POST",
-    headers: singleGroupHeader,
-    body: singleGroupFormdata,
-    redirect: "follow",
-  };
-
-  const getSingleGroupData = async () => {
-    const response = await fetchData(singleGroupURL, singleGroupRequestOptions);
-    console.log(response);
-    setTasks(response.tasks);
-    setDepartmentDetails(response.departmentDetail);
-    response.tasks.forEach((task) => {
-      task.isAssigned && setAssignedTasks((prevTask) => [...prevTask, task]);
-      !task.isAssigned && setOrphanTasks((prevTask) => [...prevTask, task]);
-    });
+  const getData = async () => {
+    const formdata = new FormData();
+    formdata.append("departmentID", param.id);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/department/single", formdata);
+      setTasks(response.data.response.tasks);
+      setDepartmentDetails(response.data.response.departmentDetail);
+      response.data.response.tasks.forEach((task) => {
+        task.isAssigned && setAssignedTasks((prevTask) => [...prevTask, task]);
+        !task.isAssigned && setOrphanTasks((prevTask) => [...prevTask, task]);
+      });
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
 
   useEffect(() => {
-    console.log(tasks);
-    getSingleGroupData();
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getData();
+    }
   }, []);
   const handleTabChange = (e) => {
     const clicked = e.target;
@@ -138,14 +65,10 @@ const SingleGroup = () => {
   };
   return (
     <div className="container px-2" dir="rtl">
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3 mb-4">
-        <div className="bold-xlarge">
-          بخش {departmentDetails?.departmentName}
-        </div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
+      <SingleHeader
+        title={`بخش ${departmentDetails?.departmentName}`}
+        location={location.state}
+      />
       <div className="log-in-tabs bg-white d-flex justify-content-between align-items-center rounded-pill text-center p-2 mx-2 mt-2 drop-shadow">
         <span
           className="active-tab flex-fill py-2 px-1 has-pointer"

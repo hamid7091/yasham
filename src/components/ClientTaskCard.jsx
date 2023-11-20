@@ -1,11 +1,12 @@
 import React from "react";
 import useDate from "../micro-components/useDate2";
 import OrderListIcon from "../assets/svg-icons/OrderListIcon";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const ClientTaskCard = ({ order, loadedFrom, isClient }) => {
   const newDate = useDate(order.date);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleRedirect = (id) => {
     if (id.invoiceID != 0) {
@@ -19,7 +20,7 @@ const ClientTaskCard = ({ order, loadedFrom, isClient }) => {
   return (
     <>
       <div className="drop-shadow mt-3 p-4 rounded-5 bg-white">
-        <Link to={`/order/${order.orderID}`}>
+        <Link to={`/order/${order.orderID}`} state={location.pathname}>
           <div className="">
             <OrderListIcon />
             <span className="me-2 grey-large-bold ">

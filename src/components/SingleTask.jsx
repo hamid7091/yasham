@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import Overall from "./Overall";
 import SingleTaskTimeline from "./SingleTaskTimeline";
@@ -13,9 +13,11 @@ import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import SingleHeader from "./SingleHeader";
 
 const SingleTask = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [userInfo, setUserInfo] = useState();
   const [taskInfo, setTaskInfo] = useState();
@@ -227,13 +229,10 @@ const SingleTask = () => {
           />
         </>
       )}
-
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
-        <div className="bold-xlarge">{taskInfo.overAll.taskType}</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
+      <SingleHeader
+        title={taskInfo.overAll.taskType}
+        location={location.state}
+      />
       <div className="log-in-tabs bg-white d-flex justify-content-between align-items-center rounded-pill text-center p-2 mx-2 mt-2 drop-shadow">
         <span
           className="active-tab flex-fill py-2 px-1 has-pointer"

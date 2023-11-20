@@ -17,167 +17,169 @@ import {
 } from "recharts";
 import ClientTaskCard from "./ClientTaskCard";
 import Message from "../micro-components/Message";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const SalesPage = () => {
   const mockResponse = {
-    salesReport: {
-      count: 15,
-      income: 2500000,
-      profit: 1500000,
+    data: {
+      response: {
+        salesReport: {
+          count: 15,
+          income: 2500000,
+          profit: 1500000,
+        },
+        chartData: [
+          {
+            date: "08/01",
+            sale: 120000,
+          },
+          {
+            date: "08/02",
+            sale: 180000,
+          },
+          {
+            date: "08/03",
+            sale: 100000,
+          },
+          {
+            date: "08/04",
+            sale: 150000,
+          },
+          {
+            date: "08/05",
+            sale: 190000,
+          },
+          {
+            date: "08/06",
+            sale: 170000,
+          },
+          {
+            date: "08/07",
+            sale: 195000,
+          },
+          {
+            date: "08/08",
+            sale: 250000,
+          },
+          {
+            date: "08/09",
+            sale: 350000,
+          },
+          {
+            date: "08/10",
+            sale: 20,
+          },
+          {
+            date: "08/11",
+            sale: 450000,
+          },
+          {
+            date: "08/12",
+            sale: 230000,
+          },
+          {
+            date: "08/13",
+            sale: 125000,
+          },
+          {
+            date: "08/14",
+            sale: 135000,
+          },
+          {
+            date: "08/15",
+            sale: 145000,
+          },
+          {
+            date: "08/16",
+            sale: 120000,
+          },
+          {
+            date: "08/17",
+            sale: 50000,
+          },
+          {
+            date: "08/18",
+            sale: 20,
+          },
+          {
+            date: "08/19",
+            sale: 650000,
+          },
+          {
+            date: "08/20",
+            sale: 352000,
+          },
+          {
+            date: "08/21",
+            sale: 685000,
+          },
+          {
+            date: "08/22",
+            sale: 124000,
+          },
+          {
+            date: "08/23",
+            sale: 368000,
+          },
+          {
+            date: "08/24",
+            sale: 754000,
+          },
+          {
+            date: "08/25",
+            sale: 365000,
+          },
+          {
+            date: "08/26",
+            sale: 20,
+          },
+          {
+            date: "08/27",
+            sale: 124000,
+          },
+          {
+            date: "08/28",
+            sale: 354000,
+          },
+          {
+            date: "08/29",
+            sale: 496000,
+          },
+          {
+            date: "08/30",
+            sale: 321000,
+          },
+        ],
+        orderTypeData: [
+          { taskType: "PFZ", count: 12, income: 235000 },
+          { taskType: "ایمپلنت", count: 8, income: 135000 },
+          { taskType: "PFM", count: 5, income: 120000 },
+        ],
+        departmentReport: {
+          fixed: {
+            all: 25,
+            income: 2500000,
+            profit: 1500000,
+          },
+          mobile: {
+            all: 35,
+            income: 4500000,
+            profit: 2500000,
+          },
+        },
+        orders: [
+          {
+            orderID: 123456,
+            patientName: "حمید قهرمانی",
+            date: "1402-06-12",
+            price: 250000,
+            invoiceStatus: "1",
+            invoiceID: "35",
+          },
+        ],
+      },
     },
-    chartData: [
-      {
-        date: "08/01",
-        sale: 120000,
-      },
-      {
-        date: "08/02",
-        sale: 180000,
-      },
-      {
-        date: "08/03",
-        sale: 100000,
-      },
-      {
-        date: "08/04",
-        sale: 150000,
-      },
-      {
-        date: "08/05",
-        sale: 190000,
-      },
-      {
-        date: "08/06",
-        sale: 170000,
-      },
-      {
-        date: "08/07",
-        sale: 195000,
-      },
-      {
-        date: "08/08",
-        sale: 250000,
-      },
-      {
-        date: "08/09",
-        sale: 350000,
-      },
-      {
-        date: "08/10",
-        sale: 20,
-      },
-      {
-        date: "08/11",
-        sale: 450000,
-      },
-      {
-        date: "08/12",
-        sale: 230000,
-      },
-      {
-        date: "08/13",
-        sale: 125000,
-      },
-      {
-        date: "08/14",
-        sale: 135000,
-      },
-      {
-        date: "08/15",
-        sale: 145000,
-      },
-      {
-        date: "08/16",
-        sale: 120000,
-      },
-      {
-        date: "08/17",
-        sale: 50000,
-      },
-      {
-        date: "08/18",
-        sale: 20,
-      },
-      {
-        date: "08/19",
-        sale: 650000,
-      },
-      {
-        date: "08/20",
-        sale: 352000,
-      },
-      {
-        date: "08/21",
-        sale: 685000,
-      },
-      {
-        date: "08/22",
-        sale: 124000,
-      },
-      {
-        date: "08/23",
-        sale: 368000,
-      },
-      {
-        date: "08/24",
-        sale: 754000,
-      },
-      {
-        date: "08/25",
-        sale: 365000,
-      },
-      {
-        date: "08/26",
-        sale: 20,
-      },
-      {
-        date: "08/27",
-        sale: 124000,
-      },
-      {
-        date: "08/28",
-        sale: 354000,
-      },
-      {
-        date: "08/29",
-        sale: 496000,
-      },
-      {
-        date: "08/30",
-        sale: 321000,
-      },
-    ],
-    orderTypeData: [
-      { taskType: "PFZ", count: 12, income: 235000 },
-      { taskType: "ایمپلنت", count: 8, income: 135000 },
-      { taskType: "PFM", count: 5, income: 120000 },
-    ],
-    departmentReport: {
-      fixed: {
-        all: 25,
-        income: 2500000,
-        profit: 1500000,
-      },
-      mobile: {
-        all: 35,
-        income: 4500000,
-        profit: 2500000,
-      },
-    },
-    orders: [
-      {
-        orderID: 123456,
-        patientName: "حمید قهرمانی",
-        date: "1402-06-12",
-        price: 250000,
-        invoiceStatus: "1",
-        invoiceID: "35",
-      },
-    ],
   };
-
-  const accessToken = window.localStorage.getItem("AccessToken");
-  const navigate = useNavigate();
 
   const {
     ts,
@@ -245,7 +247,7 @@ const SalesPage = () => {
         setStartDate(ysu);
         setEndDate(yeu);
         setStartDateFront(ys);
-        setEndtDateFront(ys);
+        setEndtDateFront(ye);
         break;
       case "هفته جاری":
         setStartDate(twsu);
@@ -286,53 +288,88 @@ const SalesPage = () => {
     }
   };
 
-  const getNewFilteredData = async (event) => {
-    Loading.standard("در حال دریافت اطلاعات");
+  const getSaleData = async (event) => {
+    console.log(startDate, endDate);
     event?.preventDefault();
+    const formdata = new FormData();
     window.scrollTo(0, 0);
     setIsFilterPopupActive(false);
-    const filterHeader = new Headers();
-    filterHeader.append("Authorization", `Bearer ${accessToken}`);
-    const filterFormdata = new FormData();
     if (typeof startDate === "object") {
-      filterFormdata.append("startDate", startDate?.toUnix());
-      filterFormdata.append("endDate", endDate?.toUnix());
+      formdata.append("startDate", startDate?.toUnix());
+      formdata.append("endDate", endDate?.toUnix());
       setStartDateFront(moment.unix(startDate?.toUnix()).format("jYYYY/jM/jD"));
       setEndtDateFront(moment.unix(endDate?.toUnix()).format("jYYYY/jM/jD"));
     } else {
-      filterFormdata.append("startDate", startDate);
-      filterFormdata.append("endDate", endDate);
+      formdata.append("startDate", startDate);
+      formdata.append("endDate", endDate);
     }
-
-    const filterRequestOptions = {
-      method: "POST",
-      headers: filterHeader,
-      body: filterFormdata,
-      redirect: "follow",
-    };
-
-    // const response = await fetchData(URL, filterRequestOptions);
-    const response = mockResponse;
-    setSalesReport(response.salesReport);
-    setChartData(response.chartData);
-    setDepartmentReport(response.departmentReport);
-    setOrderTypeData(response.orderTypeData);
-    setOrders(response.orders);
-    Loading.remove();
-
-    console.log(response);
-    console.log(startDate);
-    // console.log(startDate.toUnix());
-    console.log(endDate);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      // const response = await axiosInstance.post("/order/sale-report",formdata)
+      const response = mockResponse;
+      setSalesReport(response.data.response.salesReport);
+      setChartData(response.data.response.chartData);
+      setDepartmentReport(response.data.response.departmentReport);
+      setOrderTypeData(response.data.response.orderTypeData);
+      setOrders(response.data.response.orders);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
+
+  // const getNewFilteredData = async (event) => {
+  //   Loading.standard("در حال دریافت اطلاعات");
+  //   event?.preventDefault();
+  //   window.scrollTo(0, 0);
+  //   setIsFilterPopupActive(false);
+  //   const filterHeader = new Headers();
+  //   filterHeader.append("Authorization", `Bearer ${accessToken}`);
+  //   const filterFormdata = new FormData();
+  //   if (typeof startDate === "object") {
+  //     filterFormdata.append("startDate", startDate?.toUnix());
+  //     filterFormdata.append("endDate", endDate?.toUnix());
+  //     setStartDateFront(moment.unix(startDate?.toUnix()).format("jYYYY/jM/jD"));
+  //     setEndtDateFront(moment.unix(endDate?.toUnix()).format("jYYYY/jM/jD"));
+  //   } else {
+  //     filterFormdata.append("startDate", startDate);
+  //     filterFormdata.append("endDate", endDate);
+  //   }
+
+  //   const filterRequestOptions = {
+  //     method: "POST",
+  //     headers: filterHeader,
+  //     body: filterFormdata,
+  //     redirect: "follow",
+  //   };
+
+  //   // const response = await fetchData(URL, filterRequestOptions);
+  //   const response = mockResponse;
+  //   setSalesReport(response.salesReport);
+  //   setChartData(response.chartData);
+  //   setDepartmentReport(response.departmentReport);
+  //   setOrderTypeData(response.orderTypeData);
+  //   setOrders(response.orders);
+  //   Loading.remove();
+
+  //   console.log(response);
+  //   console.log(startDate);
+  //   // console.log(startDate.toUnix());
+  //   console.log(endDate);
+  // };
 
   useEffect(() => {
     setStartDateFront(tms);
     setEndtDateFront(te);
-    getNewFilteredData();
+    setStartDate(tmsu);
+    setEndDate(teu);
   }, [te, tms]);
+  useEffect(() => {
+    getSaleData();
+  }, []);
 
-  console.log(departmentReport);
+  // console.log(departmentReport);
 
   return (
     salesReport && (
@@ -345,7 +382,7 @@ const SalesPage = () => {
               handleEndDateChange={handleEndDateChange}
               startDate={startDate}
               endDate={endDate}
-              handleFilter={getNewFilteredData}
+              handleFilter={getSaleData}
               setPredefinedDate={setPredefinedDate}
             />
             <PopupBackground

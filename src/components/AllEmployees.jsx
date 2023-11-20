@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import SortIcon from "../assets/svg-icons/SortIcon";
 import Select from "react-select";
@@ -8,14 +8,46 @@ import useRoleSetter from "../micro-components/useRoleSetter";
 import axiosInstance from "../util-functions/axiosInstance";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import Message from "../micro-components/Message";
+import usePredefinedDats from "../micro-components/usePredefinedDates";
+import SingleHeader from "./SingleHeader";
 
 const AllEmployees = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  console.log(location);
   const [sortStatus, setSortStatus] = useState();
   const [employees, setEmployees] = useState();
   const [isSubmited, setIsSubmited] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState();
+  const {
+    ts,
+    tsu,
+    te,
+    teu,
+    ys,
+    ysu,
+    ye,
+    yeu,
+    tms,
+    tmsu,
+    pms,
+    pmsu,
+    pme,
+    pmeu,
+    tws,
+    twsu,
+    pws,
+    pwsu,
+    pwe,
+    pweu,
+    tys,
+    tysu,
+    pys,
+    pysu,
+    pye,
+    pyeu,
+  } = usePredefinedDats();
   const [
     isEmployee,
     isClient,
@@ -32,8 +64,8 @@ const AllEmployees = () => {
     setIsSubmited(true);
   };
   const sortOptions = [
-    { label: "انجام شده‌ها", value: 0 },
-    { label: "واگذاری شده‌ها", value: 1 },
+    { label: "انجام شده‌ها", value: 1 },
+    { label: "واگذاری شده‌ها", value: 2 },
   ];
   const customStyles = {
     option: (defaultStyles, state) => ({
@@ -118,104 +150,109 @@ const AllEmployees = () => {
     setIsSubmited(false);
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      //const response = await axiosInstance.post("/task/get_employees")
-      const response = {
-        data: {
-          response: {
-            cards: [
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-              {
-                employeeAvatar:
-                  "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-                employeeName: "علی قناتیانی",
-                employeeID: 6969,
-                doneTasks: 12,
-                assignedTasks: 14,
-              },
-            ],
-          },
-        },
-      };
-      setEmployees(response.data.response.cards);
+      console.log(tmsu, teu);
+      const response = await axiosInstance.post("activity/employee-list", {
+        startDate: tmsu,
+        endDate: teu,
+      });
+      // const response = {
+      //   data: {
+      //     response: {
+      //       cards: [
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //         {
+      //           employeeAvatar:
+      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //           employeeName: "علی قناتیانی",
+      //           employeeID: 6969,
+      //           doneTasks: 12,
+      //           assignedTasks: 14,
+      //         },
+      //       ],
+      //     },
+      //   },
+      // };
+      setEmployees(response.data.response?.cards);
+      console.log(response.data.response);
 
       Loading.remove();
     } catch (error) {
@@ -227,8 +264,10 @@ const AllEmployees = () => {
     setIsSubmited(false);
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post("/task/all_employees", {
+      const response = await axiosInstance.post("activity/employee-list", {
         sortID: sortStatus.value,
+        startDate: tmsu,
+        endDate: teu,
       });
       setEmployees(response.data.response.cards);
       Loading.remove();
@@ -247,14 +286,17 @@ const AllEmployees = () => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    getUser();
+  }, []);
   useEffect(() => {
     if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/login");
     } else {
-      getUser();
-      getEmployeesList();
+      tmsu && getEmployeesList();
     }
-  }, []);
+  }, [tmsu]);
   useEffect(() => {
     if (!isLoading) {
       !isPManager && navigate("/unauthorized");
@@ -268,12 +310,7 @@ const AllEmployees = () => {
   console.log(isSubmited);
   return (
     <div className="container px-3" dir="rtl">
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
-        <div className="bold-xlarge">کلیه کارمندان</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
+      <SingleHeader title={"کلیه کارمندان"} location={location.state} />
       <section className="mt-3">
         <div className="d-flex align-items-center justify-content-between bg-white p-3 rounded-5">
           <span>

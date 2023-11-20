@@ -1,21 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import EditPen from "../assets/svg-icons/EditPen";
 import Select from "react-select";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
-import fetchData from "../util-functions/fetchData";
 import axiosInstance from "../util-functions/axiosInstance";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
+import SingleHeader from "./SingleHeader";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const EditStockInfo = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
-  //const location = useLocation();
   const param = useParams();
   const navigate = useNavigate();
-  //console.log(location.state);
+  const location = useLocation();
 
   const [stockData, setStockData] = useState();
+
+  const avatarInput = useRef(null);
+  const avatar = useRef(null);
   // const mockStockData = {
   //   stockInfo: {
   //     itemPicture:
@@ -47,8 +48,20 @@ const EditStockInfo = () => {
   const [isWarningLimitValid, setIsWarningLimitValid] = useState(null);
   const [isAvatarSet, setIsAvatarSet] = useState(false);
 
-  const avatarInput = useRef(null);
-  const avatar = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState();
+
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+
   const customStyles = {
     option: (defaultStyles, state) => ({
       ...defaultStyles,
@@ -148,33 +161,6 @@ const EditStockInfo = () => {
       setItemName(e.target.value);
     }
   };
-  // const handleItemIDValidation = (e) => {
-  //   if (e.target.value) {
-  //     setIsItemIDValid(true);
-  //     setItemID(e.target.value);
-  //   } else {
-  //     setIsItemIDValid(false);
-  //     setItemID(e.target.value);
-  //   }
-  // };
-  // const handlePurchaseAmount = (e) => {
-  //   if (e.target.value) {
-  //     setIsPurchasedAmountValid(true);
-  //     setPurchasedAmount(e.target.value);
-  //   } else {
-  //     setIsPurchasedAmountValid(false);
-  //     setPurchasedAmount(e.target.value);
-  //   }
-  // };
-  // const handlePurchaseCost = (e) => {
-  //   if (e.target.value) {
-  //     setIsPurchaseCostValid(true);
-  //     setPurchaseCost(e.target.value);
-  //   } else {
-  //     setIsPurchaseCostValid(false);
-  //     setPurchaseCost(e.target.value);
-  //   }
-  // };
 
   const handleWarningLimitValidation = (e) => {
     if (e.target.value) {
@@ -185,34 +171,6 @@ const EditStockInfo = () => {
       setWarningLimit(e.target.value);
     }
   };
-  // const handleSubmitNewItem = async (event) => {
-  //   event.preventDefault();
-  //   Loading.standard("در حال ثبت محصول جدید");
-  //   const submitURL = "some bullshit url";
-  //   const submitHeader = new Headers();
-  //   submitHeader.append("Authorization", `Bearer ${accessToken}`);
-  //   const submitFormdata = new FormData();
-  //   submitFormdata.append("itemName", itemName);
-  //   submitFormdata.append("itemID", itemID);
-  //   submitFormdata.append("itemUnit", itemUnit.value);
-  //   // submitFormdata.append("purchasedAmount", purchasedAmount);
-  //   // submitFormdata.append("purchaseCost", purchaseCost);
-  //   submitFormdata.append("warningLimit", warningLimit);
-  //   if (itemPicture) {
-  //     submitFormdata.append("itemPicture", itemPicture);
-  //   }
-  //   const submitItemRequestOptions = {
-  //     method: "POST",
-  //     headers: submitHeader,
-  //     body: submitFormdata,
-  //     redirect: "follow",
-  //   };
-  //   const response = await fetchData(submitURL, submitItemRequestOptions);
-  //   console.log(response);
-  //   Loading.remove();
-  // };
-  //console.log(isItemNameValid);
-
   const getItemData = async () => {
     try {
       Loading.standard("در حال دریافت اطلاعات");
@@ -280,26 +238,34 @@ const EditStockInfo = () => {
     }
   };
 
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
-    // setStockData(mockStockData);
-    // setItemUnit(mockStockData?.stockInfo.itemUnit);
-    getItemData();
+    if (!isLoading) {
+      !isInventory && navigate("/unauthorized");
+    }
+  }, [isInventory]);
+  useEffect(() => {
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getItemData();
+      getUser();
+    }
   }, []);
 
-  console.log(stockData);
-  console.log(itemID);
-  console.log(itemName);
-  console.log(itemUnit);
-  console.log(warningLimit);
   return (
     stockData && (
       <div className="container px-2" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3 px-2">
-          <div className="bold-xlarge">ویرایش آیتم</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader title={"ویرایش آیتم"} location={location.state} />
         <div className="text-center d-flex flex-column justify-content-center align-items-center">
           <div>
             <img

@@ -13,10 +13,12 @@ import { Loading } from "notiflix";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
 import useInfiniteScroll from "../micro-components/useInfiniteScroll";
+import SingleHeader from "./SingleHeader";
 
 const OrderList = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  console.log(location.state);
   const searchField = useRef(null);
 
   const setter = useRef(null);
@@ -346,7 +348,7 @@ const OrderList = () => {
   }, []);
 
   useEffect(() => {
-    if (location.state === "searchToday") {
+    if (location.state?.searchToday === "searchToday") {
       console.log("triggered");
       setStartDate(todatUnix);
       setEndDate(todatUnix);
@@ -416,12 +418,10 @@ const OrderList = () => {
         </>
       )}
       {isPManager && (
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
-          <div className="bold-xlarge">لیست سفارشات</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader
+          title={"لیست سفارشات"}
+          location={location?.state?.location}
+        />
       )}
       {(isClient || isPManager) && (
         <div className="d-flex align-items-center gap-3">

@@ -1,12 +1,17 @@
 import React from "react";
 import BackIcon from "../assets/svg-icons/BackIcon";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const EmployeeCard = ({ employee }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const navigateToAllTaskLoader = () => {
     navigate("/allTaskLoader", {
-      state: { label: employee.employeeName, value: employee.employeeID },
+      state: {
+        label: employee.employeeName,
+        value: employee.employeeID,
+        location: location.pathname,
+      },
     });
   };
   return (

@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import BackArrow from "../assets/svg-icons/BackArrow";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import fetchData from "../util-functions/fetchData";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import useDate from "../micro-components/useDate2";
 import ClientAssignedCard from "./ClientAssignedCard";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import SingleHeader from "./SingleHeader";
 
 const SingleOrder = () => {
   const navigate = useNavigate();
   const param = useParams();
+  const location = useLocation();
+  console.log(location.state);
   const [orderData, setOrderData] = useState();
   const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,19 +70,18 @@ const SingleOrder = () => {
   }, []);
   useEffect(() => {
     if (!isLoading) {
-      (isShipping || isEmployee || isSupervisor || isInventory) && navigate("/unauthorized");
+      (isShipping || isEmployee || isSupervisor || isInventory) &&
+        navigate("/unauthorized");
     }
-  }, [isShipping, isEmployee, isSupervisor,isInventory]);
+  }, [isShipping, isEmployee, isSupervisor, isInventory]);
 
   return (
     orderData && (
       <div className="container px-4" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
-          <div className="bold-xlarge">شماره سفارش {param.id}</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader
+          title={`شماره سفارش ${param.id}`}
+          location={location.state}
+        />
         <section className="my-4">
           <div className="bg-white rounded-5 py-4 px-4">
             <div className=" d-flex align-items-center gap-4">
