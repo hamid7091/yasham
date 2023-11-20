@@ -3,11 +3,12 @@ import BackIcon from "../assets/svg-icons/BackIcon";
 import OrderListIcon30 from "../assets/svg-icons/OrderListIcon30";
 import IncomeIcon from "../assets/svg-icons/IncomeIcon";
 import ProfitIcon from "../assets/svg-icons/ProfitIcon";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 const BusinessCard = ({ data }) => {
+  const location = useLocation();
   const navigate = useNavigate();
   const handleNavigate = () => {
-    navigate(`/business/${data.businessID}`);
+    navigate(`/business/${data.businessID}`, { state: location.pathname });
   };
   return (
     <div

@@ -3,7 +3,7 @@ import useDate from "../micro-components/useDate2";
 import OrderListIcon from "../assets/svg-icons/OrderListIcon";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const ClientTaskCard = ({ order, loadedFrom, isClient }) => {
+const ClientTaskCard = ({ order, loadedFrom, isClient, isFManager }) => {
   const newDate = useDate(order.date);
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,107 +18,105 @@ const ClientTaskCard = ({ order, loadedFrom, isClient }) => {
   };
 
   return (
-    <>
-      <div className="drop-shadow mt-3 p-4 rounded-5 bg-white">
-        <Link to={`/order/${order.orderID}`} state={location.pathname}>
-          <div className="">
-            <OrderListIcon />
-            <span className="me-2 grey-large-bold ">
-              شماره سفارش {order.orderID}
-            </span>
+    <div className="drop-shadow mt-3 p-4 rounded-5 bg-white">
+      <Link to={`/order/${order.orderID}`} state={location.pathname}>
+        <div className="">
+          <OrderListIcon />
+          <span className="me-2 grey-large-bold ">
+            شماره سفارش {order.orderID}
+          </span>
+        </div>
+        <hr />
+        <div className="">
+          <div className="d-flex align-items-center justify-content-between">
+            <div className=" royal-default-bold my-2">
+              <span className="ms-2">نام بیمار </span>
+              <span className="grey-default-bold500">
+                {order.patientName || order.patientFullName}
+              </span>
+            </div>
+            <div className=" royal-default-bold my-2">
+              <span className="ms-2">تاریخ</span>
+              <span className="grey-default-bold500">{newDate}</span>
+            </div>
           </div>
-          <hr />
-          <div className="">
+          {(isClient || isFManager) && (
             <div className="d-flex align-items-center justify-content-between">
-              <div className=" royal-default-bold my-2">
-                <span className="ms-2">نام بیمار </span>
+              <div className="royal-default-bold my-2">
+                <span className="ms-2">مبلغ</span>
                 <span className="grey-default-bold500">
-                  {order.patientName || order.patientFullName}
+                  {order.price?.toLocaleString() ||
+                    order.orderPrice?.toLocaleString()}{" "}
+                  تومان
                 </span>
               </div>
-              <div className=" royal-default-bold my-2">
-                <span className="ms-2">تاریخ</span>
-                <span className="grey-default-bold500">{newDate}</span>
-              </div>
-            </div>
-            {isClient && (
-              <div className="d-flex align-items-center justify-content-between">
-                <div className="royal-default-bold my-2">
-                  <span className="ms-2">مبلغ</span>
-                  <span className="grey-default-bold500">
-                    {order.price?.toLocaleString() ||
-                      order.orderPrice?.toLocaleString()}{" "}
-                    تومان
-                  </span>
+              {order.invoiceStatus == 3 && (
+                <div
+                  className={`lroyal-default-bold my-2 py-2 px-3 badge-done`}
+                >
+                  <span>پرداخت شده</span>
                 </div>
-                {order.invoiceStatus == 3 && (
-                  <div
-                    className={`lroyal-default-bold my-2 py-2 px-3 badge-done`}
-                  >
-                    <span>پرداخت شده</span>
-                  </div>
-                )}
-                {(order.invoiceStatus == 1 ||
-                  (order.price != 0 && order.invoiceStatus === null)) && (
-                  <div
-                    className={`lroyal-default-bold my-3 py-2 px-3 badge-in-process`}
-                  >
-                    <span>در انتظار پرداخت</span>
-                  </div>
-                )}
-                {((order.invoiceStatus == null && order.price == 0) ||
-                  (order.status == 0 && order.price == 0)) && (
-                  <div
-                    className={`lroyal-default-bold my-3 py-2 px-3 badge-waiting`}
-                  >
-                    <span>در انتظار قیمت گذاری</span>
-                  </div>
-                )}
-                {(order.invoiceStatus == 2 || order.status == 2) && (
-                  <div
-                    className={`lroyal-default-bold my-3 py-2 px-3 badge-canceled`}
-                  >
-                    <span>لغو شده</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          {((loadedFrom === "orderList" && isClient) ||
-            loadedFrom === "dashboard") && <hr />}
-        </Link>
+              )}
+              {(order.invoiceStatus == 1 ||
+                (order.price != 0 && order.invoiceStatus === null)) && (
+                <div
+                  className={`lroyal-default-bold my-3 py-2 px-3 badge-in-process`}
+                >
+                  <span>در انتظار پرداخت</span>
+                </div>
+              )}
+              {((order.invoiceStatus == null && order.price == 0) ||
+                (order.status == 0 && order.price == 0)) && (
+                <div
+                  className={`lroyal-default-bold my-3 py-2 px-3 badge-waiting`}
+                >
+                  <span>در انتظار قیمت گذاری</span>
+                </div>
+              )}
+              {(order.invoiceStatus == 2 || order.status == 2) && (
+                <div
+                  className={`lroyal-default-bold my-3 py-2 px-3 badge-canceled`}
+                >
+                  <span>لغو شده</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         {((loadedFrom === "orderList" && isClient) ||
-          loadedFrom === "dashboard") && (
-          <div className="d-flex">
-            {order.invoiceStatus === "3" && (
-              <span
-                className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
-                onClick={() => handleRedirect(order)}
-              >
-                مشاهده فاکتور
-              </span>
-            )}
-            {(order.invoiceStatus === "1" ||
-              order.invoiceStatus === 1 ||
-              (order.invoiceStatus === null && order.price !== 0)) && (
-              <span
-                className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
-                onClick={() => handleRedirect(order)}
-              >
-                پرداخت
-              </span>
-            )}
-            {order.price == 0 && (
-              <span
-                className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer disabled`}
-              >
-                پرداخت
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-    </>
+          loadedFrom === "dashboard") && <hr />}
+      </Link>
+      {((loadedFrom === "orderList" && isClient) ||
+        loadedFrom === "dashboard") && (
+        <div className="d-flex">
+          {order.invoiceStatus === "3" && (
+            <span
+              className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+              onClick={() => handleRedirect(order)}
+            >
+              مشاهده فاکتور
+            </span>
+          )}
+          {(order.invoiceStatus === "1" ||
+            order.invoiceStatus === 1 ||
+            (order.invoiceStatus === null && order.price !== 0)) && (
+            <span
+              className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+              onClick={() => handleRedirect(order)}
+            >
+              پرداخت
+            </span>
+          )}
+          {order.price == 0 && (
+            <span
+              className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer disabled`}
+            >
+              پرداخت
+            </span>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -301,7 +301,28 @@ const AllBusinesses = () => {
   };
   const getUser = async () => {
     try {
-      const response = await axiosInstance.post("/user/check_access_token");
+      //const response = await axiosInstance.post("/user/check_access_token");
+      const response = {
+        data: {
+          response: {
+            userInfo: {
+              mobile: "9360390099",
+              userAvatar:
+                "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+              userCaps: {
+                اطلاعیه: true,
+                پروفایل: true,
+                "لیست سفارشات": true,
+                "کسب و کارها": true,
+              },
+              userFirstName: "حمید",
+              userID: 123,
+              userLastName: "مدیر مالی",
+              userRole: ["financial_manager"],
+            },
+          },
+        },
+      };
       setUserRole(response.data.response.userInfo.userRole);
       setIsLoading(false);
       console.log(response.data.response);
@@ -347,9 +368,9 @@ const AllBusinesses = () => {
   }, []);
   useEffect(() => {
     if (!isLoading) {
-      !isPManager && navigate("/unauthorized");
+      !isFManager && navigate("/unauthorized");
     }
-  }, [isPManager]);
+  }, [isFManager]);
   useEffect(() => {
     console.log(sortStatus);
     if (isSubmited) {

@@ -1,18 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
-import fetchData from "../util-functions/fetchData";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
-import OrderList from "./OrderList";
-import Invoices from "./Invoices";
+import SingleHeader from "./SingleHeader";
+import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
+import ClientTaskCard from "./ClientTaskCard";
+import InvoiceCard from "./InvoiceCard";
 
 const SingleBusiness = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
   const params = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   console.log(params.id);
 
   const [businessInfo, setBusinessInfo] = useState();
   const [tabLocation, setTabLocation] = useState("orders");
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState();
+
+  const [orders, setOrders] = useState();
+  const [invoices, setInvoice] = useState();
+
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
 
   const mockBusinessInfoResponse = {
     businessInfo: {
@@ -31,7 +50,7 @@ const SingleBusiness = () => {
     },
     orders: [
       {
-        orderID: "123456",
+        orderID: "239",
         patientName: "حمید قهرمانی",
         price: 1500000,
         date: "1402-09-22",
@@ -47,36 +66,69 @@ const SingleBusiness = () => {
         paymentMethod: "نقدی",
         invoiceStatus: "1",
       },
+      {
+        invoiceID: 12,
+        price: 8857642,
+        date: "1402-7-16",
+        type: null,
+        status: 1,
+      },
     ],
   };
 
-  const getBusinessInfoURL = "some url";
-  const getBusinessInfoHeader = new Headers();
-  getBusinessInfoHeader.append("Authorization", `Bearer ${accessToken}`);
-  const getBusinessInfoFormdata = new FormData();
-  getBusinessInfoFormdata.append("businessID", params.id);
-  const getBusinessInfoRequestOptions = {
-    method: "POST",
-    headers: getBusinessInfoHeader,
-    body: getBusinessInfoFormdata,
-    redirect: "follow",
+  const getBusinessData = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      // axiosInstance.post("/business/get-businss-info", {
+      //   businessID: params.id,
+      // });
+      setBusinessInfo(mockBusinessInfoResponse);
+      setOrders(mockBusinessInfoResponse.orders);
+      setInvoice(mockBusinessInfoResponse.invoices);
+
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getUser = async () => {
+    try {
+      //const response = await axiosInstance.post("/user/check_access_token");
+      const response = {
+        data: {
+          response: {
+            userInfo: {
+              mobile: "9360390099",
+              userAvatar:
+                "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+              userCaps: {
+                اطلاعیه: true,
+                پروفایل: true,
+                "لیست سفارشات": true,
+                "کسب و کارها": true,
+              },
+              userFirstName: "حمید",
+              userID: 123,
+              userLastName: "مدیر مالی",
+              userRole: ["financial_manager"],
+            },
+          },
+        },
+      };
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const getBusinessInfo = async (url, options) => {
-    Loading.standard("در حال در یافت اطلاعات");
-    const response = await fetchData(url, options);
-    setBusinessInfo(mockBusinessInfoResponse);
-    Loading.remove();
-  };
   const handleTabChange = (event) => {
     const orders = document.getElementById("orders");
     const invoices = document.getElementById("invoices");
     const info = document.getElementById("info");
     const selected = event.currentTarget;
-    console.log(orders.id);
-    console.log(invoices.id);
-    console.log(info.id);
-    console.log(selected.id);
     switch (selected.id) {
       case "orders":
         setTabLocation(selected.id);
@@ -101,18 +153,23 @@ const SingleBusiness = () => {
   };
 
   useEffect(() => {
-    getBusinessInfo(getBusinessInfoURL, getBusinessInfoRequestOptions);
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getBusinessData();
+      getUser();
+    }
   }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      !isFManager && navigate("/unauthorized");
+    }
+  }, [isFManager]);
 
   return (
     businessInfo && (
       <div className="container px-3" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-          <div className="bold-xlarge">عنوان کسب و کار</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader title={"عنوان کسب و کار"} location={location.state} />
         <section className="d-flex flex-column align-items-center gap-3">
           <div>
             <img
@@ -189,9 +246,57 @@ const SingleBusiness = () => {
             </span>
           </div>
           {tabLocation === "orders" && (
-            <OrderList isDirect={true} fromSingleBusiness={true} />
+            <div className="pb-3">
+              {orders.map((order, index) => {
+                return (
+                  <ClientTaskCard
+                    key={index}
+                    order={order}
+                    isClient={isClient}
+                    isFManager={isFManager}
+                    loadedFrom={"single"}
+                  />
+                );
+              })}
+            </div>
           )}
-          {tabLocation === "invoices" && <Invoices fromSingleBusiness={true} />}
+          {tabLocation === "invoices" && (
+            <div className="pt-2 pb-3">
+              {invoices.map((invoice, index) => {
+                return <InvoiceCard key={index} factor={invoice} />;
+              })}
+            </div>
+          )}
+          {tabLocation === "info" && (
+            <div className="pt-2 pb-3">
+              <div>
+                <div className="d-flex align-items-center bg-white rounded-pill p-4 drop-shadow">
+                  <span className="royal-large ms-2">نام کسب و کار</span>
+                  <span className="grey-large-bold500">
+                    {businessInfo.businessInfo.businessName}
+                  </span>
+                </div>
+                <div className="d-flex align-items-center bg-white rounded-pill p-4 drop-shadow mt-4">
+                  <span className="royal-large ms-2">شماره تماس کسب و کار</span>
+                  <span className="grey-large-bold500">
+                    {businessInfo.businessInfo.businessContact}
+                  </span>
+                </div>
+                <div className="d-flex align-items-center bg-white rounded-pill p-4 drop-shadow mt-4">
+                  <span className="royal-large ms-2">آدرس کسب و کار</span>
+                  <span className="grey-large-bold500">
+                    {businessInfo.businessInfo.businessAddress}
+                  </span>
+                </div>
+                <div className="d-flex align-items-center bg-white rounded-pill p-4 drop-shadow mt-4">
+                  <span className="royal-large ms-2">موقعیت مکانی</span>
+                  <span className="grey-large-bold500">
+                    {businessInfo.businessInfo.locations}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       </div>
     )

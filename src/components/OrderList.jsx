@@ -93,7 +93,7 @@ const OrderList = () => {
       console.log(searchedPatientName);
       console.log(isPManager, isClient);
       formdata.append(
-        `${isClient || isPManager ? "clientName" : "patientName"}`,
+        `${isFManager || isPManager ? "clientName" : "patientName"}`,
         searchedPatientName
       );
       //formdata.append("clientName", searchedPatientName);
@@ -101,7 +101,7 @@ const OrderList = () => {
         ...prevStates,
         {
           label: searchedPatientName,
-          value: `${isClient || isPManager ? "clientName" : "patientName"}`,
+          value: `${isFManager || isPManager ? "clientName" : "patientName"}`,
         },
       ]);
       // setSearchedPatientName(null);
@@ -211,6 +211,9 @@ const OrderList = () => {
       ]);
     }
     if (startDate && endDate) {
+      console.log(startDate?.toUnix());
+      console.log(endDate?.toUnix());
+      console.log(moment().format("iYYYY/iMM/iDD"));
       formdata.append(
         "startDate",
         typeof startDate === "object" ? startDate?.toUnix() : startDate
@@ -261,6 +264,27 @@ const OrderList = () => {
   const getUser = async () => {
     try {
       const response = await axiosInstance.post("/user/check_access_token");
+      // const response = {
+      //   data: {
+      //     response: {
+      //       userInfo: {
+      //         mobile: "9360390099",
+      //         userAvatar:
+      //           "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //         userCaps: {
+      //           اطلاعیه: true,
+      //           پروفایل: true,
+      //           "لیست سفارشات": true,
+      //           "کسب و کارها": true,
+      //         },
+      //         userFirstName: "حمید",
+      //         userID: 123,
+      //         userLastName: "مدیر مالی",
+      //         userRole: ["financial_manager"],
+      //       },
+      //     },
+      //   },
+      // };
       setUserRole(response.data.response.userInfo.userRole);
       setIsLoading(false);
       console.log(response.data.response);
@@ -417,13 +441,13 @@ const OrderList = () => {
           />
         </>
       )}
-      {isPManager && (
+      {(isPManager || isFManager) && (
         <SingleHeader
           title={"لیست سفارشات"}
           location={location?.state?.location}
         />
       )}
-      {(isClient || isPManager) && (
+      {(isClient || isPManager || isFManager) && (
         <div className="d-flex align-items-center gap-3">
           <input
             ref={searchField}
@@ -470,6 +494,7 @@ const OrderList = () => {
                   order={order}
                   isClient={isClient}
                   loadedFrom={"orderList"}
+                  isFManager={isFManager}
                 />
               );
             })
@@ -486,18 +511,19 @@ const OrderList = () => {
                   order={order}
                   isClient={isClient}
                   loadedFrom={"orderList"}
+                  isFManager={isFManager}
                 />
               );
             })
           ) : (
             <Message>موردی یافت نشد</Message>
           ))}
-        <div ref={setter} style={{ width: "100%", height: "100px" }}></div>
+        <div ref={setter}></div>
       </div>
-      {(isClient || isPManager) && (
+      {(isClient || isPManager || isFManager) && (
         <span
           className={`drop-shadow has-pointer ${
-            isPManager ? "fixed-bottom-30" : "fixed-bottom-80"
+            isPManager || isFManager ? "fixed-bottom-30" : "fixed-bottom-80"
           }`}
           onClick={() => {
             setIsFilterPopupActive(true);

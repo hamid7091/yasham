@@ -2,9 +2,10 @@ import React from "react";
 import useDate from "../micro-components/useDate2";
 import InvoiceCardDollarIcon from "../assets/svg-icons/InvoiceCardDollarIcon";
 import LeftArrow from "../assets/svg-icons/LeftArrow";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const InvoiceCard = (factor) => {
+  const location = useLocation();
   const newDate = useDate(factor.factor.date);
   return (
     <div className="bg-white rounded-4 p-4 mb-3 d-flex flex-column">
@@ -54,7 +55,10 @@ const InvoiceCard = (factor) => {
       </div>
       <hr />
       <div className="d-flex justify-content-center has-pointer">
-        <Link to={`/invoice/${factor.factor.invoiceID}`}>
+        <Link
+          to={`/invoice/${factor.factor.invoiceID}`}
+          state={location.pathname}
+        >
           <span className="royal-large-bold ms-2">مشاهده جزئیات</span>
           <span>
             <LeftArrow />
