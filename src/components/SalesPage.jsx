@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import usePredefinedDats from "../micro-components/usePredefinedDates";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import moment from "moment-jalaali";
@@ -18,6 +18,7 @@ import {
 import ClientTaskCard from "./ClientTaskCard";
 import Message from "../micro-components/Message";
 import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const SalesPage = () => {
   const mockResponse = {
@@ -222,6 +223,27 @@ const SalesPage = () => {
   const [departmentReport, setDepartmentReport] = useState();
   const [orders, setOrders] = useState();
 
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleStartDateChange = (date) => {
     setStartDate(date);
     if (!endDate) {
@@ -367,6 +389,7 @@ const SalesPage = () => {
   }, [te, tms]);
   useEffect(() => {
     getSaleData();
+    getUser();
   }, []);
 
   // console.log(departmentReport);
@@ -474,7 +497,7 @@ const SalesPage = () => {
           <div className="bg-white rounded-5 p-4">
             <div className="d-flex align-items-center justify-content-between mb-4">
               <span className="bold-xlarge">بیشترین سفارش کار</span>
-              <span className="grey-thin-bold">مشاهده همه</span>
+              {/* <span className="grey-thin-bold">مشاهده همه</span> */}
             </div>
             <div className="d-flex flex-column gap-3">
               {orderTypeData.map((data, index) => {
@@ -547,7 +570,9 @@ const SalesPage = () => {
         <section>
           <div className="d-flex align-items-center justify-content-between px-4 pt-3">
             <span className="bold-xlarge">آخرین سفارشات</span>
-            <span className="grey-thin-bold">همه سفارشات</span>
+            <Link to={"/orderList"}>
+              <span className="grey-thin-bold">همه سفارشات</span>
+            </Link>
           </div>
           {orders ? (
             orders.map((order, index) => {
@@ -555,8 +580,8 @@ const SalesPage = () => {
                 <ClientTaskCard
                   key={index}
                   order={order}
-                  isSingle={false}
-                  isDirect={true}
+                  isClient={isClient}
+                  isFManager={isFManager}
                 />
               );
             })

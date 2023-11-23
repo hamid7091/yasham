@@ -121,8 +121,8 @@ const FilterPopup = ({
         </span>
       </div>
       <hr />
-      <div className="px-3">
-        <form onSubmit={handleFilter} className="edit-form form-group px-3">
+      <div className="px-3 form-container">
+        <form onSubmit={handleFilter} className=" px-3">
           <div className="mt-3">
             <label
               className="mb-3 me-3 bold-large"

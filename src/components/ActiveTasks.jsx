@@ -37,11 +37,7 @@ const ActiveTasks = (taskInfo) => {
   }, [progressBarRef]);
 
   return (
-    <Link
-      className="has-pointer"
-      to={`/task/${taskInfo.taskInfo.taskID}`}
-      state={location.pathname}
-    >
+    <Link to={`/task/${taskInfo.taskInfo.taskID}`} state={location.pathname}>
       <div className="position-relative drown bg-royal rounded-5 pt-4 pb-2 px-4 mb-2">
         <div className="dborder-dashed-vlroyal d-flex justify-content-between align-items-center">
           <div className="pe-1">

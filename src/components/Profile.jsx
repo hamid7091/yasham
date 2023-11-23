@@ -1,27 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import EditPen from "../assets/svg-icons/EditPen";
-import EditProfileIcon from "../assets/svg-icons/EditProfileIcon";
-import BackIconLight from "../assets/svg-icons/BackIconLight";
-import OrderListIcon from "../assets/svg-icons/OrderListIcon";
-import WalletIcon from "../assets/svg-icons/WalletIcon";
+import SingleHeader from "./SingleHeader";
 
 import ExitProfilePopup from "./ExitProfilePopup";
 import PopupBackground from "./PopupBackground";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const Profile = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
-
-  const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state.user;
-  console.log(location);
-  console.log(state);
 
   const [isPopupActive, setIsPopupActive] = useState(false);
   const [firstNameIsValid, setFirstNameIsValid] = useState(true);
@@ -29,13 +21,11 @@ const Profile = () => {
   const [mobileIsValid, setMobileIsValid] = useState(true);
   const [passwordIsValid, setPasswordIsValid] = useState(true);
   const [avatarIsChanged, setAvatarIsChanged] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [userRole, setUserRole] = useState(state?.userRole);
 
-  const [userFirstName, setUserFirstName] = useState(state?.userFirstName);
-  const [userLastName, setUserLastName] = useState(state?.userLastName);
-  const [userAvatar, setUserAvatar] = useState(state?.userAvatar);
-  const [mobile, setMobile] = useState(state?.mobile);
+  const [userFirstName, setUserFirstName] = useState();
+  const [userLastName, setUserLastName] = useState();
+  const [userAvatar, setUserAvatar] = useState();
+  const [mobile, setMobile] = useState();
   const [userPassword, setUserPassword] = useState("");
 
   const profile = useRef(null);
@@ -43,15 +33,28 @@ const Profile = () => {
   const avatarInput = useRef(null);
   const avatar = useRef(null);
 
-  useEffect(() => {
-    if (state === null) {
-      navigate("/");
+  const getUser = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/user/check_access_token");
+      Loading.remove();
+      setUserFirstName(response.data.response.userInfo.userFirstName);
+      setUserLastName(response.data.response.userInfo.userLastName);
+      setUserAvatar(response.data.response.userInfo.userAvatar);
+      setMobile(response.data.response.userInfo.mobile);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
     }
-    userRole?.forEach((role) => {
-      if (role === "client") {
-        setIsClient(true);
-      }
-    });
+  };
+
+  useEffect(() => {
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getUser();
+    }
   }, []);
 
   const handleChangePage = () => {
@@ -154,7 +157,7 @@ const Profile = () => {
     }
   };
   return (
-    state && (
+    userFirstName && (
       <>
         {isPopupActive && (
           <>
@@ -180,7 +183,7 @@ const Profile = () => {
                 <img
                   ref={avatar}
                   className="avatar-svg-image"
-                  src={state.userAvatar}
+                  src={userAvatar}
                   alt=""
                 />
               </div>
@@ -213,7 +216,7 @@ const Profile = () => {
               </span>
             </label>
             <input
-              defaultValue={state.userFirstName}
+              defaultValue={userFirstName}
               type="text"
               name="userFirstName"
               className={`form-control rounded-pill mb-3 py-2 is-valid ${
@@ -232,7 +235,7 @@ const Profile = () => {
               </span>
             </label>
             <input
-              defaultValue={state.userLastName}
+              defaultValue={userLastName}
               type="text"
               name="userLastName"
               className={`form-control rounded-pill mb-3 py-2 ${
@@ -249,7 +252,7 @@ const Profile = () => {
               </span>
             </label>
             <input
-              defaultValue={state.mobile}
+              defaultValue={mobile}
               maxLength={10}
               type="tel"
               name="mobile"
@@ -289,34 +292,25 @@ const Profile = () => {
           </form>
         </div>
         <div ref={profile} className="container px-3" dir="rtl">
-          <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
-            <div className="bold-xlarge">پروفایل کاربری</div>
-            <Link to="/" state={state}>
-              <BackArrow />
-            </Link>
-          </header>
+          <SingleHeader title={"پروفایل کاربری"} location={"/"} />
           <div className="text-center d-flex flex-column justify-content-between align-items-center">
             <div>
-              <img
-                className="avatar-svg-image"
-                src={state.userAvatar}
-                alt="آواتار"
-              />
+              <img className="avatar-svg-image" src={userAvatar} alt="آواتار" />
             </div>
           </div>
           <hr />
           <div className="mt-4">
             <div className="d-flex align-items-center bg-white rounded-pill p-4 drop-shadow mt-4">
               <span className="royal-large ms-2 has-pointer">نام</span>
-              <span className="grey-large-bold500">{state.userFirstName}</span>
+              <span className="grey-large-bold500">{userFirstName}</span>
             </div>
             <div className="d-flex align-items-center bg-white rounded-pill p-4 drop-shadow mt-4">
               <span className="royal-large ms-2 has-pointer">نام خانوادگی</span>
-              <span className="grey-large-bold500">{state.userLastName}</span>
+              <span className="grey-large-bold500">{userLastName}</span>
             </div>
             <div className="d-flex align-items-center bg-white rounded-pill p-4 drop-shadow mt-4">
               <span className="royal-large ms-2 has-pointer">شماره تماس</span>
-              <span className="grey-large-bold500">{state.mobile}</span>
+              <span className="grey-large-bold500">{mobile}</span>
             </div>
             <div className="d-flex align-items-center rounded-pill gap-3 mt-4">
               <button

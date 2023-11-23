@@ -5,10 +5,13 @@ import { Link } from "react-router-dom";
 const DashboardHeader = ({ user, userRole }) => {
   const state = user;
   return (
-    <div className="position-sticky top-0 px-3" style={{ zIndex: 5 }}>
+    <div
+      className="fixed-top top-0 px-3"
+      style={{ zIndex: 5, maxWidth: "var(--general-width)", margin: "0 auto" }}
+    >
       <header
         dir="rtl"
-        className="d-flex bg-default rounded-bottom-5 align-items-center py-3 mt-2"
+        className="d-flex bg-default rounded-bottom align-items-center py-3 px-1"
       >
         <div>
           <Link to="/profile" state={{ user: user, userRole: userRole }}>

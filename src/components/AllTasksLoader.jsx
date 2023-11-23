@@ -17,8 +17,6 @@ const AllTasksLoader = ({ isDirect }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log(location.state);
-
   const [userRole, setUserRole] = useState();
 
   const [
@@ -48,7 +46,7 @@ const AllTasksLoader = ({ isDirect }) => {
   const [isFiltered, setIsFiltered] = useState(false);
   const [filteredCats, setFilteredCats] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSom, setIsSom] = useState(false);
 
   const invoiceStatusOptions = [
@@ -77,7 +75,6 @@ const AllTasksLoader = ({ isDirect }) => {
     ]);
     setTotalPages(response.data.response.total_pages);
     setCurrentPageNumber((prevPageNum) => prevPageNum + 1);
-    setIsLoading(false);
     setIsSom(true);
     console.log(response.data.response);
 
@@ -216,6 +213,7 @@ const AllTasksLoader = ({ isDirect }) => {
   // };
 
   const handleScroll = useCallback(() => {
+    console.log("fired");
     if (
       !isFiltered &&
       document.documentElement.offsetHeight -
@@ -255,6 +253,7 @@ const AllTasksLoader = ({ isDirect }) => {
     try {
       const response = await axiosInstance.post("/user/check_access_token");
       setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
       console.log(response.data.response);
     } catch (error) {
       console.error(error);
@@ -303,6 +302,11 @@ const AllTasksLoader = ({ isDirect }) => {
       //location.state = null;
     }
   }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      (isShipping || isInventory) && navigate("/unauthorized");
+    }
+  }, [isShipping, isInventory]);
 
   return (
     totalTasksData.length > 0 && (
@@ -376,7 +380,6 @@ const AllTasksLoader = ({ isDirect }) => {
             ) : (
               <Message>موردی یافت نشد</Message>
             ))}
-          {isLoading && <Message>درحال بارگذاری</Message>}
         </div>
         <span
           className={`drop-shadow has-pointer ${

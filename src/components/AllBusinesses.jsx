@@ -168,9 +168,8 @@ const AllBusinesses = () => {
   };
 
   const sortOptions = [
-    { label: "تعداد", value: 0 },
-    { label: "درآمد", value: 1 },
-    { label: "سود", value: 2 },
+    { label: "تعداد", value: 1 },
+    { label: "درآمد", value: 2 },
   ];
   const customStyles = {
     option: (defaultStyles, state) => ({
@@ -288,8 +287,11 @@ const AllBusinesses = () => {
 
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      // const response = await axiosInstance.post("/order/history", formdata);
-      const response = mockSearchedB;
+      const response = await axiosInstance.post(
+        "/client/client-list",
+        formdata
+      );
+      // const response = mockSearchedB;
       setBusinessData(response.data.response.cards);
       searchField.current.value = null;
 
@@ -335,25 +337,30 @@ const AllBusinesses = () => {
     setIsSubmited(false);
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      // const response = await axiosInstance.post("/order/business-list");
-      const response = mockResponse;
+      const response = await axiosInstance.post("/client/client-list");
+      // const response = mockResponse;
       setBusinessData(response.data.response.cards);
+      console.log(response.data.response);
+
       Loading.remove();
     } catch (error) {
       console.error(error);
       Loading.remove();
     }
   };
+
   const getSortedBusinessList = async () => {
     setFilteredCats([]);
     setSearchedBusinessName(null);
     setIsSubmited(false);
+    console.log(sortStatus);
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      // const response = await axiosInstance.post("activity/employee-list", {
-      //   sortID: sortStatus.value,
-      // });
-      const response = mockSortedB;
+      const response = await axiosInstance.post("/client/client-list", {
+        sortBy: sortStatus.value,
+      });
+      // const response = mockSortedB;
+      console.log(response.data.response);
       setBusinessData(response.data.response.cards);
       Loading.remove();
     } catch (error) {
@@ -378,7 +385,7 @@ const AllBusinesses = () => {
     }
   }, [isSubmited]);
 
-  console.log(businessData);
+  // console.log(businessData);
   return (
     <div className="container px-3" dir="rtl">
       <SingleHeader title={"لیست کسب و کارها"} location={"/"} />

@@ -7,18 +7,18 @@ import FilterIcon from "../assets/svg-icons/FilterIcon";
 import PopupBackground from "./PopupBackground";
 import FilterPopup from "./FilterPopup";
 import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
-import BackArrow from "../assets/svg-icons/BackArrow";
 import moment from "moment-jalaali";
 import { Loading } from "notiflix";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
 import useInfiniteScroll from "../micro-components/useInfiniteScroll";
 import SingleHeader from "./SingleHeader";
+import useInfLoader from "../micro-components/useInfLoader";
 
 const OrderList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log(location.state);
+  // console.log(location.state);
   const searchField = useRef(null);
 
   const setter = useRef(null);
@@ -55,6 +55,8 @@ const OrderList = () => {
 
   const [isSom, setIsSom] = useState(false);
 
+  const [isFilterFired, setIsFilterFired] = useState(false);
+
   const invoiceStatusOptions = [
     { clientName: "پرداخت شده", clientID: 3 }, // به منظور همخوانی با نحوه کانورت در پاپ اپ فیلتر بدین شکل نوشته شده است
     { clientName: "در انتظار پرداخت", clientID: 1 },
@@ -78,6 +80,7 @@ const OrderList = () => {
   };
 
   const getSearchedOrderList = async (event) => {
+    setIsFilterFired(true);
     event?.preventDefault();
     window.scrollTo({ top: 0, behavior: "instant" });
     setFilterPageNum(1);
@@ -111,6 +114,9 @@ const OrderList = () => {
       Loading.standard("در حال دریافت اطلاعات");
       console.log(Object.fromEntries(formdata));
       const response = await axiosInstance.post("/order/history", formdata);
+
+      //setIsFilterFired(false);
+
       setFilterPageNum((prevNum) => prevNum + 1);
       setFilteredOrdersData(response.data.response.cards);
       setFilterTotalPages(response.data.response.total_pages);
@@ -166,17 +172,9 @@ const OrderList = () => {
   const getOrderList = async () => {
     try {
       Loading.standard("درحال دریافت اطلاعات");
-      const response = await axiosInstance.post(
-        "/order/history",
-        {
-          pageNum,
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axiosInstance.post("/order/history", {
+        pageNum,
+      });
       setOrdersData((prevItems) => [
         ...prevItems,
         ...response.data.response?.cards,
@@ -192,73 +190,105 @@ const OrderList = () => {
       Loading.remove();
     }
   };
+
   const getFilteredOrderList = async (event) => {
-    console.log("fired with state");
+    // setIsFilterFired(true);
+    // console.log("fired with state");
+    // event?.preventDefault();
+    // window.scrollTo({ top: 0, behavior: "instant" });
+    // setFilterPageNum(1);
+    // setFilteredCats([]);
+    // setIsFiltered(true);
+    // setIsFilterPopupActive(false);
+    // setSearchedPatientName(null);
+    // const formdata = new FormData();
+    // formdata.append("pageNum", 1);
+    // if (invoiceStatus) {
+    //   formdata.append("invoiceStatusID", invoiceStatus.value);
+    //   setFilteredCats((prevStates) => [
+    //     ...prevStates,
+    //     { label: invoiceStatus.label, value: "client" },
+    //   ]);
+    // }
+    // if (startDate && endDate) {
+    //   console.log(startDate?.toUnix());
+    //   console.log(endDate?.toUnix());
+    //   console.log(moment().format("iYYYY/iMM/iDD"));
+    //   formdata.append(
+    //     "startDate",
+    //     typeof startDate === "object" ? startDate?.toUnix() : startDate
+    //   );
+    //   formdata.append(
+    //     "endDate",
+    //     typeof endDate === "object" ? endDate?.toUnix() : endDate
+    //   );
+    //   setFilteredCats((prevStates) => [
+    //     ...prevStates,
+    //     {
+    //       label:
+    //         typeof startDate === "object"
+    //           ? `${moment
+    //               .unix(startDate?.toUnix())
+    //               .format("jYYYY/jM/jD")} تا ${moment
+    //               .unix(endDate?.toUnix())
+    //               .format("jYYYY/jM/jD")}`
+    //           : `${moment.unix(startDate).format("jYYYY/jM/jD")} تا ${moment
+    //               .unix(endDate)
+    //               .format("jYYYY/jM/jD")}`,
+    //       value: "date",
+    //     },
+    //   ]);
+    // }
+
+    // try {
+    //   Loading.standard("در حال دریافت اطلاعات");
+    //   const response = await axiosInstance.post("/order/history", formdata);
+
+    //   //setIsFilterFired(false);
+
+    //   setFilterPageNum((prevNum) => prevNum + 1);
+    //   setFilteredOrdersData(response.data.response.cards);
+    //   setFilterTotalPages(response.data.response.total_pages);
+    //   setIsSom(true);
+    //   searchField.current.value = null;
+
+    //   console.log(response.data.response);
+    //   Loading.remove();
+    // } catch (error) {
+    //   console.error(error);
+    //   Loading.remove();
+    // }
+    console.log("filter function is fired");
+
     event?.preventDefault();
-    window.scrollTo({ top: 0, behavior: "instant" });
-    setFilterPageNum(1);
-    setFilteredCats([]);
-    setIsFiltered(true);
     setIsFilterPopupActive(false);
-    setSearchedPatientName(null);
-    const formdata = new FormData();
-    formdata.append("pageNum", 1);
-    if (invoiceStatus) {
-      formdata.append("invoiceStatusID", invoiceStatus.value);
-      setFilteredCats((prevStates) => [
-        ...prevStates,
-        { label: invoiceStatus.label, value: "client" },
-      ]);
-    }
-    if (startDate && endDate) {
-      console.log(startDate?.toUnix());
-      console.log(endDate?.toUnix());
-      console.log(moment().format("iYYYY/iMM/iDD"));
-      formdata.append(
-        "startDate",
-        typeof startDate === "object" ? startDate?.toUnix() : startDate
-      );
-      formdata.append(
-        "endDate",
-        typeof endDate === "object" ? endDate?.toUnix() : endDate
-      );
-      setFilteredCats((prevStates) => [
-        ...prevStates,
-        {
-          label:
-            typeof startDate === "object"
-              ? `${moment
-                  .unix(startDate?.toUnix())
-                  .format("jYYYY/jM/jD")} تا ${moment
-                  .unix(endDate?.toUnix())
-                  .format("jYYYY/jM/jD")}`
-              : `${moment.unix(startDate).format("jYYYY/jM/jD")} تا ${moment
-                  .unix(endDate)
-                  .format("jYYYY/jM/jD")}`,
-          value: "date",
-        },
-      ]);
-    }
-
-    try {
-      Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post("/order/history", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setFilterPageNum((prevNum) => prevNum + 1);
-      setFilteredOrdersData(response.data.response.cards);
-      setFilterTotalPages(response.data.response.total_pages);
-      setIsSom(true);
-      searchField.current.value = null;
-
-      console.log(response.data.response);
-      Loading.remove();
-    } catch (error) {
-      console.error(error);
-      Loading.remove();
-    }
+    window.scrollTo({ top: 0, behavior: "instant" });
+    console.log(invoiceStatus);
+    // if (invoiceStatus) {
+    //   setFilteredCats((prevStates) => [
+    //     ...prevStates,
+    //     { label: invoiceStatus.label, value: "client" },
+    //   ]);
+    // }
+    // if (startDate && endDate) {
+    //   setFilteredCats((prevStates) => [
+    //     ...prevStates,
+    //     {
+    //       label:
+    //         typeof startDate === "object"
+    //           ? `${moment
+    //               .unix(startDate?.toUnix())
+    //               .format("jYYYY/jM/jD")} تا ${moment
+    //               .unix(endDate?.toUnix())
+    //               .format("jYYYY/jM/jD")}`
+    //           : `${moment.unix(startDate).format("jYYYY/jM/jD")} تا ${moment
+    //               .unix(endDate)
+    //               .format("jYYYY/jM/jD")}`,
+    //       value: "date",
+    //     },
+    //   ]);
+    // }
+    setIsFilterFired(true);
   };
 
   const getUser = async () => {
@@ -293,44 +323,55 @@ const OrderList = () => {
     }
   };
 
-  const handleScroll = () => {
-    console.log("scroll fired");
-    if (
-      !isFiltered &&
-      document.documentElement.offsetHeight -
-        window.innerHeight -
-        document.documentElement.scrollTop <
-        1 &&
-      isSom
-    ) {
-      getOrderList();
-    } else if (
-      isFiltered &&
-      document.documentElement.offsetHeight -
-        window.innerHeight -
-        document.documentElement.scrollTop <
-        1 &&
-      isSom
-    ) {
-      getFilteredOrderListAuto();
-    }
-  };
+  // const handleScroll = () => {
+  //   console.log("scroll fired");
+  //   if (
+  //     !isFiltered &&
+  //     document.documentElement.offsetHeight -
+  //       window.innerHeight -
+  //       document.documentElement.scrollTop <
+  //       1 &&
+  //     isSom
+  //   ) {
+  //     // getOrderList();
+  //   } else if (
+  //     isFiltered &&
+  //     document.documentElement.offsetHeight -
+  //       window.innerHeight -
+  //       document.documentElement.scrollTop <
+  //       1 &&
+  //     isSom
+  //   ) {
+  //     getFilteredOrderListAuto();
+  //   }
+  // };
 
   const handleCapReduction = (cat) => {
-    if (isFiltered) {
-      if (cat.value == "client") {
-        setIsSubmitted(true);
-        setInvoiceStatus(null);
-      } else if (cat.value == "date") {
-        setIsSubmitted(true);
-        setStartDate(null);
-        setEndDate(null);
-      } else if (cat.value === "patientName" || cat.value === "clientName") {
-        setIsSubmitted(true);
-        setSearchedPatientName(null);
-      }
+    // if (isFiltered) {
+    //   if (cat.value == "client") {
+    //     setIsSubmitted(true);
+    //     setInvoiceStatus(null);
+    //   } else if (cat.value == "date") {
+    //     setIsSubmitted(true);
+    //     setStartDate(null);
+    //     setEndDate(null);
+    //   } else if (cat.value === "patientName" || cat.value === "clientName") {
+    //     setIsSubmitted(true);
+    //     setSearchedPatientName(null);
+    //   }
+    // }
+    // console.log(filteredCats.length);
+
+    console.log(cat);
+    if (cat.value == "client") {
+      setInvoiceStatus(null);
+    } else if (cat.value == "date") {
+      setStartDate(null);
+      setEndDate(null);
+    } else if (cat.value === "patientName" || cat.value === "clientName") {
+      setSearchedPatientName(null);
     }
-    console.log(filteredCats.length);
+    getFilteredOrderList();
   };
 
   useEffect(() => {
@@ -341,7 +382,7 @@ const OrderList = () => {
       navigate("/");
     }
     if (!isFiltered) {
-      getOrderList();
+      // getOrderList();
     }
     if (isFiltered) {
       console.log("triggered");
@@ -349,15 +390,15 @@ const OrderList = () => {
     }
   }, [isFiltered]);
 
-  useEffect(() => {
-    if (totalPages >= pageNum && !isFiltered) {
-      window.addEventListener("scroll", handleScroll);
-    }
-    if (filterTotalPages >= filterPageNum && isFiltered) {
-      window.addEventListener("scroll", handleScroll);
-    }
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [pageNum, filterPageNum]);
+  // useEffect(() => {
+  //   if (totalPages >= pageNum && !isFiltered) {
+  //     window.addEventListener("scroll", handleScroll);
+  //   }
+  //   if (filterTotalPages >= filterPageNum && isFiltered) {
+  //     window.addEventListener("scroll", handleScroll);
+  //   }
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, [pageNum, filterPageNum]);
 
   useEffect(() => {
     // console.log("newuseeffectfired");
@@ -389,31 +430,63 @@ const OrderList = () => {
 
   // Intersection Observer Implementations
 
-  // const onIntersection = (entries) => {
-  //   console.log(entries);
-  //   const firstEntry = entries[0];
-  //   if (
-  //     firstEntry.isIntersecting &&
-  //     !isFiltered &&
-  //     totalPages >= pageNum &&
-  //     isSom
-  //   ) {
-  //     getOrderList();
-  //   }
-  // };
+  const [query, setQuery] = useState([]);
+  const [pNumber, setPNumber] = useState(1);
+  const { od, hasMore, isLoadingg, fCats } = useInfLoader(
+    query,
+    pNumber,
+    isClient
+  );
 
-  // useEffect(() => {
-  //   const observer = new IntersectionObserver(onIntersection);
-  //   if (observer && setter.current) {
-  //     observer.observe(setter.current);
-  //   }
+  const onIntersection = (entries) => {
+    console.log(entries);
+    console.log(hasMore);
+    const firstEntry = entries[0];
+    if (isLoadingg) return;
+    if (firstEntry.isIntersecting && hasMore) {
+      // setIsFilterFired(true);
+      setPNumber((prev) => prev + 1);
+    }
+  };
 
-  //   return () => {
-  //     if (observer) {
-  //       observer.disconnect();
-  //     }
-  //   };
-  // }, [ordersData]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(onIntersection);
+    if (observer && setter.current) {
+      observer.observe(setter.current);
+    }
+
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [od]);
+
+  useEffect(() => {
+    if (isFilterFired) {
+      console.log("filtere is fired");
+      setPNumber(1);
+      setQuery([]);
+      invoiceStatus &&
+        setQuery((prevQ) => [...prevQ, { invoiceStatus: invoiceStatus.value }]);
+      startDate &&
+        setQuery((prevQ) => [
+          ...prevQ,
+          { startDate: startDate, endDate: endDate },
+        ]);
+      // endDate && setQuery((prevQ) => [...prevQ, { endDate: endDate }]);
+      searchedPatientName &&
+        setQuery([{ searchedPatientName: searchedPatientName }]);
+      setIsFilterFired(false);
+      searchField.current.value = "";
+    }
+    setSearchedPatientName();
+    setInvoiceStatus();
+    setStartDate();
+    setEndDate();
+  }, [isFilterFired]);
+
+  console.log(od, hasMore, isLoadingg, fCats);
 
   return (
     <div className="px-3 mb-100 container" id="parent" dir="rtl">
@@ -458,15 +531,15 @@ const OrderList = () => {
               isClient ? "جستجوی نام بیمار ..." : "جستجوی نام پزشک ..."
             }`}
           />
-          <span className="has-pointer" onClick={getSearchedOrderList}>
+          <span className="has-pointer" onClick={getFilteredOrderList}>
             <SearchIcon />
           </span>
         </div>
       )}
-      {filteredCats.length > 0 && (
+      {fCats?.length > 0 && (
         <>
           <div className="d-flex ">
-            {filteredCats.map((cat, i) => {
+            {fCats.map((cat, i) => {
               console.log(cat);
               return (
                 <div
@@ -486,8 +559,8 @@ const OrderList = () => {
       )}
       <div id="watched">
         {!isFiltered &&
-          (ordersData ? (
-            ordersData.map((order, index) => {
+          (od.length ? (
+            od.map((order, index) => {
               return (
                 <ClientTaskCard
                   key={index}

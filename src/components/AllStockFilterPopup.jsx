@@ -7,7 +7,6 @@ const AllStockFilterPopup = ({
   setStockStatus,
   stockStatus,
 }) => {
-  console.log(stockStatus);
   const sufficientRef = useRef(null);
   const inSufficientRef = useRef(null);
   const emptyRef = useRef(null);

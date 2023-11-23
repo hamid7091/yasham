@@ -131,8 +131,8 @@ const Dashboard = () => {
 
   const getDataWithAxios = async () => {
     try {
-      // const response = await axiosInstance.post("/task/dashboard");
-      const response = mockFinancialManagerDashboardData;
+      const response = await axiosInstance.post("/task/dashboard");
+      // const response = mockFinancialManagerDashboardData;
       console.log(response.data.response);
 
       setUserInfo(response.data.response.userInfo); // اطلاعات کاربر مشترک تمامی رول ها
@@ -218,116 +218,139 @@ const Dashboard = () => {
   return userInfo ? (
     <div className="container" dir="rtl">
       <DashboardHeader user={userInfo} userRole={userRole} />
-
-      {isSupervisor && isEmployee && (
-        <div>
-          {location === "dashboard" && (
-            <SupervisorDashboard data={superVisorDashboardData} />
-          )}
-          {location === "totalTasks" && <AllTasksLoader isDirect={true} />}
-          {location === "actionMenu" && (
-            <>
-              <ActionMenu
-                userRole={userRole}
-                userInfo={userInfo}
-                serviceType={services}
-                clientsList={clients}
+      <div className="mt-100">
+        {isSupervisor && isEmployee && (
+          <div>
+            {location === "dashboard" && (
+              <SupervisorDashboard data={superVisorDashboardData} />
+            )}
+            {location === "totalTasks" && <AllTasksLoader isDirect={true} />}
+            {location === "actionMenu" && (
+              <>
+                <ActionMenu
+                  userRole={userRole}
+                  userInfo={userInfo}
+                  serviceType={services}
+                  clientsList={clients}
+                />
+              </>
+            )}
+          </div>
+        )}
+        {isSupervisor && !isEmployee && (
+          <div>
+            {location === "dashboard" && (
+              <SupervisorDashboard data={superVisorDashboardData} />
+            )}
+            {location === "totalTasks" && <AllTasksLoader isDirect={true} />}
+            {location === "actionMenu" && (
+              <>
+                <ActionMenu
+                  userRole={userRole}
+                  userInfo={userInfo}
+                  serviceType={services}
+                  clientsList={clients}
+                />
+              </>
+            )}
+          </div>
+        )}
+        {isEmployee && !isSupervisor && (
+          <div>
+            {location === "dashboard" && (
+              <MyTasks
+                activeTasks={activeTasks}
+                assignedTasks={assignedTasks}
+                isDash={isEmployee}
               />
-            </>
-          )}
-        </div>
-      )}
-      {isSupervisor && !isEmployee && (
-        <div>
-          {location === "dashboard" && (
-            <SupervisorDashboard data={superVisorDashboardData} />
-          )}
-          {location === "totalTasks" && <AllTasksLoader isDirect={true} />}
-          {location === "actionMenu" && (
-            <>
-              <ActionMenu
-                userRole={userRole}
-                userInfo={userInfo}
-                serviceType={services}
-                clientsList={clients}
+            )}
+            {location === "totalTasks" && <AllTasksLoader isDirect={true} />}
+            {location === "actionMenu" && (
+              <>
+                <ActionMenu
+                  userRole={userRole}
+                  userInfo={userInfo}
+                  serviceType={services}
+                  clientsList={clients}
+                />
+              </>
+            )}
+          </div>
+        )}
+        {isClient && (
+          <div>
+            {location === "dashboard" && (
+              <ClientDashboard
+                assignedTasks={assignedTasks}
+                ongoingOrders={ongoingOrders}
+                isClient={isClient}
               />
-            </>
-          )}
-        </div>
-      )}
-      {isEmployee && !isSupervisor && (
-        <div>
-          {location === "dashboard" && (
-            <MyTasks
-              activeTasks={activeTasks}
-              assignedTasks={assignedTasks}
-              isDash={isEmployee}
-            />
-          )}
-          {location === "totalTasks" && <AllTasksLoader isDirect={true} />}
-          {location === "actionMenu" && (
-            <>
-              <ActionMenu
-                userRole={userRole}
-                userInfo={userInfo}
-                serviceType={services}
-                clientsList={clients}
-              />
-            </>
-          )}
-        </div>
-      )}
-      {isClient && (
-        <div>
-          {location === "dashboard" && (
-            <ClientDashboard
-              assignedTasks={assignedTasks}
-              ongoingOrders={ongoingOrders}
-              isClient={isClient}
-            />
-          )}
-          {location === "totalTasks" && <OrderList isDirect={true} />}
-          {location === "actionMenu" && (
-            <>
+            )}
+            {location === "totalTasks" && <OrderList />}
+            {location === "actionMenu" && (
+              <>
+                <ActionMenu
+                  userRole={userRole}
+                  userInfo={userInfo}
+                  serviceType={services}
+                  businessInfo={businessInfo}
+                />
+              </>
+            )}
+          </div>
+        )}
+        {isShipping && (
+          <div>
+            {location === "dashboard" && (
+              <ShippingDashboard packagesArray={packagesArray} />
+            )}
+            {location === "totalTasks" && (
+              <ShippingDashboard packagesArray={packagesArray} />
+            )}
+            {location === "actionMenu" && (
               <ActionMenu
                 userRole={userRole}
                 userInfo={userInfo}
                 serviceType={services}
                 businessInfo={businessInfo}
               />
-            </>
-          )}
-        </div>
-      )}
-      {isShipping && (
-        <div>
-          {location === "dashboard" && (
-            <ShippingDashboard packagesArray={packagesArray} />
-          )}
-          {location === "totalTasks" && (
-            <ShippingDashboard packagesArray={packagesArray} />
-          )}
-          {location === "actionMenu" && (
-            <ActionMenu
-              userRole={userRole}
-              userInfo={userInfo}
-              serviceType={services}
-              businessInfo={businessInfo}
-            />
-          )}
-        </div>
-      )}
-      {isInventory && (
-        <div>
-          {location === "dashboard" && (
-            <InventoryDashboard
-              dashboardData={inventoryDashboardData}
-              setLocation={setLocation}
-            />
-          )}
-          {location === "totalTasks" && <AllInventory />}
-          {location === "actionMenu" && (
-            <>
+            )}
+          </div>
+        )}
+        {isInventory && (
+          <div>
+            {location === "dashboard" && (
+              <InventoryDashboard
+                dashboardData={inventoryDashboardData}
+                setLocation={setLocation}
+              />
+            )}
+            {location === "totalTasks" && <AllInventory />}
+            {location === "actionMenu" && (
+              <>
+                <ActionMenu
+                  userRole={userRole}
+                  userInfo={userInfo}
+                  serviceType={services}
+                  businessInfo={businessInfo}
+                  universalUnits={universalUnits}
+                />
+              </>
+            )}
+          </div>
+        )}
+        {isPManager && (
+          <div>
+            {location === "dashboard" && (
+              <ProjectManagerDashboard
+                dailyOrders={dailyOrders}
+                dailyTaskReport={dailyTaskReport}
+                employeeStatus={employeeStatus}
+                customerSatisfaction={customerSatisfaction}
+              />
+            )}
+            {location === "totalTasks" && <AllTasksLoader isDirect={true} />}
+            {location === "actionMenu" && (
               <ActionMenu
                 userRole={userRole}
                 userInfo={userInfo}
@@ -335,74 +358,52 @@ const Dashboard = () => {
                 businessInfo={businessInfo}
                 universalUnits={universalUnits}
               />
-            </>
-          )}
-        </div>
-      )}
-      {isPManager && (
-        <div>
-          {location === "dashboard" && (
-            <ProjectManagerDashboard
-              dailyOrders={dailyOrders}
-              dailyTaskReport={dailyTaskReport}
-              employeeStatus={employeeStatus}
-              customerSatisfaction={customerSatisfaction}
-            />
-          )}
-          {location === "totalTasks" && <AllTasksLoader isDirect={true} />}
-          {location === "actionMenu" && (
-            <ActionMenu
-              userRole={userRole}
-              userInfo={userInfo}
-              serviceType={services}
-              businessInfo={businessInfo}
-              universalUnits={universalUnits}
-            />
-          )}
-        </div>
-      )}
-      {isFManager && (
-        <div>
-          {location === "dashboard" && (
-            <FinancialManagerDashboard
-              dailyOrders={finacialDailyOrders}
-              financialBusinessInfo={financialBusinessInfo}
-              financialWeelyChartData={financialWeelyChartData}
-            />
-          )}
-          {location === "totalTasks" && <SalesPage />}
-          {location === "actionMenu" && (
-            <ActionMenu
-              userRole={userRole}
-              userInfo={userInfo}
-              serviceType={services}
-              businessInfo={businessInfo}
-              universalUnits={universalUnits}
-            />
-          )}
-        </div>
-      )}
-      {isReception && (
-        <div>
-          {location === "dashboard" && (
-            <ReceptionDashboard
-              dailyOrders={dailyOrders}
-              recentOrders={orders}
-              packageData={packagesArray}
-            />
-          )}
-          {location === "totalTasks" && <OrderList isDirect={true} />}
-          {location === "actionMenu" && (
-            <ActionMenu
-              userRole={userRole}
-              userInfo={userInfo}
-              serviceType={services}
-              businessInfo={businessInfo}
-              universalUnits={universalUnits}
-            />
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+        {isFManager && (
+          <div>
+            {location === "dashboard" && (
+              <FinancialManagerDashboard
+                dailyOrders={finacialDailyOrders}
+                financialBusinessInfo={financialBusinessInfo}
+                financialWeelyChartData={financialWeelyChartData}
+              />
+            )}
+            {location === "totalTasks" && <SalesPage />}
+            {location === "actionMenu" && (
+              <ActionMenu
+                userRole={userRole}
+                userInfo={userInfo}
+                serviceType={services}
+                businessInfo={businessInfo}
+                universalUnits={universalUnits}
+              />
+            )}
+          </div>
+        )}
+        {isReception && (
+          <div>
+            {location === "dashboard" && (
+              <ReceptionDashboard
+                dailyOrders={dailyOrders}
+                recentOrders={orders}
+                packageData={packagesArray}
+              />
+            )}
+            {location === "totalTasks" && <OrderList isDirect={true} />}
+            {location === "actionMenu" && (
+              <ActionMenu
+                userRole={userRole}
+                userInfo={userInfo}
+                serviceType={services}
+                businessInfo={businessInfo}
+                universalUnits={universalUnits}
+              />
+            )}
+          </div>
+        )}
+      </div>
 
       {/* قسمت فوتر */}
       {isSupervisor && isEmployee && (

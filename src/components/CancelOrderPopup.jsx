@@ -16,9 +16,10 @@ const CancelOrderPopup = ({ orderID, setisModalActive }) => {
   const handleCancelOrder = async () => {
     try {
       Loading.standard("در حال ارسال درخواست");
-      const response = await axiosInstance.post("/order/update-order", {
+      const response = await axiosInstance.post("order/abortion", {
         orderID,
       });
+      console.log(response.data.response);
       Loading.remove();
       if (response.data.response.success) {
         setisModalActive(false);

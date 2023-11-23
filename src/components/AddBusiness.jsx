@@ -1,14 +1,14 @@
-import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import React, { useState, useRef, useEffect } from "react";
 import EditPen from "../assets/svg-icons/EditPen";
+import SingleHeader from "./SingleHeader";
+import { Loading } from "notiflix/build/notiflix-loading-aio";
+import { Notify } from "notiflix/build/notiflix-notify-aio";
+import axiosInstance from "../util-functions/axiosInstance";
+import { useNavigate } from "react-router-dom";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const AddBusiness = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
-  const registerBusinessURL = "Register Business URL";
-  const registerBusinessHeader = new Headers();
-  registerBusinessHeader.append("Authorization", `Bearer ${accessToken}`);
-  const registerBusinessFormdata = new FormData();
+  const navigate = useNavigate();
 
   const avatar = useRef(null);
   const avatarInput = useRef(null);
@@ -25,41 +25,68 @@ const AddBusiness = () => {
   const [businessAddressIsValid, setBusinessAddressIsValid] = useState();
   const [locationIsValid, setLocationIsValid] = useState();
 
-  const handleSubmit = (event) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    const fromdata = new FormData();
 
     if (businessAvatar) {
-      registerBusinessFormdata.append("businessAvatar", businessAvatar);
+      fromdata.append("businessAvatar", businessAvatar);
     }
     if (businessLocation) {
-      registerBusinessFormdata.append("businessLocation", businessLocation);
+      fromdata.append("businessLocation", businessLocation);
     }
     if (businessName === undefined || businessName === "") {
       setBusinessNameIsValid(false);
     } else {
-      registerBusinessFormdata.append("businessName", businessName);
+      fromdata.append("businessName", businessName);
     }
     if (businessMobile === undefined || businessMobile === "") {
       setMobileIsValid(false);
     } else {
-      registerBusinessFormdata.append("businessTel", businessMobile);
+      fromdata.append("businessTel", businessMobile);
     }
     if (businessAddress === undefined || businessAddress === "") {
       setBusinessAddressIsValid(false);
     } else {
-      registerBusinessFormdata.append("businessAddress", businessAddress);
+      fromdata.append("businessAddress", businessAddress);
     }
-    const registerBusinessRequestOptions = {
-      method: "POST",
-      headers: registerBusinessHeader,
-      body: registerBusinessFormdata,
-      redirect: "follow",
-    };
-
-    console.log(businessName);
-    console.log(businessAddress);
-    console.log(businessMobile);
-    console.log(businessLocation);
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post("/register/business", fromdata);
+      Loading.remove();
+      if (response.data.response.success) {
+        Notify.success("کسب و کار جدید با موفقیت ایجاد شد");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+      Notify.failure("خطا ! مجددا تلاش کنید");
+    }
   };
   const handleAvatarChange = () => {
     const choosenFile = avatarInput.current.files[0];
@@ -111,15 +138,23 @@ const AddBusiness = () => {
       setBusinessLocation(e.target.value);
     }
   };
-  console.log(businessName);
+
+  useEffect(() => {
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/");
+    } else {
+      getUser();
+    }
+  }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      !isReception && navigate("/unauthorized");
+    }
+  }, [isReception]);
+
   return (
     <div className="container px-3" dir="rtl">
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-        <div className="bold-xlarge">ثبت کسب و کار جدید</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
+      <SingleHeader title={"ثبت کسب و کار جدید"} location={"/"} />
       <div>
         <form
           className="edit-form mt-5 pb-4"

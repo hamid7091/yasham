@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import React, { useEffect, useState, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import CheckoutCard from "./CheckoutCard";
 import useCart from "../micro-components/useCart";
 import Message from "../micro-components/Message";
 import axiosInstance from "../util-functions/axiosInstance";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import useRoleSetter from "../micro-components/useRoleSetter";
-import Unauthorized from "./Unauthorized";
+import SingleHeader from "./SingleHeader";
 
 const Checkout = () => {
   const state = useLocation();
-  console.log(state.state);
+
   const navigate = useNavigate();
   const [checkoutData, setCheckoutData] = useState([]);
   const [receivedInvoiceID, setReceivedInvoiceID] = useState();
@@ -32,29 +31,32 @@ const Checkout = () => {
   const { selectedOrdersIDs, totalPrice, addToCart, removeFromCart, isInCart } =
     useCart(checkoutData);
   useEffect(() => {
-    console.log(isClient);
-    console.log("ue1");
     if (!isLoading) {
       !isClient && navigate("/unauthorized");
     }
   }, [isClient]);
   useEffect(() => {
-    console.log("ue2");
     if (state.state) {
       addToCart(state.state);
     }
   }, []);
 
-  const handleAddOrderToCard = (order) => {
-    addToCart(order);
-  };
-  const handleRemoveOrderFromCart = (order) => {
-    removeFromCart(order);
-  };
-  const isOrderAdded = (order) => {
-    return isInCart(order);
+  const handleOrderAction = (order, action) => {
+    if (action === "add") {
+      addToCart(order);
+    } else if (action === "remove") {
+      removeFromCart(order);
+    }
   };
 
+  // =============================
+  const memoizedIsOrderAdded = useMemo(() => {
+    const isOrderAddedMemo = (order) => {
+      return isInCart(order);
+    };
+    return isOrderAddedMemo;
+  }, [isInCart]);
+  // ==============================
   const getCheckoutDataAxios = async () => {
     try {
       Loading.standard("در حاب دریافت اطلاعات");
@@ -77,7 +79,6 @@ const Checkout = () => {
     }
   };
   useEffect(() => {
-    console.log("ue3");
     if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/login");
     } else {
@@ -101,7 +102,6 @@ const Checkout = () => {
     }
   };
   useEffect(() => {
-    console.log("ue4");
     if (isCheckoutSubmitted) {
       console.log(receivedInvoiceID);
       navigate(`/invoice/${receivedInvoiceID}`);
@@ -110,12 +110,7 @@ const Checkout = () => {
 
   return (
     <div className="container px-4" dir="rtl">
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3 mb-3">
-        <div className="bold-xlarge">تسویه حساب</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
+      <SingleHeader title={"تسویه حساب"} location={"/"} />
       <div className="mb-100">
         {checkoutData.length > 0 ? (
           checkoutData.map((data, index) => {
@@ -123,9 +118,13 @@ const Checkout = () => {
               <CheckoutCard
                 data={data}
                 key={index}
-                handleAddOrderToCard={handleAddOrderToCard}
-                handleRemoveOrderFromCart={handleRemoveOrderFromCart}
-                isOrderAdded={isOrderAdded}
+                handleAddOrderToCard={(order) =>
+                  handleOrderAction(order, "add")
+                }
+                handleRemoveOrderFromCart={(order) =>
+                  handleOrderAction(order, "remove")
+                }
+                isOrderAdded={memoizedIsOrderAdded}
               />
             );
           })

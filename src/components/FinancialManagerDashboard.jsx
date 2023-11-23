@@ -1,3 +1,4 @@
+import moment from "moment-jalaali";
 import React from "react";
 import {
   BarChart,
@@ -18,6 +19,27 @@ const FinancialManagerDashboard = ({
   console.log(dailyOrders);
   console.log(financialBusinessInfo);
   console.log(financialWeelyChartData);
+
+  const dateArray = Object.keys(financialWeelyChartData);
+  const saleArray = Object.values(financialWeelyChartData);
+
+  const jDateArray = [];
+  dateArray.forEach((date) => {
+    const jDate = moment(date, "YYYY-MM-DD").format("jMM/jDD");
+    jDateArray.push(jDate);
+  });
+  console.log(jDateArray);
+
+  const desiredDataFormat = [];
+  jDateArray.forEach((date, index) => {
+    desiredDataFormat.push({
+      date: date,
+      sale: saleArray[index],
+    });
+  });
+
+  console.log(desiredDataFormat);
+
   return (
     <div className="container px-3 mb-100" dir="rtl">
       <section className="mb-3">
@@ -49,7 +71,7 @@ const FinancialManagerDashboard = ({
               aspect={1.5}
               style={{ pointerEvents: "none" }}
             >
-              <BarChart width="100%" data={financialWeelyChartData.data}>
+              <BarChart width="100%" data={desiredDataFormat}>
                 {/* <CartesianGrid strokeDasharray="1 3" /> */}
                 <XAxis
                   dataKey="date"

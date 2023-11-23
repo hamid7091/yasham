@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 const ChangePriceModal = ({ order, setisModalActive }) => {
   const navigate = useNavigate();
   const [price, setPrice] = useState();
-
+  console.log(order);
   const handleClosePopup = () => {
     setisModalActive(false);
   };
@@ -17,16 +17,18 @@ const ChangePriceModal = ({ order, setisModalActive }) => {
   };
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log(price, order.id);
     const formdata = new FormData();
-    formdata.append("price", price);
-    formdata.append("orderID", order.id);
+    formdata.append("orderPrice", price);
+    formdata.append("orderID", order.orderID);
     try {
       Loading.standard("در حال ارسال درخواست");
-      const response = await axiosInstance.post("order/update-price", formdata);
+      const response = await axiosInstance.post("order/update_price", formdata);
       Loading.remove();
+      console.log(response.data.response);
       if (response.data.response.success) {
         setisModalActive(false);
-        Notify.success(response.data.response.success);
+        Notify.success(response.data.response.message);
         navigate("/orderList");
       }
     } catch (error) {
@@ -52,7 +54,7 @@ const ChangePriceModal = ({ order, setisModalActive }) => {
             قیمت جدید (تومان)
           </label>
           <input
-            type="text"
+            type="number"
             id="userLastName"
             className="form-control rounded-pill mb-3 py-3 border-0"
             placeholder="قیمت جدید را وارد کنید"

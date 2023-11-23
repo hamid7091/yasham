@@ -6,13 +6,11 @@ import NotifIcon from "../assets/svg-icons/NotifIcon";
 import ProfileIcon from "../assets/svg-icons/ProfileIcon";
 import MenuClipboardIcon from "../assets/svg-icons/MenuClipboardIcon";
 import HeadphoneIcon from "../assets/svg-icons/HeadphoneIcon";
-import OrdersIcon from "../assets/svg-icons/OrdersIcon";
 import MenuWalletIcon from "../assets/svg-icons/MenuWalletIcon";
 import MenuFinancialIcon from "../assets/svg-icons/MenuFinancialIcon";
 import WalletTickedIcon from "../assets/svg-icons/WalletTickedIcon";
 import BusinessIcon from "../assets/svg-icons/BusinessIcon";
 import AddStockIcon from "../assets/svg-icons/AddStockIcon";
-import RechargeStockIcon from "../assets/svg-icons/RechargeStockIcon";
 import InventoryManagementIcon from "../assets/svg-icons/InventoryManagementIcon";
 import ReturnIcon from "../assets/svg-icons/ReturnIcon";
 import LikeIcon from "../assets/svg-icons/LikeIcon";
@@ -35,11 +33,6 @@ const ActionMenuCard = ({
   businessInfo,
   universalUnits,
 }) => {
-  console.log(serviceType);
-  console.log(clientsList);
-  console.log(isSupervisor);
-  console.log(businessInfo);
-  console.log(userRole);
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -48,7 +41,7 @@ const ActionMenuCard = ({
     const target = Array.from(event.currentTarget.children)[1].innerHTML;
 
     if (target === "پروفایل") {
-      navigate("/profile", { state: { user: userInfo, userRole: userRole } });
+      navigate("/profile");
     }
     if (target === "ثبت سفارش") {
       navigate("/registerOrder", {

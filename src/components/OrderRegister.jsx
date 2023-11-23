@@ -71,7 +71,6 @@ const OrderRegister = () => {
         borderBottom: "2px solid var(--gray-ultra-light)",
       },
       ":hover": {
-        backgroundColor: "var(--gray-very-light)",
         color: "#000",
       },
     }),
@@ -83,7 +82,7 @@ const OrderRegister = () => {
       paddingBlock: "4px",
       border: "none",
       ":hover": {
-        border: "2px solid var( --blue-royal)",
+        border: "1px solid var( --blue-royal)",
       },
     }),
     singleValue: (defaultStyles) => ({
@@ -105,7 +104,9 @@ const OrderRegister = () => {
       },
       backgroundColor: "var(--blue-royal-very-light)",
       padding: "3px",
-      marginRight: "5px",
+      marginRight: "8px",
+      marginLeft: "8px",
+      marginBlock: "4px",
       borderRadius: "6px",
     }),
     clearIndicator: (defaultStyles) => ({
@@ -118,6 +119,7 @@ const OrderRegister = () => {
     menuList: (defaultStyles) => ({
       ...defaultStyles,
       borderRadius: "4px",
+      paddingInline: "10px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
@@ -137,6 +139,16 @@ const OrderRegister = () => {
       borderRadius: "50%",
       padding: "2px",
       margin: "5px",
+    }),
+    menu: (defaultStyles) => ({
+      ...defaultStyles,
+      width: "90%",
+      marginRight: "5%",
+      border: "none",
+    }),
+    indicatorSeparator: (defaultStyles) => ({
+      ...defaultStyles,
+      display: "none",
     }),
   };
 
@@ -333,7 +345,7 @@ const OrderRegister = () => {
               value={clientName}
               onChange={(e) => handleClientName(e)}
               options={clientOptions}
-              placeholder="نام پزشک را انتخاب کنید"
+              placeholder="نام مشتری را انتخاب کنید"
               styles={customStyles}
               isClearable
             />

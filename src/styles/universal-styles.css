@@ -444,20 +444,20 @@ hr {
 
 /* width */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
   background: var(--gray-ultra-light);
+  margin-block: 18px;
   border-radius: 20px;
-  margin-block: 25px;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: var(--blue-royal);
-  border-radius: 20px;
+  border-radius: 10px;
 }
 
 /* Handle on hover */
@@ -466,7 +466,7 @@ hr {
 }
 
 .recharts-default-legend {
-  /* display: flex;
+  /* display: flex;var(--general-width)
   flex-direction: column;
   gap: 15px; */
 }

@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import EditPen from "../assets/svg-icons/EditPen";
-import EditProfileIcon from "../assets/svg-icons/EditProfileIcon";
-import BackIconLight from "../assets/svg-icons/BackIconLight";
-import OrderListIcon from "../assets/svg-icons/OrderListIcon";
-import WalletIcon from "../assets/svg-icons/WalletIcon";
 
 import ExitProfilePopup from "./ExitProfilePopup";
 import PopupBackground from "./PopupBackground";
@@ -12,61 +8,35 @@ import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import fetchData from "../util-functions/fetchData";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const Profile = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
-
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state.businessInfo;
-  // console.log(location);
-  console.log(state);
-  // console.log(location.state.businessInfo);
+  const state = location?.state?.businessInfo;
 
   const [isPopupActive, setIsPopupActive] = useState(false);
-  // const [firstNameIsValid, setFirstNameIsValid] = useState(true);
   const [businessIsValid, setBusinessIsValid] = useState(true);
-  // const [lastNameIsValid, setLastNameIsValid] = useState(true);
   const [businessLocation, setBusinessLocation] = useState(true);
   const [businessAddress, setBusinessAddress] = useState(true);
   const [mobileIsValid, setMobileIsValid] = useState(true);
-  const [passwordIsValid, setPasswordIsValid] = useState(true);
   const [avatarIsChanged, setAvatarIsChanged] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  // const [userRole, setUserRole] = useState(state?.userRole);
 
-  // const [userFirstName, setUserFirstName] = useState(state?.clientName);
   const [clientName, setClientName] = useState(state?.clientName);
-  // const [userMobile, setUserMobile] = useState(state?.clientPhone);
   const [clientPhone, setClientPhone] = useState(state?.clientPhone);
-  // const [userLastName, setUserLastName] = useState(state?.clientName);
   const [clientAddress, setClientAddress] = useState(state?.clientAddress);
   const [clientLocation, setClientLocation] = useState(state?.clientLocation);
   const [userAvatar, setUserAvatar] = useState(state?.clientAvatar);
-  // const [userPassword, setUserPassword] = useState("");
 
   const profile = useRef(null);
   const editProfile = useRef(null);
   const avatarInput = useRef(null);
   const avatar = useRef(null);
 
-  useEffect(() => {
-    if (state === null) {
-      navigate("/");
-    }
-    // userRole?.forEach((role) => {
-    //   if (role === "client") {
-    //     setIsClient(true);
-    //   }
-    // });
-  }, []);
-
   const handleChangePage = () => {
     profile.current.classList.toggle("d-none");
     editProfile.current.classList.toggle("d-none");
   };
-
   const handleExitPopup = () => {
     setIsPopupActive(true);
   };
@@ -119,83 +89,39 @@ const Profile = () => {
       setClientLocation(e.target.value);
     }
   };
-  const handleSubmit = async (e) => {
-    Loading.standard("در حال بارگذاری اطلاعات");
-    e.preventDefault();
-    const updateUserFormdata = new FormData();
-    var updateUserHeader = new Headers();
-    updateUserHeader.append("Authorization", `Bearer ${accessToken}`);
-    const updateUserURL =
-      "https://samane.zbbo.net/api/v1/client/update_business";
-
-    if (
-      businessIsValid &&
-      businessAddress &&
-      mobileIsValid &&
-      passwordIsValid &&
-      avatarIsChanged
-    ) {
-      updateUserFormdata.append("businessName", clientName);
-      updateUserFormdata.append("phone", clientPhone);
-      updateUserFormdata.append("address", clientAddress);
-      updateUserFormdata.append("location", clientLocation);
-      updateUserFormdata.append("clientAvatar", userAvatar);
-
-      const updateUserOptions = {
-        method: "POST",
-        headers: updateUserHeader,
-        body: updateUserFormdata,
-        redirect: "follow",
-      };
-
-      const response = await fetchData(updateUserURL, updateUserOptions);
-      if (response) {
-        Loading.remove();
-        Notify.success(response);
+  const handleSubmitAxios = async (event) => {
+    event.preventDefault();
+    const formdata = new FormData();
+    businessIsValid && formdata.append("businessName", clientName);
+    businessAddress && formdata.append("address", clientAddress);
+    mobileIsValid && formdata.append("phone", clientPhone);
+    avatarIsChanged && formdata.append("clientAvatar", userAvatar);
+    businessLocation && formdata.append("location", clientLocation);
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post(
+        "/client/update_business",
+        formdata
+      );
+      console.log(response.data.response);
+      Loading.remove();
+      if (response.data.response) {
+        Notify.success(response.data.response);
         navigate("/");
       }
-    } else if (
-      businessIsValid &&
-      businessAddress &&
-      mobileIsValid &&
-      passwordIsValid
-    ) {
-      updateUserFormdata.append("businessName", clientName);
-      updateUserFormdata.append("address", clientAddress);
-      updateUserFormdata.append("phone", clientPhone);
-      updateUserFormdata.append("location", clientLocation);
-
-      const updateUserOptions = {
-        method: "POST",
-        headers: updateUserHeader,
-        body: updateUserFormdata,
-        redirect: "follow",
-      };
-
-      const response = await fetchData(updateUserURL, updateUserOptions);
-      if (response) {
-        Loading.remove();
-        Notify.success(response);
-        navigate("/");
-      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+      Notify.failure("خطا! مجددا تلاش کنید");
     }
-    Loading.remove();
   };
-  // const handlePassword = (e) => {
-  //   const passwordPattern = /^[\w]{8,24}$/;
-  //   if (e.target.value) {
-  //     if (passwordPattern.test(e.target.value)) {
-  //       setUserPassword(e.target.value);
-  //       setPasswordIsValid(true);
-  //     } else {
-  //       setPasswordIsValid(false);
-  //     }
-  //   } else {
-  //     setPasswordIsValid(true);
-  //   }
-  // };
 
-  console.log(isClient);
+  useEffect(() => {
+    if (state === null || state === undefined) {
+      navigate("/");
+    }
+  }, []);
+
   return (
     state && (
       <>
@@ -214,7 +140,7 @@ const Profile = () => {
           </header>
           <form
             className="edit-form mt-5 pb-4"
-            onSubmit={(event) => handleSubmit(event)}
+            onSubmit={(event) => handleSubmitAxios(event)}
           >
             <div className="text-center d-flex flex-column justify-content-center align-items-center">
               <div>

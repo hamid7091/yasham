@@ -4,12 +4,14 @@ import OrderListIcon30 from "../assets/svg-icons/OrderListIcon30";
 import IncomeIcon from "../assets/svg-icons/IncomeIcon";
 import ProfitIcon from "../assets/svg-icons/ProfitIcon";
 import { useLocation, useNavigate } from "react-router-dom";
+import useMathRound from "../micro-components/UseMathRound";
 const BusinessCard = ({ data }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const handleNavigate = () => {
     navigate(`/business/${data.businessID}`, { state: location.pathname });
   };
+  const roundedIncome = useMathRound(+data.income / 1000000);
   return (
     <div
       className="bg-white rounded-5 p-4 mt-2 mb-4 has-pointer"
@@ -44,17 +46,13 @@ const BusinessCard = ({ data }) => {
           <span>
             <IncomeIcon />
           </span>
-          <span className="grey-default-thin me-2">
-            {data.income / 1000000} میلیون
-          </span>
+          <span className="grey-default-thin me-2">{roundedIncome} میلیون</span>
         </span>
         <span className=" me-3">
           <span>
             <ProfitIcon />
           </span>
-          <span className="grey-default-thin me-2">
-            {data.profit / 1000000} میلیون
-          </span>
+          <span className="grey-default-thin me-2">{data.profit} میلیون</span>
         </span>
       </div>
     </div>

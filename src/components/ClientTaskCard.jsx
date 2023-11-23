@@ -58,14 +58,14 @@ const ClientTaskCard = ({ order, loadedFrom, isClient, isFManager }) => {
                 </div>
               )}
               {(order.invoiceStatus == 1 ||
-                (order.price != 0 && order.invoiceStatus === null)) && (
+                (order.price != 0 && order.invoiceStatus === 0)) && (
                 <div
                   className={`lroyal-default-bold my-3 py-2 px-3 badge-in-process`}
                 >
                   <span>در انتظار پرداخت</span>
                 </div>
               )}
-              {((order.invoiceStatus == null && order.price == 0) ||
+              {((order.invoiceStatus == 0 && order.price == 0) ||
                 (order.status == 0 && order.price == 0)) && (
                 <div
                   className={`lroyal-default-bold my-3 py-2 px-3 badge-waiting`}

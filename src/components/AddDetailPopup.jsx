@@ -178,8 +178,12 @@ const AddDetailPopup = ({
           <CloseIcon />
         </span>
       </div>
+      <hr />
       {/* choosing service type */}
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={handleSubmit}
+        className="px-3 edit-form form-group riw-form"
+      >
         <div>
           <label htmlFor="service-type" className="bold500-large my-3 pe-3">
             نوع خدمات

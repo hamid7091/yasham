@@ -79,12 +79,12 @@ const SingleBusiness = () => {
   const getBusinessData = async () => {
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      // axiosInstance.post("/business/get-businss-info", {
-      //   businessID: params.id,
-      // });
-      setBusinessInfo(mockBusinessInfoResponse);
-      setOrders(mockBusinessInfoResponse.orders);
-      setInvoice(mockBusinessInfoResponse.invoices);
+      const response = await axiosInstance.post("/client/get_client", {
+        clientID: params.id,
+      });
+      setBusinessInfo(response.data.response);
+      setOrders(response.data.response.orders);
+      setInvoice(response.data.response.invoices);
 
       Loading.remove();
     } catch (error) {

@@ -123,7 +123,7 @@ const SingleOrder = () => {
         {isCancelModalActive && (
           <>
             <CancelOrderPopup
-              order={orderData}
+              orderID={param.id}
               setisModalActive={setIsCancelModalActive}
             />
             <PopupBackground
@@ -180,7 +180,7 @@ const SingleOrder = () => {
                   )}
                   {(orderData?.invoiceStatus == 1 ||
                     (orderData?.price !== 0 &&
-                      orderData?.invoiceStatus === null)) && (
+                      orderData?.invoiceStatus === 0)) && (
                     <div
                       className={`lroyal-default-bold py-2 px-3 badge-in-process`}
                     >
@@ -200,6 +200,9 @@ const SingleOrder = () => {
                     {orderData?.invoiceStatus == 3 && (
                       <span
                         className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+                        onClick={() => {
+                          navigate(`/invoice/${orderData.invoiceID}`);
+                        }}
                       >
                         مشاهده فاکتور
                       </span>
@@ -228,13 +231,16 @@ const SingleOrder = () => {
                     {orderData?.invoiceStatus == 3 && (
                       <span
                         className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+                        onClick={() => {
+                          navigate(`/invoice/${orderData.invoiceID}`);
+                        }}
                       >
                         مشاهده فاکتور
                       </span>
                     )}
                     {(orderData?.invoiceStatus == 1 ||
                       (orderData?.price !== 0 &&
-                        orderData?.invoiceStatus === null)) && (
+                        orderData?.invoiceStatus === 0)) && (
                       <div className="flex-grow-1 d-flex flex-column align-items-center">
                         <span
                           onClick={() => setIsPriceModalActive(true)}
@@ -242,12 +248,12 @@ const SingleOrder = () => {
                         >
                           اصلاح قیمت
                         </span>
-                        <span
+                        {/* <span
                           className={`btn-red-bold w-100 rounded-pill flex-grow-1 text-center py-3 has-pointer `}
                           onClick={() => setIsCancelModalActive(true)}
                         >
                           لغو سفارش
-                        </span>
+                        </span> */}
                       </div>
                     )}
                     {orderData?.price == 0 && (
@@ -258,12 +264,12 @@ const SingleOrder = () => {
                         >
                           اصلاح قیمت
                         </span>
-                        <span
+                        {/* <span
                           className={`btn-red-bold w-100 rounded-pill flex-grow-1 text-center py-3 has-pointer `}
                           onClick={() => setIsCancelModalActive(true)}
                         >
                           لغو سفارش
-                        </span>
+                        </span> */}
                       </div>
                     )}
                   </div>
