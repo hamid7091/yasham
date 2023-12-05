@@ -1,61 +1,75 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
-import fetchData from "../util-functions/fetchData";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
+import SingleHeader from "./SingleHeader";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const SingleUser = () => {
   const param = useParams();
   const navigate = useNavigate();
-  const accessToken = window.localStorage.getItem("AccessToken");
-  const getUserInfoURL = "Get User Info URL";
-  const getUserInfoHeader = new Headers();
-  getUserInfoHeader.append("Authorization", `Bearer ${accessToken}`);
-  const getUserInfoFormdata = new FormData();
-  getUserInfoFormdata.append("userID", param.id);
-  const getUserInfoRequestOptions = {
-    method: "POST",
-    headers: getUserInfoHeader,
-    body: getUserInfoFormdata,
-    redirect: "follow",
-  };
+  const location = useLocation();
   const [userInfo, setUserInfo] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState();
 
-  const mockUserInfo = {
-    userName: "علی",
-    userLastName: "قنات محور",
-    userRole: "گچ کار",
-    userTel: "4433556698",
-    businessName: "کلینیک محمود",
-    userID: "21",
-    userAvatar:
-      "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-  };
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
 
-  const getUserInfo = async (url, options) => {
-    Loading.standard("در حال دریافت اطلاعات");
-    // const response = await fetchData (url , options)
-    const response = mockUserInfo;
-    setUserInfo(response);
-    Loading.remove();
+  const getUserData = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/user/get_user", {
+        userID: param.id,
+      });
+      Loading.remove();
+      console.log(response.data.response);
+      setUserInfo(response.data.response.userInfo);
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    if (!isLoading) {
+      !isReception && navigate("/unauthorized");
+    }
+  }, [isReception]);
 
   useEffect(() => {
-    getUserInfo(getUserInfoURL, getUserInfoRequestOptions);
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getUserData();
+      getUser();
+    }
   }, []);
 
   const handleRedirect = () => {
-    navigate(`/editUser/${param.id}`);
+    navigate(`/editUser/${param.id}`, { state: location.pathname });
   };
   return (
     userInfo && (
-      <div className="container px-3" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-          <div className="bold-xlarge">کاربر</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+      <div className="container px-3 mt-100" dir="rtl">
+        <SingleHeader title={"کاربر"} location={location.state} />
         <section className="d-flex flex-column align-items-center gap-3 mb-5">
           <div>
             <img
@@ -85,10 +99,10 @@ const SingleUser = () => {
           <div>
             <div className="bg-white rounded-pill p-4 d-flex align-items-start gap-2 mb-3">
               <span className="royal-large">نام</span>
-              <span className="grey-large-bold">{userInfo.userName}</span>
+              <span className="grey-large-bold">{userInfo.userFirstName}</span>
             </div>
             <div className="bg-white rounded-pill p-4 d-flex align-items-start gap-2 mb-3">
-              <span className="royal-large">نام کسب و کار</span>
+              <span className="royal-large">نام خانوادگی</span>
               <span className="grey-large-bold">{userInfo.userLastName}</span>
             </div>
             <div className="bg-white rounded-pill p-4 d-flex align-items-start gap-2 mb-3">
@@ -103,7 +117,7 @@ const SingleUser = () => {
             )}
             <div className="bg-white rounded-pill p-4 d-flex align-items-start gap-2 mb-3">
               <span className="royal-large text-nowrap">شماره تماس</span>
-              <span className="grey-large-bold">{userInfo.userTel}</span>
+              <span className="grey-large-bold">{userInfo.mobile}</span>
             </div>
           </div>
         </section>

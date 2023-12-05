@@ -43,6 +43,7 @@ const SingleOrder = () => {
       });
       setOrderData(response.data.response.details);
       setTasks(response.data.response?.details?.tasks);
+      console.log(response.data.response);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -51,28 +52,28 @@ const SingleOrder = () => {
   };
   const getUser = async () => {
     try {
-      // const response = await axiosInstance.post("/user/check_access_token");
-      const response = {
-        data: {
-          response: {
-            userInfo: {
-              mobile: "9360390099",
-              userAvatar:
-                "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-              userCaps: {
-                اطلاعیه: true,
-                پروفایل: true,
-                "لیست سفارشات": true,
-                "کسب و کارها": true,
-              },
-              userFirstName: "حمید",
-              userID: 123,
-              userLastName: "مدیر مالی",
-              userRole: ["financial_manager"],
-            },
-          },
-        },
-      };
+      const response = await axiosInstance.post("/user/check_access_token");
+      // const response = {
+      //   data: {
+      //     response: {
+      //       userInfo: {
+      //         mobile: "9360390099",
+      //         userAvatar:
+      //           "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //         userCaps: {
+      //           اطلاعیه: true,
+      //           پروفایل: true,
+      //           "لیست سفارشات": true,
+      //           "کسب و کارها": true,
+      //         },
+      //         userFirstName: "حمید",
+      //         userID: 123,
+      //         userLastName: "مدیر مالی",
+      //         userRole: ["financial_manager"],
+      //       },
+      //     },
+      //   },
+      // };
       setUserRole(response.data.response.userInfo.userRole);
       setIsLoading(false);
       console.log(response.data.response);
@@ -105,7 +106,7 @@ const SingleOrder = () => {
 
   return (
     orderData && (
-      <div className="container px-4" dir="rtl">
+      <div className="container px-3 mt-100" dir="rtl">
         {isPriceModalActive && (
           <>
             <ChangePriceModal
@@ -125,6 +126,7 @@ const SingleOrder = () => {
             <CancelOrderPopup
               orderID={param.id}
               setisModalActive={setIsCancelModalActive}
+              canceling={"سفارش"}
             />
             <PopupBackground
               isPopupActive={setIsCancelModalActive}
@@ -179,8 +181,8 @@ const SingleOrder = () => {
                     </div>
                   )}
                   {(orderData?.invoiceStatus == 1 ||
-                    (orderData?.price !== 0 &&
-                      orderData?.invoiceStatus === 0)) && (
+                    (orderData?.price != 0 &&
+                      orderData?.invoiceStatus == 0)) && (
                     <div
                       className={`lroyal-default-bold py-2 px-3 badge-in-process`}
                     >
@@ -207,7 +209,24 @@ const SingleOrder = () => {
                         مشاهده فاکتور
                       </span>
                     )}
-                    {(orderData?.invoiceStatus == 1 ||
+                    {orderData.invoiceStatus == 1 && (
+                      <span
+                        className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+                        onClick={() => handleRedirect(orderData)}
+                      >
+                        مشاهده فاکتور
+                      </span>
+                    )}
+
+                    {orderData.invoiceStatus == 0 && orderData.price != 0 && (
+                      <span
+                        className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+                        onClick={() => handleRedirect(orderData)}
+                      >
+                        ایجاد فاکتور
+                      </span>
+                    )}
+                    {/* {(orderData?.invoiceStatus == 1 ||
                       (orderData?.price !== 0 &&
                         orderData?.invoiceStatus === null)) && (
                       <span
@@ -216,7 +235,7 @@ const SingleOrder = () => {
                       >
                         پرداخت
                       </span>
-                    )}
+                    )} */}
                     {orderData?.price == 0 && (
                       <span
                         className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer disabled`}

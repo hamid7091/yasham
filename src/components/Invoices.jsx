@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import { Loading } from "notiflix/build/notiflix-aio";
 import moment from "moment-jalaali";
@@ -11,10 +11,14 @@ import BLCloseBtn from "../assets/svg-icons/BLCloseBtn";
 import Message from "../micro-components/Message";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import SingleHeader from "./SingleHeader";
 
 const Invoices = ({ fromSingleBusiness }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [userRole, setUserRole] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+
   const [
     isEmployee,
     isClient,
@@ -42,13 +46,11 @@ const Invoices = ({ fromSingleBusiness }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSom, setIsSom] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     if (!isLoading) {
-      !isClient && navigate("/unauthorized");
+      !isClient && !isFManager && navigate("/unauthorized");
     }
-  }, [isClient]);
+  }, [isClient, isFManager]);
 
   const invoiceStatusOptions = [
     { clientName: "پرداخت شده", clientID: 3 }, // به منظور همخوانی با نحوه کانورت در پاپ اپ فیلتر بدین شکل نوشته شده است
@@ -111,7 +113,8 @@ const Invoices = ({ fromSingleBusiness }) => {
         }
       );
       setCurrentFPageNum((prevNum) => prevNum + 1);
-      setFilteredFactorsData(response.data.response.cards);
+      response.data.response.cards &&
+        setFilteredFactorsData(response.data.response.cards);
       setTotalFPages(response.data.response.total_pages);
       console.log(response.data.response);
       Loading.remove();
@@ -158,19 +161,14 @@ const Invoices = ({ fromSingleBusiness }) => {
   const getInvoicesList = async () => {
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      const response = await axiosInstance.post(
-        "/invoice/all_invoices",
-        { pageNum: currentPageNum },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      setFactorsData((prevItems) => [
-        ...prevItems,
-        ...response.data.response.cards,
-      ]);
+      const response = await axiosInstance.post("/invoice/all_invoices", {
+        pageNum: currentPageNum,
+      });
+      response.data.response.cards &&
+        setFactorsData((prevItems) => [
+          ...prevItems,
+          ...response.data.response.cards,
+        ]);
       setTotalPages(response.data.response.total_pages);
       setCurrentPageNum((prevPage) => prevPage + 1);
       setIsSom(true);
@@ -253,9 +251,9 @@ const Invoices = ({ fromSingleBusiness }) => {
     }
   }, [isSubmitted, invoiceStatus, startDate, endDate]);
 
-  console.log(isClient);
+  console.log(filteredFactorsData);
   return (
-    <div className="container px-4" dir="rtl">
+    <div className="container px-3 mt-100" dir="rtl">
       {isFilterPopupActive && (
         <>
           <FilterPopup
@@ -279,12 +277,7 @@ const Invoices = ({ fromSingleBusiness }) => {
         </>
       )}
       {fromSingleBusiness !== true && (
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3 mb-3">
-          <div className="bold-xlarge">فاکتورها</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader location={location.state} title={"فاکتورها"} />
       )}
       {filteredCats.length > 0 && (
         <>
@@ -307,13 +300,16 @@ const Invoices = ({ fromSingleBusiness }) => {
         </>
       )}
       <div className="shipping-cards-container">
-        {}
         {!isFiltered &&
-          factorsData.map((factor, index) => {
-            return <InvoiceCard key={index} factor={factor} />;
-          })}
+          (factorsData.length ? (
+            factorsData.map((factor, index) => {
+              return <InvoiceCard key={index} factor={factor} />;
+            })
+          ) : (
+            <Message>فاکتوری برای نمایش وجود ندارد</Message>
+          ))}
         {isFiltered &&
-          (filteredFactorsData ? (
+          (filteredFactorsData.length ? (
             filteredFactorsData.map((factor, index) => {
               return <InvoiceCard key={index} factor={factor} />;
             })

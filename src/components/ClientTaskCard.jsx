@@ -3,7 +3,13 @@ import useDate from "../micro-components/useDate2";
 import OrderListIcon from "../assets/svg-icons/OrderListIcon";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const ClientTaskCard = ({ order, loadedFrom, isClient, isFManager }) => {
+const ClientTaskCard = ({
+  order,
+  loadedFrom,
+  isClient,
+  isFManager,
+  isReception,
+}) => {
   const newDate = useDate(order.date);
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,7 +34,7 @@ const ClientTaskCard = ({ order, loadedFrom, isClient, isFManager }) => {
         </div>
         <hr />
         <div className="">
-          <div className="d-flex align-items-center justify-content-between">
+          <div className="d-flex align-items-start justify-content-between">
             <div className=" royal-default-bold my-2">
               <span className="ms-2">نام بیمار </span>
               <span className="grey-default-bold500">
@@ -40,7 +46,7 @@ const ClientTaskCard = ({ order, loadedFrom, isClient, isFManager }) => {
               <span className="grey-default-bold500">{newDate}</span>
             </div>
           </div>
-          {(isClient || isFManager) && (
+          {(isClient || isFManager || isReception) && (
             <div className="d-flex align-items-center justify-content-between">
               <div className="royal-default-bold my-2">
                 <span className="ms-2">مبلغ</span>
@@ -58,22 +64,21 @@ const ClientTaskCard = ({ order, loadedFrom, isClient, isFManager }) => {
                 </div>
               )}
               {(order.invoiceStatus == 1 ||
-                (order.price != 0 && order.invoiceStatus === 0)) && (
+                (order.price != 0 && order.invoiceStatus == 0)) && (
                 <div
                   className={`lroyal-default-bold my-3 py-2 px-3 badge-in-process`}
                 >
                   <span>در انتظار پرداخت</span>
                 </div>
               )}
-              {((order.invoiceStatus == 0 && order.price == 0) ||
-                (order.status == 0 && order.price == 0)) && (
+              {order.price == 0 && (
                 <div
                   className={`lroyal-default-bold my-3 py-2 px-3 badge-waiting`}
                 >
                   <span>در انتظار قیمت گذاری</span>
                 </div>
               )}
-              {(order.invoiceStatus == 2 || order.status == 2) && (
+              {order.invoiceStatus == 2 && (
                 <div
                   className={`lroyal-default-bold my-3 py-2 px-3 badge-canceled`}
                 >
@@ -84,12 +89,12 @@ const ClientTaskCard = ({ order, loadedFrom, isClient, isFManager }) => {
           )}
         </div>
         {((loadedFrom === "orderList" && isClient) ||
-          loadedFrom === "dashboard") && <hr />}
+          (loadedFrom === "dashboard" && isClient)) && <hr />}
       </Link>
       {((loadedFrom === "orderList" && isClient) ||
-        loadedFrom === "dashboard") && (
+        (loadedFrom === "dashboard" && isClient)) && (
         <div className="d-flex">
-          {order.invoiceStatus === "3" && (
+          {order.invoiceStatus == 3 && (
             <span
               className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
               onClick={() => handleRedirect(order)}
@@ -97,14 +102,21 @@ const ClientTaskCard = ({ order, loadedFrom, isClient, isFManager }) => {
               مشاهده فاکتور
             </span>
           )}
-          {(order.invoiceStatus === "1" ||
-            order.invoiceStatus === 1 ||
-            (order.invoiceStatus === null && order.price !== 0)) && (
+          {order.invoiceStatus == 1 && (
             <span
               className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
               onClick={() => handleRedirect(order)}
             >
-              پرداخت
+              مشاهده فاکتور
+            </span>
+          )}
+
+          {order.invoiceStatus == 0 && order.price != 0 && (
+            <span
+              className={`btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer`}
+              onClick={() => handleRedirect(order)}
+            >
+              ایجاد فاکتور
             </span>
           )}
           {order.price == 0 && (

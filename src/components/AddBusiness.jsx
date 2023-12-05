@@ -4,11 +4,13 @@ import SingleHeader from "./SingleHeader";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import axiosInstance from "../util-functions/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useRoleSetter from "../micro-components/useRoleSetter";
+import defImg from "../assets/svg-pics/userDefaultPic.svg";
 
 const AddBusiness = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const avatar = useRef(null);
   const avatarInput = useRef(null);
@@ -25,7 +27,7 @@ const AddBusiness = () => {
   const [businessAddressIsValid, setBusinessAddressIsValid] = useState();
   const [locationIsValid, setLocationIsValid] = useState();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState();
   const [
     isEmployee,
@@ -52,12 +54,11 @@ const AddBusiness = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const fromdata = new FormData();
-
     if (businessAvatar) {
-      fromdata.append("businessAvatar", businessAvatar);
+      fromdata.append("clientAvatar", businessAvatar);
     }
     if (businessLocation) {
-      fromdata.append("businessLocation", businessLocation);
+      fromdata.append("location", businessLocation);
     }
     if (businessName === undefined || businessName === "") {
       setBusinessNameIsValid(false);
@@ -67,20 +68,24 @@ const AddBusiness = () => {
     if (businessMobile === undefined || businessMobile === "") {
       setMobileIsValid(false);
     } else {
-      fromdata.append("businessTel", businessMobile);
+      fromdata.append("phone", businessMobile);
     }
     if (businessAddress === undefined || businessAddress === "") {
       setBusinessAddressIsValid(false);
     } else {
-      fromdata.append("businessAddress", businessAddress);
+      fromdata.append("address", businessAddress);
     }
+    console.log(Object.fromEntries(fromdata));
     try {
       Loading.standard("در حال ارسال درخواست");
-      const response = await axiosInstance.post("/register/business", fromdata);
+      const response = await axiosInstance.post(
+        "/client/add_business",
+        fromdata
+      );
       Loading.remove();
-      if (response.data.response.success) {
-        Notify.success("کسب و کار جدید با موفقیت ایجاد شد");
-        navigate("/");
+      if (response.data.response) {
+        Notify.success(response.data.response);
+        navigate("/allBusinessesReception");
       }
     } catch (error) {
       console.error(error);
@@ -153,8 +158,8 @@ const AddBusiness = () => {
   }, [isReception]);
 
   return (
-    <div className="container px-3" dir="rtl">
-      <SingleHeader title={"ثبت کسب و کار جدید"} location={"/"} />
+    <div className="container px-3 mt-100" dir="rtl">
+      <SingleHeader title={"ثبت کسب و کار جدید"} location={location.state} />
       <div>
         <form
           className="edit-form mt-5 pb-4"
@@ -165,7 +170,7 @@ const AddBusiness = () => {
               <img
                 ref={avatar}
                 className="avatar-svg-image"
-                src="https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg"
+                src={defImg}
                 alt=""
               />
             </div>
@@ -202,6 +207,8 @@ const AddBusiness = () => {
           <input
             type="text"
             name="business-name"
+            autoComplete="off"
+            autoCorrect="off"
             className={`form-control rounded-pill mb-3 py-2 ${
               businessNameIsValid === false
                 ? "is-invalid"
@@ -212,6 +219,7 @@ const AddBusiness = () => {
             id="business-name"
             placeholder="نام کسب و کار را وارد کنید"
             onChange={(event) => handleBusinessNameValidation(event)}
+            required
           />
           <label htmlFor="mobile" className="bold500-large mb-2 pe-3">
             شماره تماس کسب و کار{" "}
@@ -227,6 +235,8 @@ const AddBusiness = () => {
             maxLength={10}
             type="number"
             name="mobile"
+            autoComplete="off"
+            autoCorrect="off"
             className={`form-control rounded-pill mb-3 py-2 ${
               mobileIsValid === false
                 ? "is-invalid"
@@ -237,6 +247,7 @@ const AddBusiness = () => {
             id="mobile"
             placeholder="شماره تماس کسب و کار را وارد کنید"
             onChange={(event) => handleMobileValidation(event)}
+            required
           />
           <label htmlFor="business-address" className="bold500-large mb-2 pe-3">
             آدرس کسب و کار{" "}
@@ -251,6 +262,8 @@ const AddBusiness = () => {
           <input
             type="text"
             name="business-address"
+            autoComplete="off"
+            autoCorrect="off"
             className={`form-control rounded-pill mb-3 py-2 ${
               businessAddressIsValid === false
                 ? "is-invalid"
@@ -261,6 +274,7 @@ const AddBusiness = () => {
             id="business-address"
             placeholder="آدرس کسب و کار را وارد کنید"
             onChange={(event) => handleBusinessAddressValidations(event)}
+            required
           />
 
           <label htmlFor="location" className="bold500-large mb-2 pe-3">
@@ -273,6 +287,8 @@ const AddBusiness = () => {
             onChange={(event) => handleBusinessLocatoinValidation(event)}
             type="text"
             name="location"
+            autoComplete="off"
+            autoCorrect="off"
             className={`form-control rounded-pill mb-3 py-2`}
             id="location"
             placeholder="موقعیت مکانی را وارد کنید"

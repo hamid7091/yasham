@@ -1,33 +1,31 @@
 import React from "react";
 import GreenUpArrow from "../assets/svg-icons/GreenUpArrow";
-import YellowArrowUp from "../assets/svg-icons/YellowArrowUp";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import BlueDownArrow from "../assets/svg-icons/BlueDownArrow";
 import BackIcon from "../assets/svg-icons/BackIcon";
 
 const PackageCard = ({ packageData, isFromShipping }) => {
-  console.log(packageData);
-  const sentPackages = packageData.packages?.sent;
-  const recievePackages = packageData.packages?.receive;
+  const sentPackages = packageData?.sent_count;
+  const recievePackages = packageData?.receive_count;
 
-  console.log(sentPackages);
+  const location = useLocation();
 
   return (
     <Link
       className="has-pointer py-5"
-      to={`/package/${packageData.clientID}`}
-      state={packageData}
+      to={`/package/${packageData.client_id}`}
+      state={location.pathname}
     >
       <div className="bg-white rounded-5 p-4 mb-3">
         <div className="delivery-card-head d-flex align-items-center mb-3">
           <div className="d-flex align-items-center flex-grow-1">
             <img
               className="shipping-card-avatar"
-              src={packageData.packages.clientDetails.clientAvatar}
+              src={packageData.clientAvatar}
               alt=""
             />
             <p className="grey-large-bold500 mb-0 me-3">
-              {packageData.packages.clientDetails.clientName}
+              {packageData.clientName}
             </p>
           </div>
           <BackIcon />
@@ -39,7 +37,7 @@ const PackageCard = ({ packageData, isFromShipping }) => {
               <GreenUpArrow />
               <span>{isFromShipping && "ارسالی‌ها"}</span>
               <span className="grey-default-bold500">
-                {sentPackages ? sentPackages.length : 0}
+                {sentPackages ? sentPackages : 0}
               </span>
             </span>
           </div>
@@ -48,7 +46,7 @@ const PackageCard = ({ packageData, isFromShipping }) => {
               <BlueDownArrow />
               <span>{isFromShipping && "دریافتی‌ها"}</span>
               <span className="grey-default-bold500">
-                {recievePackages ? recievePackages.length : 0}
+                {recievePackages ? recievePackages : 0}
               </span>
             </span>
           </div>

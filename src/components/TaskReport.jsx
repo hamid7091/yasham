@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import moment from "moment-jalaali";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
@@ -11,9 +11,11 @@ import { Loading } from "notiflix/build/notiflix-loading-aio";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
 import ClientAssignedCard from "./ClientAssignedCard";
+import SingleHeader from "./SingleHeader";
 
 const TaskReport = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     ts,
     tsu,
@@ -306,7 +308,7 @@ const TaskReport = () => {
   // ----------------------------------------------------------------
 
   return (
-    <div className="container px-3" dir="rtl">
+    <div className="container px-3 mt-100" dir="rtl">
       {isFilterPopupActive && (
         <>
           <FilterDatePopup
@@ -326,12 +328,7 @@ const TaskReport = () => {
           />
         </>
       )}
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 ">
-        <div className="bold-xlarge">گزارش وظایف</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
+      <SingleHeader title={"گزارش وظایف"} location={location.state} />
       <div
         className="d-flex align-items-center bg-white rounded-5 p-3 mb-4 has-pointer mt-2"
         onClick={() => setIsFilterPopupActive(true)}

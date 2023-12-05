@@ -1,12 +1,12 @@
 import React from "react";
 import BackIcon from "../assets/svg-icons/BackIcon";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 const ReceptionUserCard = ({ data }) => {
-  console.log(data);
+  const location = useLocation();
 
   const navigate = useNavigate();
   const handleNavigate = () => {
-    navigate(`/user/${data.userID}`);
+    navigate(`/user/${data.userID}`, { state: location.pathname });
   };
   return (
     <div

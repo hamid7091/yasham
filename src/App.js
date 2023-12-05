@@ -76,7 +76,10 @@ const App = () => {
         <Route path="/businessInfo" element={<BusinessPage />} />
         <Route path="*" element={<Navigate to="/" />} />
         <Route path="/registerOrder" element={<OrderRegister />} />
-        <Route path="/orderList" element={<OrderList />} />
+        <Route
+          path="/orderList"
+          element={<OrderList loadedFrom={"action"} />}
+        />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/performance" element={<Performance />} />
         <Route path="/checkout" element={<Checkout />} />

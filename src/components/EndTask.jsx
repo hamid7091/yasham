@@ -1,23 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import MinusButton from "../assets/svg-icons/MinusButton";
 import MinusButtonGray from "../assets/svg-icons/MinusButtonGray";
 import PlusButton from "../assets/svg-icons/PlusButton";
-import { useParams, useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import axiosInstance from "../util-functions/axiosInstance";
+import SingleHeader from "./SingleHeader";
 
 const EndTask = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
+  const location = useLocation();
   const param = useParams();
   const navigate = useNavigate();
-  const endTaskHeader = new Headers();
-  endTaskHeader.append("Authorization", `Bearer ${accessToken}`);
-  const endTaskFormdata = new FormData();
-  endTaskFormdata.append("taskID", param.id);
 
   const customStyles = {
     option: (defaultStyles, state) => ({
@@ -30,7 +25,6 @@ const EndTask = () => {
         borderBottom: "2px solid var(--gray-ultra-light)",
       },
       ":hover": {
-        backgroundColor: "var(--gray-very-light)",
         color: "#000",
       },
     }),
@@ -42,7 +36,7 @@ const EndTask = () => {
       paddingBlock: "4px",
       border: "none",
       ":hover": {
-        border: "2px solid var( --blue-royal)",
+        border: "1px solid var( --blue-royal)",
       },
     }),
     singleValue: (defaultStyles) => ({
@@ -64,7 +58,9 @@ const EndTask = () => {
       },
       backgroundColor: "var(--blue-royal-very-light)",
       padding: "3px",
-      marginRight: "5px",
+      marginRight: "8px",
+      marginLeft: "8px",
+      marginBlock: "4px",
       borderRadius: "6px",
     }),
     clearIndicator: (defaultStyles) => ({
@@ -77,6 +73,7 @@ const EndTask = () => {
     menuList: (defaultStyles) => ({
       ...defaultStyles,
       borderRadius: "4px",
+      paddingInline: "10px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
@@ -97,24 +94,34 @@ const EndTask = () => {
       padding: "2px",
       margin: "5px",
     }),
+    menu: (defaultStyles) => ({
+      ...defaultStyles,
+      width: "90%",
+      marginRight: "5%",
+      border: "none",
+    }),
+    indicatorSeparator: (defaultStyles) => ({
+      ...defaultStyles,
+      display: "none",
+    }),
   };
   // States ------------------------------------------------------
+  const [isError, setIsError] = useState(false);
+  const [errorItself, setErrorItself] = useState();
 
-  //   const [details, setDetails] = useState();
   const [toothColors, setToothColors] = useState([[]]);
+
   const [toothNumbers, setToothNumbers] = useState([[]]);
+  const [selectedStocks, setSelectedStocks] = useState([]);
+
   const [selectedUnit, setSelectedUnit] = useState([[]]);
+
+  const [inventoryList, setInventoryList] = useState([]);
 
   // States ------------------------------------------------------
 
   // Functions ---------------------------------------------------
 
-  //   const handleUpdate = (detail) => {
-  //     // const id = Math.floor(Math.random() * 1000);
-  //     const newDetail = { ...detail };
-
-  //     setDetails([newDetail]);
-  //   };
   const handleAddFields = () => {
     const colorVals = [...toothColors, []];
     setToothColors(colorVals);
@@ -122,228 +129,225 @@ const EndTask = () => {
     setToothNumbers(numVlas);
     const uniVals = [...selectedUnit, []];
     setSelectedUnit(uniVals);
+
+    const newSelectedStock = [...selectedStocks, []];
+    setSelectedStocks(newSelectedStock);
   };
   const handleColorChange = (value, i) => {
-    console.log(value?.value);
     const inputData = [...toothColors];
-    inputData[i] = [value];
-    setToothColors(inputData);
+    const oldSelectedStocks = [...selectedStocks];
+    inputData[i] = value;
+    oldSelectedStocks[i] = value.value;
 
+    setToothColors(inputData);
+    setSelectedStocks(oldSelectedStocks);
+
+    console.log(selectedUnit);
     const uniVals = [...selectedUnit];
-    uniVals[i] = [mockItemsList.items.find((el) => el.itemID === value?.value)];
-    const un = mockItemsList.items.find((el) => el.itemID === value?.value);
-    console.log(un?.itemUnit);
+    uniVals[i] = [inventoryList.find((el) => el.id == value?.value)];
+    const un = inventoryList.find((el) => el.id == value?.value);
+    console.log(un?.unit);
     setSelectedUnit(uniVals);
   };
+
   const handleNumberChange = (event, i) => {
-    console.log(event.target.value);
-    console.log(i);
     const inputData = [...toothNumbers];
     inputData[i] = event.target.value;
     setToothNumbers(inputData);
   };
+
   const handleDelete = (i) => {
+    console.log(toothColors);
+    console.log(toothNumbers);
+    console.log(selectedUnit);
+    console.log(selectedStocks);
+    console.log(i);
+
     const deleteColorVal = [...toothColors];
     const deleteNumberVal = [...toothNumbers];
     const deleteUniVals = [...selectedUnit];
-    deleteNumberVal.splice(i, 1);
+    const deleteSelected = [...selectedStocks];
+
     deleteColorVal.splice(i, 1);
+    deleteNumberVal.splice(i, 1);
     deleteUniVals.splice(i, 1);
+    deleteSelected.splice(i, 1);
+
+    console.log(deleteColorVal);
+    console.log(deleteNumberVal);
+    console.log(deleteUniVals);
+    console.log(deleteSelected);
+
     setToothColors(deleteColorVal);
     setToothNumbers(deleteNumberVal);
     setSelectedUnit(deleteUniVals);
+    setSelectedStocks(deleteSelected);
   };
-  //   const numberConvertor = (array) => {
-  //     return array
-  //       .map((subArray) => subArray.map((obj) => obj.value))
-  //       .filter((subArray) => subArray.length > 0);
-  //   };
-  //   const colorConvertor = (array) => {
-  //     return array.map((subArray) => subArray[0]?.value).filter(Boolean);
-  //   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const sentObject = [];
+    selectedStocks.forEach((stock, index) => {
+      sentObject.push({
+        id: stock,
+        value: toothNumbers[index],
+      });
+    });
+    const formdata = new FormData();
+    formdata.append("taskID", param.id);
+    formdata.append("usedStocks", JSON.stringify(sentObject));
+    console.log(Object.fromEntries(formdata));
     try {
       Loading.standard("در حال ارسال درخواست");
-      const response = await axiosInstance.post("/task/update_task", {
-        taskID: param.id,
-      });
-      const responseData = response.data.response
+      const response = await axiosInstance.post("/task/update_task", formdata);
+      console.log(response.data.response);
       Loading.remove();
-      if (responseData.started) {
-        Notify.success("تسک با موفقیت شروع شد");
-        //setIsTaskStarted(true);
-        window.location.reload();
-      }else if (responseData.finished) {
-        Notify.success("تسک با موفقیت به اتمام رسید");
-        //setIsTaskStarted(true);
-        navigate(`/task/${param.id}`);
+      if (response.data.response.finished) {
+        Notify.success("وظیفه با موفقیت به اتمام رسید");
+        navigate(location.state);
       }
     } catch (error) {
       console.error(error);
       Loading.remove();
+      Notify.failure("خطا ! مجددا تلاش کنید");
     }
-    // const detail = {
-    //   toothColors,
-    //   toothNumbers,
-    // };
-    // console.log(detail);
+  };
 
-    // handleUpdate(detail);
-
-    console.log(toothColors);
-    console.log(toothNumbers);
+  const getInventoryItems = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/item/instock");
+      setInventoryList(response.data.response.stock);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
 
   // Functions ---------------------------------------------------
 
   // Constants ---------------------------------------------------
 
-  const mockItemsList = {
-    items: [
-      {
-        itemName: "گچ 1",
-        itemID: "#p123456",
-        itemUnit: "کیلوگرم",
-      },
-      {
-        itemName: "گچ 2",
-        itemID: "#p123457",
-        itemUnit: "لیتر",
-      },
-      {
-        itemName: "گچ 3",
-        itemID: "#p123458",
-        itemUnit: "عدد",
-      },
-    ],
-  };
-
   const itemListConvertor = (list) => {
     const itemList = [];
     list.forEach((item, index) => {
       itemList.push({
-        label: `${item.itemID} || ${item.itemName}`,
-        value: item.itemID,
+        label: `${item.name} || ${item.inv_code}`,
+        value: item.id,
       });
     });
     return itemList;
   };
-  const itemListUnitConvertor = (list) => {
-    const units = [];
-    list.forEach((item) => {
-      units.push(item.itemUnit);
-    });
-    return units;
-  };
-
-  console.log(itemListConvertor(mockItemsList.items));
-  console.log(itemListUnitConvertor(mockItemsList.items));
+  useEffect(() => {
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getInventoryItems();
+    }
+  }, []);
 
   // Constants ---------------------------------------------------
 
-  console.log(toothColors);
-  console.log(toothNumbers);
-  console.log(selectedUnit);
-  //   console.log(details);
-
   return (
-    <div dir="rtl" className="container px-3">
-      {/* headeer */}
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-        <div className="bold-xlarge">اتمام وظیفه</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
-      {/* choosing service type */}
-      <form onSubmit={handleSubmit}>
-        {/* repeatable input */}
-        <div className="repeatable-input-wrapper mt-2">
-          {toothColors?.map((color, index) => (
-            <div
-              key={index}
-              className="repeatable-input position-relative d-flex align-items-center mt-4 "
-            >
-              <div className="flex-grow-1">
-                <div className="  ">
-                  <label
-                    htmlFor="tooth-color"
-                    className="bold500-large px-3 py-2"
-                  >
-                    کد انبار
-                  </label>
-                  <Select
-                    // required
-                    className=""
-                    id="color-option"
-                    name="color-option"
-                    value={color}
-                    onChange={(e) => handleColorChange(e, index)}
-                    options={itemListConvertor(mockItemsList.items)}
-                    placeholder="انتخاب سرویس "
-                    styles={customStyles}
-                    isClearable
-                  />
-                </div>
-                <div className="">
-                  <label
-                    htmlFor="tooth-number"
-                    className="bold500-large px-3 py-2"
-                  >
-                    مقدار مصرف{" "}
-                    <span className="">
-                      {selectedUnit[index].length > 0 &&
-                      selectedUnit[index][0] !== undefined
-                        ? `(${selectedUnit[index][0]?.itemUnit})`
-                        : ""}
-                    </span>
-                  </label>
-                  {toothNumbers?.map((number, i) => (
-                    <div key={i}>
-                      {index === i && (
-                        <input
-                          //required
-                          type="text"
-                          name="last-name"
-                          className={`form-control rounded-pill mb-3 py-2`}
-                          id="last-name"
-                          placeholder="نام خانوادگی را وارد کنید"
-                          onChange={(event) => handleNumberChange(event, i)}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <span
-                className={`delete-field-btn mt-4 has-pointer me-2 border-0 rounded-circle text-white bg-default fw-bold ${
-                  toothColors.length > 1 ? "" : "disabled"
-                }`}
-                onClick={() => handleDelete(index)}
+    inventoryList && (
+      <div dir="rtl" className="container px-3 mt-100">
+        {/* headeer */}
+        <SingleHeader title={"اتمام وظیفه"} location={location.state} />
+
+        {/* choosing service type */}
+        <form onSubmit={handleSubmit}>
+          {/* repeatable input */}
+          <div className="repeatable-input-wrapper mt-2">
+            {toothColors?.map((color, index) => (
+              <div
+                key={index}
+                className="repeatable-input position-relative d-flex align-items-center mt-4 "
               >
-                {toothColors.length > 1 ? <MinusButton /> : <MinusButtonGray />}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div
-          className="bg-white rounded-pill py-2 px-2 d-inline-block border-royal-2 mt-4 has-pointer"
-          onClick={handleAddFields}
-        >
-          <PlusButton />
-          <span className="bold-large me-3">افزودن جدید</span>
-        </div>
-        <div className="d-flex justify-content-center align-items-center px-1 py-2 mt-3">
-          <button
-            className="btn-royal-bold rounded-pill py-3 text-center has-pointer"
-            type="submit"
+                <div className="flex-grow-1">
+                  <div className="  ">
+                    <label
+                      htmlFor="tooth-color"
+                      className="bold500-large px-3 py-2"
+                    >
+                      کد انبار
+                    </label>
+                    <Select
+                      // required
+                      className=""
+                      id="color-option"
+                      name="color-option"
+                      value={color}
+                      onChange={(e) => handleColorChange(e, index)}
+                      options={itemListConvertor(inventoryList)}
+                      placeholder="کد انبار را انتخاب کنید"
+                      styles={customStyles}
+                      isClearable
+                    />
+                  </div>
+                  <div className="">
+                    <label
+                      htmlFor="tooth-number"
+                      className="bold500-large px-3 py-2"
+                    >
+                      مقدار مصرف{" "}
+                      <span className="">
+                        {selectedUnit[index].length > 0 &&
+                        selectedUnit[index][0] !== undefined
+                          ? `(${selectedUnit[index][0]?.unit})`
+                          : ""}
+                      </span>
+                    </label>
+                    {toothNumbers?.map((number, i) => (
+                      <div key={i}>
+                        {index === i && (
+                          <input
+                            //required
+                            type="text"
+                            name="last-name"
+                            autoComplete="off"
+                            className={`form-control rounded-pill mb-3 py-2`}
+                            id="last-name"
+                            placeholder="مقدار مصرف را وارد کنید"
+                            onChange={(event) => handleNumberChange(event, i)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <span
+                  className={`delete-field-btn mt-4 has-pointer me-2 border-0 rounded-circle text-white bg-default fw-bold ${
+                    toothColors.length > 1 ? "" : "disabled"
+                  }`}
+                  onClick={() => handleDelete(index)}
+                >
+                  {toothColors.length > 1 ? (
+                    <MinusButton />
+                  ) : (
+                    <MinusButtonGray />
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div
+            className="bg-white rounded-pill py-2 pe-2 ps-5 d-inline-block border-royal-2 mt-4 has-pointer"
+            onClick={handleAddFields}
           >
-            اتمام وظیفه
-          </button>
-        </div>
-      </form>
-    </div>
+            <PlusButton />
+            <span className="bold-large me-3">افزودن جدید</span>
+          </div>
+          <div className="d-flex justify-content-center align-items-center px-1 py-2 mt-3">
+            <button
+              className="btn-royal-bold rounded-pill py-3 text-center has-pointer"
+              type="submit"
+            >
+              اتمام وظیفه
+            </button>
+          </div>
+        </form>
+      </div>
+    )
   );
 };
 

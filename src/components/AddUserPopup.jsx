@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from "react";
 import CloseIcon from "../assets/svg-icons/CloseIcon";
 import Select from "react-select";
-import fetchData from "../util-functions/fetchData";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
+import axiosInstance from "../util-functions/axiosInstance";
 
-const AddUserPopup = ({ isPopupActive }) => {
-  const accessToken = window.localStorage.getItem("AccessToken");
-
+const AddUserPopup = ({ isPopupActive, clientID }) => {
   const [selectedUser, setSelectedUser] = useState();
   const [allUsers, setAllUsers] = useState();
   const [reformattedUsers, setReformattedUsers] = useState([]);
   const customStyles = {
     option: (defaultStyles, state) => ({
       ...defaultStyles,
-      color: state.isSelected ? "#2f66db" : "#79a3fe",
-      backgroundColor: state.isSelected ? "#b8cfff" : "#fff)",
+      color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+      backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
       padding: "8px",
       fontWeight: "bold",
+      ":not(:last-child)": {
+        borderBottom: "2px solid var(--gray-ultra-light)",
+      },
       ":hover": {
-        backgroundColor: "#dee7fa",
-        color: "var(--blue-royal)",
+        color: "#000",
       },
     }),
     control: (defaultStyles) => ({
@@ -31,12 +31,12 @@ const AddUserPopup = ({ isPopupActive }) => {
       paddingBlock: "4px",
       border: "none",
       ":hover": {
-        border: "2px solid var( --blue-royal)",
+        border: "1px solid var( --blue-royal)",
       },
     }),
     singleValue: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontWeight: "bold",
     }),
     placeholder: (defaultStyles) => ({
@@ -53,7 +53,9 @@ const AddUserPopup = ({ isPopupActive }) => {
       },
       backgroundColor: "var(--blue-royal-very-light)",
       padding: "3px",
-      marginRight: "5px",
+      marginRight: "8px",
+      marginLeft: "8px",
+      marginBlock: "4px",
       borderRadius: "6px",
     }),
     clearIndicator: (defaultStyles) => ({
@@ -65,12 +67,12 @@ const AddUserPopup = ({ isPopupActive }) => {
     }),
     menuList: (defaultStyles) => ({
       ...defaultStyles,
-      borderRadius: "8px",
-      border: "2px solid var( --blue-royal)",
+      borderRadius: "4px",
+      paddingInline: "10px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontSize: "16px",
     }),
     multiValue: (defaultStyles) => ({
@@ -87,42 +89,26 @@ const AddUserPopup = ({ isPopupActive }) => {
       padding: "2px",
       margin: "5px",
     }),
+    menu: (defaultStyles) => ({
+      ...defaultStyles,
+      width: "90%",
+      marginRight: "5%",
+      border: "none",
+    }),
+    indicatorSeparator: (defaultStyles) => ({
+      ...defaultStyles,
+      display: "none",
+    }),
   };
 
-  const getAllUsersURL = "get Users URL";
-  const addNewUserURL = "Add New User URL";
-  const getAllUsersHeader = new Headers();
-  const addNewUserHeader = new Headers();
-  getAllUsersHeader.append("Authorization", `Bearer ${accessToken}`);
-  addNewUserHeader.append("Authorization", `Bearer ${accessToken}`);
-  const addNewUserFormdata = new FormData();
-  addNewUserFormdata.append("userID", selectedUser);
-  const getAllUsersRequestOptions = {
-    method: "POST",
-    headers: getAllUsersHeader,
-    redirect: "follow",
-  };
-  const mockAllUsersData = {
-    users: [
-      {
-        userID: 1,
-        userName: "علی قناتی",
-      },
-      {
-        userID: 2,
-        userName: "2علی قناتی",
-      },
-      {
-        userID: 3,
-        userName: "3علی قناتی",
-      },
-    ],
-  };
-
-  const getAllUsers = async () => {
-    // const response = await fetchData(getAllUsersURL,getAllUsersRequestOptions),
-    const response = mockAllUsersData;
-    setAllUsers(response.users);
+  const getOrphanUsers = async () => {
+    try {
+      const response = await axiosInstance.post("/user/orphan_clients");
+      console.log(response.data);
+      setAllUsers(response.data.users);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const reformatUser = () => {
@@ -137,31 +123,34 @@ const AddUserPopup = ({ isPopupActive }) => {
     });
   };
 
-  const handleAddNewUser = async () => {
-    Loading.standard("در حال ارسال درخواست");
-    addNewUserFormdata.append("userID", selectedUser.value);
-    const addNewUserRequestOptions = {
-      method: "POST",
-      headers: addNewUserHeader,
-      body: addNewUserFormdata,
-      redirect: "follow",
-    };
-    const response = await fetchData(addNewUserURL, addNewUserRequestOptions);
-    if (response.success) {
+  const handleAddNewUserAxios = async () => {
+    console.log(selectedUser.value, clientID);
+    const formdata = new FormData();
+    formdata.append("userID", selectedUser.value);
+    formdata.append("clientID", clientID);
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post(
+        "/client/add_employee",
+        formdata
+      );
+
       Loading.remove();
-      isPopupActive(false);
-      Notify.success("کاربر با موفقیت افزوده شد");
-    } else {
+      if (response.data.response) {
+        Notify.success(response.data.response.response);
+        isPopupActive(false);
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
       Loading.remove();
       isPopupActive(false);
       Notify.failure("مشکلی پیش آمده ! مجددا تلاش کنید");
     }
-
-    console.log(selectedUser);
   };
 
   useEffect(() => {
-    getAllUsers();
+    getOrphanUsers();
   }, []);
   useEffect(() => {
     reformatUser();
@@ -191,15 +180,16 @@ const AddUserPopup = ({ isPopupActive }) => {
           options={reformattedUsers}
           placeholder="انتخاب کنید"
           styles={customStyles}
+          noOptionsMessage={() => {
+            return "کاربری وجود ندارد";
+          }}
           isClearable
-          // isMulti
-          // hideSelectedOptions={false}
         />
       </div>
       <button
         className="btn-royal-bold rounded-pill flex-grow-1 py-3 mt-3"
         disabled={selectedUser ? false : true}
-        onClick={handleAddNewUser}
+        onClick={handleAddNewUserAxios}
       >
         افزودن
       </button>

@@ -1,248 +1,88 @@
 import React, { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
-import fetchData from "../util-functions/fetchData";
+import { useLocation, useNavigate } from "react-router-dom";
 import PackageCard from "./PackageCard";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
+import axiosInstance from "../util-functions/axiosInstance";
+import SingleHeader from "./SingleHeader";
+import useRoleSetter from "../micro-components/useRoleSetter";
+import Message from "../micro-components/Message";
 
 const AllDeliveryTasks = () => {
-  const mockPackagesData = {
-    userInfo: {
-      mobile: "9360390088",
-      userAvatar:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      userCaps: {
-        "لیست کاربران": true,
-        "کسب و کارها": true,
-        اطلاعیه: true,
-        پروفایل: true,
-        "وظایف پیک": true,
-      },
-      userFirstName: "حمید",
-      userID: 123,
-      userLastName: "منشی نژاد",
-      userRole: ["reception"],
-    },
-    packages: {
-      106: {
-        clientDetails: {
-          clientName: "دمو123",
-          clientAddress: "ارومیه مسجد شیخ",
-          clientPhone: "0441212121",
-          clientAvatar:
-            "https://samane.zbbo.net/wp-content/uploads/2023/10/220220152119-150x150.jpg",
-        },
-        sent: [
-          {
-            taskID: 436,
-            taskType: "Cro-Cobalt Partial",
-          },
-          {
-            taskID: 437,
-            taskType: "some shity task",
-          },
-          {
-            taskID: 438,
-            taskType: "Implant",
-          },
-        ],
-        receive: [
-          {
-            taskID: 440,
-            taskType: "PMMA",
-          },
-        ],
-      },
-      110: {
-        clientDetails: {
-          clientName: "دمو123",
-          clientAddress: "ارومیه مسجد شیخ",
-          clientPhone: "0441212121",
-          clientAvatar:
-            "https://samane.zbbo.net/wp-content/uploads/2023/10/220220152119-150x150.jpg",
-        },
-        sent: [
-          {
-            taskID: 436,
-            taskType: "Cro-Cobalt Partial",
-          },
-        ],
-        receive: [
-          {
-            taskID: 440,
-            taskType: "PMMA",
-          },
-        ],
-      },
-      113: {
-        clientDetails: {
-          clientName: "دمو123",
-          clientAddress: "ارومیه مسجد شیخ",
-          clientPhone: "0441212121",
-          clientAvatar:
-            "https://samane.zbbo.net/wp-content/uploads/2023/10/220220152119-150x150.jpg",
-        },
-        sent: [
-          {
-            taskID: 436,
-            taskType: "Cro-Cobalt Partial",
-          },
-        ],
-        receive: [
-          {
-            taskID: 440,
-            taskType: "PMMA",
-          },
-        ],
-      },
-      116: {
-        clientDetails: {
-          clientName: "دمو123",
-          clientAddress: "ارومیه مسجد شیخ",
-          clientPhone: "0441212121",
-          clientAvatar:
-            "https://samane.zbbo.net/wp-content/uploads/2023/10/220220152119-150x150.jpg",
-        },
-        sent: [
-          {
-            taskID: 436,
-            taskType: "Cro-Cobalt Partial",
-          },
-        ],
-        receive: [
-          {
-            taskID: 440,
-            taskType: "PMMA",
-          },
-        ],
-      },
-      119: {
-        clientDetails: {
-          clientName: "دمو123",
-          clientAddress: "ارومیه مسجد شیخ",
-          clientPhone: "0441212121",
-          clientAvatar:
-            "https://samane.zbbo.net/wp-content/uploads/2023/10/220220152119-150x150.jpg",
-        },
-        sent: [
-          {
-            taskID: 436,
-            taskType: "Cro-Cobalt Partial",
-          },
-        ],
-        receive: [
-          {
-            taskID: 440,
-            taskType: "PMMA",
-          },
-        ],
-      },
-      121: {
-        clientDetails: {
-          clientName: "دمو123",
-          clientAddress: "ارومیه مسجد شیخ",
-          clientPhone: "0441212121",
-          clientAvatar:
-            "https://samane.zbbo.net/wp-content/uploads/2023/10/220220152119-150x150.jpg",
-        },
-        sent: [
-          {
-            taskID: 436,
-            taskType: "Cro-Cobalt Partial",
-          },
-        ],
-        receive: [
-          {
-            taskID: 440,
-            taskType: "PMMA",
-          },
-        ],
-      },
-      132: {
-        clientDetails: {
-          clientName: "دمو123",
-          clientAddress: "ارومیه مسجد شیخ",
-          clientPhone: "0441212121",
-          clientAvatar:
-            "https://samane.zbbo.net/wp-content/uploads/2023/10/220220152119-150x150.jpg",
-        },
-        sent: [
-          {
-            taskID: 436,
-            taskType: "Cro-Cobalt Partial",
-          },
-        ],
-        receive: [
-          {
-            taskID: 440,
-            taskType: "PMMA",
-          },
-        ],
-      },
-    },
-  };
-
-  const accessToken = window.localStorage.getItem("AccessToken");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [allpackagesData, setAllPackagesData] = useState();
   //   ------------------------------------------------------
-  let packagesKeys = {};
-  let packagesValues = {};
-  let packagesArray = [];
-
-  if (allpackagesData) {
-    packagesKeys = Object.keys(allpackagesData);
-    packagesValues = Object.values(allpackagesData);
-    packagesKeys.forEach((key, index) => {
-      packagesArray.push({
-        clientID: key,
-        packages: packagesValues[index],
-      });
-    });
-  }
-  //   ------------------------------------------------------
-
-  const getAllPackagesURL = "some URL";
-  const getAllPackagesHeader = new Headers();
-  getAllPackagesHeader.append("Authorization", `Bearer ${accessToken}`);
-  const getAllPackagesFormdata = new FormData();
-
-  const getAllPackagesRequestOptions = {
-    method: "POST",
-    headers: getAllPackagesHeader,
-    redirect: "follow",
+  const [userRole, setUserRole] = useState();
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
+  const [isLoading, setIsLoading] = useState(true);
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
   };
-  const getPackagesData = async (url, options) => {
-    Loading.standard("در حال دریافت اطلاعات");
-    // const response = await fetchData(url, options);
-    const response = mockPackagesData;
-    setAllPackagesData(mockPackagesData.packages);
 
-    console.log(response);
-    Loading.remove();
+  const getPackageList = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/task/all_packages");
+      console.log(response.data.response);
+      setAllPackagesData(response.data.response.packages);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
 
   useEffect(() => {
-    getPackagesData(getAllPackagesURL, getAllPackagesRequestOptions);
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    }
+    getPackageList();
+    getUser();
   }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      !isReception && navigate("/unauthorized");
+    }
+  }, [isReception]);
 
-  console.log(packagesArray);
   return (
-    <div className="container px-3" dir="rtl">
-      <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-        <div className="bold-xlarge">لیست وظایف پیک</div>
-        <Link to="/">
-          <BackArrow />
-        </Link>
-      </header>
-      <section>
-        {packagesArray.map((pkg, index) => {
-          return (
-            <PackageCard key={index} packageData={pkg} isFromShipping={true} />
-          );
-        })}
-      </section>
-    </div>
+    allpackagesData && (
+      <div className="container px-3 mt-100" dir="rtl">
+        <SingleHeader title={"لیست وظایف پیک"} location={location.state} />
+        <section>
+          {allpackagesData.length ? (
+            allpackagesData.map((pkg, index) => {
+              return (
+                <PackageCard
+                  key={index}
+                  packageData={pkg}
+                  isFromShipping={true}
+                />
+              );
+            })
+          ) : (
+            <Message>وظیفه ای ثبت نشده است</Message>
+          )}
+        </section>
+      </div>
+    )
   );
 };
 

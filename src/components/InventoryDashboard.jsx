@@ -4,6 +4,7 @@ import InventoryItemCard from "./InventoryItemCard";
 import { Popover, ArrowContainer } from "react-tiny-popover";
 import QuestionIcon from "../assets/svg-icons/QuestionIcon";
 import useMathRound from "../micro-components/UseMathRound";
+import Message from "../micro-components/Message";
 
 const InventoryDashboard = ({ dashboardData }) => {
   console.log(dashboardData);
@@ -22,18 +23,23 @@ const InventoryDashboard = ({ dashboardData }) => {
     ];
   }, [dashboardData]);
   const mean = useMemo(() => {
-    return (
-      (parseInt(dashboardData.overallStockStatus.inSufficient) /
-        (parseInt(dashboardData.overallStockStatus.sufficient) +
-          parseInt(dashboardData.overallStockStatus.inSufficient))) *
-      100
-    );
+    const numerator = parseInt(dashboardData.overallStockStatus.inSufficient);
+    const demonimator =
+      parseInt(dashboardData.overallStockStatus.sufficient) +
+      parseInt(dashboardData.overallStockStatus.inSufficient);
+
+    if (demonimator === 0) {
+      return 0;
+    } else return numerator / demonimator;
   }, [dashboardData]);
+  console.log(mean);
   const roundedMean = useMathRound(mean);
   const COLORS = useMemo(() => {
     return ["var(--green)", "var(--red-l)"];
   }, []);
 
+  console.log(roundedMean === NaN);
+  console.log(roundedMean);
   return (
     <div className="mt-3 mb-100 px-3">
       <div className="bg-white rounded-5 p-4">
@@ -143,9 +149,13 @@ const InventoryDashboard = ({ dashboardData }) => {
           همه محصولات
         </span>
       </div>
-      {dashboardData.inSufficientStocks.map((data, index) => {
-        return <InventoryItemCard key={index} data={data} />;
-      })}
+      {dashboardData.inSufficientStocks ? (
+        dashboardData.inSufficientStocks.map((data, index) => {
+          return <InventoryItemCard key={index} data={data} />;
+        })
+      ) : (
+        <Message>آیتمی برای نمایش وجود ندارد</Message>
+      )}
     </div>
   );
 };

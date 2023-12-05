@@ -95,6 +95,12 @@ button.fliper {
 .mt-100 {
   margin-top: 100px;
 }
+.mt-150 {
+  margin-top: 150px;
+}
+.pb-100 {
+  padding-bottom: 100px;
+}
 
 .message {
   background-color: var(--blue-royal-very-light);
@@ -270,8 +276,10 @@ button.fliper {
 /* unauth */
 
 .unauth-message-box {
-  border-bottom: "8px solid var(--red)";
   position: absolute;
+  max-width: var(--general-width);
+  width: 90vw;
   top: 50%;
-  transform: translateY(-50%);
+  right: 50%;
+  transform: translate(50%, -50%);
 }

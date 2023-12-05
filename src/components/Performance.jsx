@@ -12,6 +12,8 @@ import moment from "moment-jalaali";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
 import SingleHeader from "./SingleHeader";
+import useAuth from "../micro-components/useAuth";
+import ErrorPage from "./ErrorPage";
 
 const Performance = () => {
   const navigate = useNavigate();
@@ -34,35 +36,42 @@ const Performance = () => {
   const [filteredCats, setFilteredCats] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const [userRole, setUserRole] = useState();
-  const [
-    isEmployee,
-    isClient,
-    isSupervisor,
-    isShipping,
-    isInventory,
-    isPManager,
-    isFManager,
-    isReception,
-  ] = useRoleSetter(userRole);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, isError, errorItself, response, userRole, hasAccess } =
+    useAuth(["employee", "shipping"]);
 
   useEffect(() => {
-    if (!isLoading) {
-      !isEmployee && !isShipping && navigate("/unauthorized");
-    }
-  }, [isEmployee, isShipping]);
+    !isLoading && !hasAccess && navigate("/unauthorized");
+  }, [isLoading]);
 
-  const getUser = async () => {
-    try {
-      const response = await axiosInstance.post("/user/check_access_token");
-      setUserRole(response.data.response.userInfo.userRole);
-      setIsLoading(false);
-      console.log(response.data.response);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const [userRole, setUserRole] = useState();
+  // const [
+  //   isEmployee,
+  //   isClient,
+  //   isSupervisor,
+  //   isShipping,
+  //   isInventory,
+  //   isPManager,
+  //   isFManager,
+  //   isReception,
+  // ] = useRoleSetter(userRole);
+  // const [isLoading, setIsLoading] = useState(true);
+
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     !isEmployee && !isShipping && navigate("/unauthorized");
+  //   }
+  // }, [isEmployee, isShipping]);
+
+  // const getUser = async () => {
+  //   try {
+  //     const response = await axiosInstance.post("/user/check_access_token");
+  //     setUserRole(response.data.response.userInfo.userRole);
+  //     setIsLoading(false);
+  //     console.log(response.data.response);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
@@ -210,7 +219,6 @@ const Performance = () => {
     }
     if (!isFilter) {
       getActivityDataAxios();
-      getUser();
     }
   }, []);
   useEffect(() => {
@@ -231,12 +239,9 @@ const Performance = () => {
       setIsSubmitted(false);
     }
   }, [isSubmitted, clientName, startDate, endDate]);
-
-  console.log(isEmployee);
-  console.log(isSupervisor);
-  return (
-    performanceData && (
-      <div className="container px-3" dir="rtl">
+  return !isLoading ? (
+    !isError ? (
+      <div className="container px-3 mt-100" dir="rtl">
         {isFilterPopupActive && (
           <>
             <FilterPopup
@@ -262,43 +267,45 @@ const Performance = () => {
           </>
         )}
         <SingleHeader title={"کارکرد"} location={location.state} />
+        {performanceData && (
+          <div className="performance-cards-wrapper mt-4 px-3 shipping-cards-container">
+            {filteredCats.length > 0 && (
+              <>
+                {filteredCats.map((cat, i) => {
+                  return (
+                    <div
+                      key={i}
+                      className="bg-white py-2 px-3 mb-3 rounded-pill has-pointer d-inline ms-1"
+                    >
+                      <span className="thin-default">{cat.label}</span>
+                      <span onClick={() => handleCapReduction(cat)}>
+                        <BLCloseBtn />
+                      </span>
+                    </div>
+                  );
+                })}
+                <hr className="text-primary" />
+              </>
+            )}
+            {!isFilter &&
+              (performanceData.length > 0 ? (
+                performanceData.map((data, index) => {
+                  return <PerformanceCard key={index} data={data} />;
+                })
+              ) : (
+                <Message>مورد یافت نشد</Message>
+              ))}
+            {isFilter &&
+              (filteredData ? (
+                filteredData.map((data, index) => {
+                  return <PerformanceCard key={index} data={data} />;
+                })
+              ) : (
+                <Message>موردی یافت نشد</Message>
+              ))}
+          </div>
+        )}
 
-        <div className="performance-cards-wrapper mt-4 px-3 shipping-cards-container">
-          {filteredCats.length > 0 && (
-            <>
-              {filteredCats.map((cat, i) => {
-                return (
-                  <div
-                    key={i}
-                    className="bg-white py-2 px-3 mb-3 rounded-pill has-pointer d-inline ms-1"
-                  >
-                    <span className="thin-default">{cat.label}</span>
-                    <span onClick={() => handleCapReduction(cat)}>
-                      <BLCloseBtn />
-                    </span>
-                  </div>
-                );
-              })}
-              <hr className="text-primary" />
-            </>
-          )}
-          {!isFilter &&
-            (performanceData.length > 0 ? (
-              performanceData.map((data, index) => {
-                return <PerformanceCard key={index} data={data} />;
-              })
-            ) : (
-              <Message>مورد یافت نشد</Message>
-            ))}
-          {isFilter &&
-            (filteredData ? (
-              filteredData.map((data, index) => {
-                return <PerformanceCard key={index} data={data} />;
-              })
-            ) : (
-              <Message>موردی یافت نشد</Message>
-            ))}
-        </div>
         <span
           className={`drop-shadow has-pointer fixed-bottom-30`}
           onClick={() => {
@@ -308,7 +315,11 @@ const Performance = () => {
           <FilterIcon />
         </span>
       </div>
+    ) : (
+      <ErrorPage error={errorItself} />
     )
+  ) : (
+    Loading.standard("در حال دریافت اطلاعات")
   );
 };
 

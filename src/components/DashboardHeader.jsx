@@ -2,7 +2,7 @@ import React from "react";
 import BellIcon from "../assets/svg-icons/BellIcon";
 import { Link } from "react-router-dom";
 
-const DashboardHeader = ({ user, userRole }) => {
+const DashboardHeader = ({ user }) => {
   const state = user;
   return (
     <div
@@ -14,16 +14,12 @@ const DashboardHeader = ({ user, userRole }) => {
         className="d-flex bg-default rounded-bottom align-items-center py-3 px-1"
       >
         <div>
-          <Link to="/profile" state={{ user: user, userRole: userRole }}>
+          <Link to="/profile">
             <img className="header-avatar" src={state?.userAvatar} alt="" />
           </Link>
         </div>
         <div className="flex-grow-1 d-flex flex-column align-items-start">
-          <Link
-            to="/profile"
-            state={{ user: user, userRole: userRole }}
-            className="bold-large mb-1 me-3"
-          >
+          <Link to="/profile" className="bold-large mb-1 me-3">
             {state?.userFirstName} {state?.userLastName}
           </Link>
         </div>

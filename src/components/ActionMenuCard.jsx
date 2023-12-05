@@ -23,18 +23,8 @@ import AllBusinessesIcon from "../assets/svg-icons/AllBusinessesIcon";
 import UsersActionIcon from "../assets/svg-icons/UsersActionsIcon";
 import ShippingActionIcon from "../assets/svg-icons/ShippingActionIcon";
 
-const ActionMenuCard = ({
-  cap,
-  userInfo,
-  serviceType,
-  clientsList,
-  isSupervisor,
-  userRole,
-  businessInfo,
-  universalUnits,
-}) => {
+const ActionMenuCard = ({ cap, userRole, businessInfo }) => {
   const location = useLocation();
-
   const navigate = useNavigate();
 
   const redirect = (event) => {
@@ -44,13 +34,7 @@ const ActionMenuCard = ({
       navigate("/profile");
     }
     if (target === "ثبت سفارش") {
-      navigate("/registerOrder", {
-        state: {
-          serviceType,
-          clientsList,
-          isSupervisor,
-        },
-      });
+      navigate("/registerOrder");
     }
     if (target === "کارکرد") {
       navigate("/performance", { state: location.pathname });
@@ -68,7 +52,7 @@ const ActionMenuCard = ({
       navigate("/myTasks");
     }
     if (target === "آیتم جدید") {
-      navigate("/addNewStockItem", { state: universalUnits });
+      navigate("/addNewStockItem");
     }
     if (target === "مرجوعی") {
       //navigate("/returnItem");

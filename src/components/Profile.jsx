@@ -10,7 +10,6 @@ import { Notify } from "notiflix/build/notiflix-notify-aio";
 
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../util-functions/axiosInstance";
-import useRoleSetter from "../micro-components/useRoleSetter";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -32,6 +31,8 @@ const Profile = () => {
   const editProfile = useRef(null);
   const avatarInput = useRef(null);
   const avatar = useRef(null);
+
+  const progressRef = useRef(null);
 
   const getUser = async () => {
     try {
@@ -67,14 +68,25 @@ const Profile = () => {
   const handleAvatarChange = () => {
     const choosenFile = avatarInput.current.files[0];
     if (choosenFile) {
+      console.log(choosenFile);
       setUserAvatar(choosenFile);
       setAvatarIsChanged(true);
+
       const reader = new FileReader();
 
       reader.addEventListener("load", () => {
+        console.log(reader);
         avatar.current.setAttribute("src", reader.result);
       });
+
       reader.readAsDataURL(choosenFile);
+
+      // reader.addEventListener("progress", (event) => {
+      //   if (event.lengthComputable) {
+      //     const progress = Math.round((event.loaded / event.total) * 100);
+      //     progressRef.current.textContent = `${progress}%`;
+      //   }
+      // });
     }
   };
   const handleMobileValidation = (e) => {
@@ -136,12 +148,7 @@ const Profile = () => {
       Loading.standard("در حال ارسال درخواست");
       const response = await axiosInstance.post(
         "/user/update_profile",
-        formdata,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formdata
       );
       if (response) {
         Loading.remove();
@@ -158,7 +165,7 @@ const Profile = () => {
   };
   return (
     userFirstName && (
-      <>
+      <div className="container mt-100 px-3" dir="rtl">
         {isPopupActive && (
           <>
             <ExitProfilePopup isPopupActive={setIsPopupActive} />
@@ -170,8 +177,15 @@ const Profile = () => {
             />
           </>
         )}
-        <div ref={editProfile} dir="rtl" className="container d-none">
-          <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
+        <div ref={editProfile} className=" d-none">
+          <header
+            className="d-flex bg-default align-items-center justify-content-between fixed-top top-0 p-3"
+            style={{
+              zIndex: 5,
+              maxWidth: "var(--general-width)",
+              margin: "0 auto",
+            }}
+          >
             <div className="bold-xlarge">ویرایش پروفایل کاربری</div>
             <span onClick={handleChangePage}>
               <BackArrow />
@@ -202,6 +216,7 @@ const Profile = () => {
                 >
                   <EditPen />
                   <span>{avatarIsChanged ? "انتخاب مجدد" : "انتخاب عکس"}</span>
+                  {/* <div ref={progressRef}>0%</div> */}
                 </label>
               </div>
             </div>
@@ -254,7 +269,7 @@ const Profile = () => {
             <input
               defaultValue={mobile}
               maxLength={10}
-              type="tel"
+              type="number"
               name="mobile"
               className={`form-control rounded-pill mb-3 py-2 ${
                 mobileIsValid ? "is-valid" : "is-invalid"
@@ -291,7 +306,7 @@ const Profile = () => {
             </button>
           </form>
         </div>
-        <div ref={profile} className="container px-3" dir="rtl">
+        <div ref={profile} className="">
           <SingleHeader title={"پروفایل کاربری"} location={"/"} />
           <div className="text-center d-flex flex-column justify-content-between align-items-center">
             <div>
@@ -328,7 +343,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-      </>
+      </div>
     )
   );
 };

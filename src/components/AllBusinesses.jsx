@@ -303,28 +303,28 @@ const AllBusinesses = () => {
   };
   const getUser = async () => {
     try {
-      //const response = await axiosInstance.post("/user/check_access_token");
-      const response = {
-        data: {
-          response: {
-            userInfo: {
-              mobile: "9360390099",
-              userAvatar:
-                "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-              userCaps: {
-                اطلاعیه: true,
-                پروفایل: true,
-                "لیست سفارشات": true,
-                "کسب و کارها": true,
-              },
-              userFirstName: "حمید",
-              userID: 123,
-              userLastName: "مدیر مالی",
-              userRole: ["financial_manager"],
-            },
-          },
-        },
-      };
+      const response = await axiosInstance.post("/user/check_access_token");
+      // const response = {
+      //   data: {
+      //     response: {
+      //       userInfo: {
+      //         mobile: "9360390099",
+      //         userAvatar:
+      //           "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //         userCaps: {
+      //           اطلاعیه: true,
+      //           پروفایل: true,
+      //           "لیست سفارشات": true,
+      //           "کسب و کارها": true,
+      //         },
+      //         userFirstName: "حمید",
+      //         userID: 123,
+      //         userLastName: "مدیر مالی",
+      //         userRole: ["financial_manager"],
+      //       },
+      //     },
+      //   },
+      // };
       setUserRole(response.data.response.userInfo.userRole);
       setIsLoading(false);
       console.log(response.data.response);
@@ -387,7 +387,7 @@ const AllBusinesses = () => {
 
   // console.log(businessData);
   return (
-    <div className="container px-3" dir="rtl">
+    <div className="container px-3 mt-100" dir="rtl">
       <SingleHeader title={"لیست کسب و کارها"} location={"/"} />
       <section className="d-flex align-items-center gap-3 mb-3">
         <input

@@ -29,7 +29,8 @@
   --font-bold: 700;
   --font-bold500: 500;
   --font-thin: 400;
-  --general-width: 390px;
+  --general-width: 420px;
+  --popup-max-width: 360px;
   --Drop-shadow: 5px 6px 20px -9px rgba(90, 138, 240, 0.28);
   --center-translate: translate(-50%, -50%);
   --radius-light: 10px;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import Calendar30C from "../assets/svg-icons/Calendar30C";
 import EmployeeCard from "./EmployeeCard";
@@ -12,9 +12,11 @@ import moment from "moment-jalaali";
 import useRoleSetter from "../micro-components/useRoleSetter";
 import axiosInstance from "../util-functions/axiosInstance";
 import Message from "../micro-components/Message";
+import SingleHeader from "./SingleHeader";
 
 const PerformanceReport = () => {
   const accessToken = window.localStorage.getItem("AccessToken");
+  const location = useLocation();
   const navigate = useNavigate();
   const {
     ts,
@@ -374,7 +376,7 @@ const PerformanceReport = () => {
   //console.log(reportData);
   return (
     reportData && (
-      <div className="container px-3" dir="rtl">
+      <div className="container px-3 mt-100" dir="rtl">
         {isFilterPopupActive && (
           <>
             <FilterDatePopup
@@ -394,12 +396,7 @@ const PerformanceReport = () => {
             />
           </>
         )}
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2">
-          <div className="bold-xlarge">گزارش کارکرد</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader title={"گزارش کارکرد"} location={location.state} />
         <div className="mt-2">
           <div
             className="d-flex align-items-center bg-white rounded-5 p-3 mb-4 has-pointer"

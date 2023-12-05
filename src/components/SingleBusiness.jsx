@@ -6,6 +6,7 @@ import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
 import ClientTaskCard from "./ClientTaskCard";
 import InvoiceCard from "./InvoiceCard";
+import Message from "../micro-components/Message";
 
 const SingleBusiness = () => {
   const params = useParams();
@@ -94,28 +95,28 @@ const SingleBusiness = () => {
   };
   const getUser = async () => {
     try {
-      //const response = await axiosInstance.post("/user/check_access_token");
-      const response = {
-        data: {
-          response: {
-            userInfo: {
-              mobile: "9360390099",
-              userAvatar:
-                "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-              userCaps: {
-                اطلاعیه: true,
-                پروفایل: true,
-                "لیست سفارشات": true,
-                "کسب و کارها": true,
-              },
-              userFirstName: "حمید",
-              userID: 123,
-              userLastName: "مدیر مالی",
-              userRole: ["financial_manager"],
-            },
-          },
-        },
-      };
+      const response = await axiosInstance.post("/user/check_access_token");
+      // const response = {
+      //   data: {
+      //     response: {
+      //       userInfo: {
+      //         mobile: "9360390099",
+      //         userAvatar:
+      //           "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //         userCaps: {
+      //           اطلاعیه: true,
+      //           پروفایل: true,
+      //           "لیست سفارشات": true,
+      //           "کسب و کارها": true,
+      //         },
+      //         userFirstName: "حمید",
+      //         userID: 123,
+      //         userLastName: "مدیر مالی",
+      //         userRole: ["financial_manager"],
+      //       },
+      //     },
+      //   },
+      // };
       setUserRole(response.data.response.userInfo.userRole);
       setIsLoading(false);
       console.log(response.data.response);
@@ -168,7 +169,7 @@ const SingleBusiness = () => {
 
   return (
     businessInfo && (
-      <div className="container px-3" dir="rtl">
+      <div className="container px-3 mt-100" dir="rtl">
         <SingleHeader title={"عنوان کسب و کار"} location={location.state} />
         <section className="d-flex flex-column align-items-center gap-3">
           <div>
@@ -262,9 +263,13 @@ const SingleBusiness = () => {
           )}
           {tabLocation === "invoices" && (
             <div className="pt-2 pb-3">
-              {invoices.map((invoice, index) => {
-                return <InvoiceCard key={index} factor={invoice} />;
-              })}
+              {invoices ? (
+                invoices.map((invoice, index) => {
+                  return <InvoiceCard key={index} factor={invoice} />;
+                })
+              ) : (
+                <Message>در حال حاظر فاکتوری صادر نشده</Message>
+              )}
             </div>
           )}
           {tabLocation === "info" && (

@@ -1,14 +1,12 @@
 import React from "react";
 
 import SingleTaskNotepad from "../assets/svg-icons/SingleTaskNotepad";
-import SingleTaskCalendar from "../assets/svg-icons/SingleTaskCalendar";
 import SingleTaskReceipt from "../assets/svg-icons/SingleTaskReceipt";
 import TaskTypeIcon from "../assets/svg-icons/TaskTypeIcon";
 import PatientNameIcon from "../assets/svg-icons/PatientNameIcon";
 import PatientAgeIcon from "../assets/svg-icons/PatientAgeIcon";
 
 const Overall = ({ overAllData }) => {
-  console.log(overAllData);
   const toothColor = overAllData.toothColor;
   return (
     <div className="single-task-container">

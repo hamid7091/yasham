@@ -1,6 +1,6 @@
 import React from "react";
 import CommentIcon from "../assets/svg-icons/CommentIcon";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useRoleSetter from "../micro-components/useRoleSetter";
 
 const SingleTaskFooter = ({
@@ -14,6 +14,7 @@ const SingleTaskFooter = ({
   taskID,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [
     isEmployee,
@@ -24,7 +25,7 @@ const SingleTaskFooter = ({
     isPManager,
     isFManager,
     isReception,
-  ] = useRoleSetter(userInfo.Role);
+  ] = useRoleSetter(userInfo?.Role);
 
   const handleCommentPopup = () => {
     setIsCommentPopupActive(true);
@@ -33,11 +34,10 @@ const SingleTaskFooter = ({
     setIsAssignPopupActive(true);
   };
   const handleEndTaskPopup = () => {
-    !isClient && navigate(`/endTask/${taskID}`);
+    !isClient && navigate(`/endTask/${taskID}`, { state: location.pathname });
     isClient && setIsEndTaskPoupActive(true);
   };
 
-  console.log(userInfo);
   return (
     <div>
       <footer className="footer-container px-4 py-3 fixed-bottom bottom-0 d-flex justify-content-between align-items-center single-footer-bg">

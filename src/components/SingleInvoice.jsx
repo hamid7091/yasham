@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import InvoiceSuccessIcon from "../assets/svg-icons/InvoiceSuccessIcon";
 import InvoiceSinglePendingIcon from "../assets/svg-icons/InvoiceSinglePendingIcon";
 import InvoiceSingleFailIcon from "../assets/svg-icons/InvoiceSingleFailIcon";
@@ -10,12 +9,15 @@ import { Loading } from "notiflix";
 import axiosInstance from "../util-functions/axiosInstance";
 import useRoleSetter from "../micro-components/useRoleSetter";
 import SingleHeader from "./SingleHeader";
+import CancelOrderPopup from "./CancelOrderPopup";
+import PopupBackground from "./PopupBackground";
 
 const SingleInvoice = () => {
   const navigate = useNavigate();
   const param = useParams();
   const location = useLocation();
 
+  const [isCancelModalActive, setIsCancelModalActive] = useState(false);
   const [invoiceData, setInvoiceData] = useState([]);
   const [cards, setCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,11 +130,26 @@ const SingleInvoice = () => {
   }, [isFManager, isClient]);
 
   return (
-    <div className="container px-4" dir="rtl">
+    <div className="container px-3 mt-100" dir="rtl">
       <SingleHeader
         title={`شماره فاکتور ${param.id}`}
         location={location.state}
       />
+      {isCancelModalActive && (
+        <>
+          <CancelOrderPopup
+            orderID={param.id}
+            setisModalActive={setIsCancelModalActive}
+            canceling={"فاکتور"}
+          />
+          <PopupBackground
+            isPopupActive={setIsCancelModalActive}
+            handleStartDateChange={() => {}}
+            handleEndDateChange={() => {}}
+            setStatusField={() => {}}
+          />
+        </>
+      )}
       <section>
         {invoiceData.invoiceStatus === 3 && (
           <section>
@@ -194,6 +211,18 @@ const SingleInvoice = () => {
                 </span>
               </div>
             )}
+            {isFManager && (
+              <div
+                className="d-flex justify-content-between align-items-center px-1 py-2 mt-3"
+                onClick={() => {
+                  setIsCancelModalActive(true);
+                }}
+              >
+                <span className="btn-red-bold rounded-pill flex-grow-1 py-3 text-center has-pointer">
+                  لغو فاکتور
+                </span>
+              </div>
+            )}
           </section>
         )}
         {invoiceData.invoiceStatus === 2 && (
@@ -214,7 +243,9 @@ const SingleInvoice = () => {
           </section>
         )}
       </section>
+
       <hr />
+
       <div className="pe-2">
         <span className="grey-xlarge-bold">لیست سفارشات این فاکتور</span>
         {invoiceData.invoiceStatus === 1 && (

@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useLocation, useNavigate } from "react-router-dom";
 import EditPen from "../assets/svg-icons/EditPen";
 import Select from "react-select";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
@@ -9,9 +8,101 @@ import { Notify } from "notiflix/build/notiflix-notify-aio";
 import img from "../assets/svg-pics/asd.jpg";
 import useRoleSetter from "../micro-components/useRoleSetter";
 import SingleHeader from "../components/SingleHeader";
+const customStyles = {
+  option: (defaultStyles, state) => ({
+    ...defaultStyles,
+    color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+    backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
+    padding: "8px",
+    fontWeight: "bold",
+    ":not(:last-child)": {
+      borderBottom: "2px solid var(--gray-ultra-light)",
+    },
+    ":hover": {
+      color: "#000",
+    },
+  }),
+  control: (defaultStyles) => ({
+    ...defaultStyles,
+    backgroundColor: "#fff",
+    borderRadius: "10rem",
+    paddingInline: "8px",
+    paddingBlock: "4px",
+    border: "none",
+    ":hover": {
+      border: "1px solid var( --blue-royal)",
+    },
+  }),
+  singleValue: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--gray-dark)",
+    fontWeight: "bold",
+  }),
+  placeholder: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--gray-very-light)",
+    fontWeight: "bold",
+    fontSize: "14px",
+  }),
+  dropdownIndicator: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--blue-royal)",
+    ":hover": {
+      color: "var(--blue-royal-light)",
+    },
+    backgroundColor: "var(--blue-royal-very-light)",
+    padding: "3px",
+    marginRight: "8px",
+    marginLeft: "8px",
+    marginBlock: "4px",
+    borderRadius: "6px",
+  }),
+  clearIndicator: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--blue-royal)",
+    ":hover": {
+      color: "var(--blue-royal-light)",
+    },
+  }),
+  menuList: (defaultStyles) => ({
+    ...defaultStyles,
+    borderRadius: "4px",
+    paddingInline: "10px",
+  }),
+  input: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--gray-dark)",
+    fontSize: "16px",
+  }),
+  multiValue: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--blue-royal)",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    paddingRight: "10px",
+  }),
+  multiValueRemove: (defaultStyles) => ({
+    ...defaultStyles,
+    backgroundColor: "var(--blue-royal-light)",
+    borderRadius: "50%",
+    padding: "2px",
+    margin: "5px",
+  }),
+  menu: (defaultStyles) => ({
+    ...defaultStyles,
+    width: "90%",
+    marginRight: "5%",
+    border: "none",
+  }),
+  indicatorSeparator: (defaultStyles) => ({
+    ...defaultStyles,
+    display: "none",
+  }),
+};
 
 const AddNewStockItem = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   // ---------------states------------------
 
   const [itemPicture, setItemPicture] = useState();
@@ -53,82 +144,6 @@ const AddNewStockItem = () => {
 
   const avatarInput = useRef(null);
   const avatar = useRef(null);
-  const customStyles = {
-    option: (defaultStyles, state) => ({
-      ...defaultStyles,
-      color: state.isSelected ? "#2f66db" : "#79a3fe",
-      backgroundColor: state.isSelected ? "#b8cfff" : "#fff)",
-      padding: "8px",
-      fontWeight: "bold",
-      ":hover": {
-        backgroundColor: "#dee7fa",
-        color: "var(--blue-royal)",
-      },
-    }),
-    control: (defaultStyles) => ({
-      ...defaultStyles,
-      backgroundColor: "#fff",
-      borderRadius: "10rem",
-      paddingInline: "8px",
-      paddingBlock: "4px",
-      border: "none",
-      ":hover": {
-        border: "2px solid var( --blue-royal)",
-      },
-    }),
-    singleValue: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--blue-royal)",
-      fontWeight: "bold",
-    }),
-    placeholder: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--gray-very-light)",
-      fontWeight: "bold",
-      fontSize: "14px",
-    }),
-    dropdownIndicator: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--blue-royal)",
-      ":hover": {
-        color: "var(--blue-royal-light)",
-      },
-      backgroundColor: "var(--blue-royal-very-light)",
-      padding: "3px",
-      marginRight: "5px",
-      borderRadius: "6px",
-    }),
-    clearIndicator: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--blue-royal)",
-      ":hover": {
-        color: "var(--blue-royal-light)",
-      },
-    }),
-    menuList: (defaultStyles) => ({
-      ...defaultStyles,
-      borderRadius: "8px",
-    }),
-    input: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--blue-royal)",
-      fontSize: "16px",
-    }),
-    multiValue: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--blue-royal)",
-      borderRadius: "10px",
-      fontWeight: "bold",
-      paddingRight: "10px",
-    }),
-    multiValueRemove: (defaultStyles) => ({
-      ...defaultStyles,
-      backgroundColor: "var(--blue-royal-light)",
-      borderRadius: "50%",
-      padding: "2px",
-      margin: "5px",
-    }),
-  };
   // ---------------functions------------------
   const handleAvatarChange = () => {
     const choosenFile = avatarInput.current.files[0];
@@ -266,8 +281,8 @@ const AddNewStockItem = () => {
 
   console.log(isInventory);
   return (
-    <div className="container px-4" dir="rtl">
-      <SingleHeader title={"ثبت آیتم جدید"} location={"/"} />
+    <div className="container px-3 mt-100" dir="rtl">
+      <SingleHeader title={"ثبت آیتم جدید"} location={location.state} />
       <div className="text-center d-flex flex-column justify-content-center align-items-center">
         <div>
           <img className="avatar-svg-image" ref={avatar} src={img} alt="" />
@@ -310,6 +325,7 @@ const AddNewStockItem = () => {
             required
             type="text"
             name="itemName"
+            autoComplete="off"
             className={`form-control rounded-pill border-0 py-2 ${
               isItemNameValid
                 ? "is-valid"
@@ -341,6 +357,7 @@ const AddNewStockItem = () => {
             required
             type="text"
             name="itemID"
+            autoComplete="off"
             className={`form-control rounded-pill border-0 py-2 ${
               isItemIDValid
                 ? "is-valid"
@@ -388,6 +405,7 @@ const AddNewStockItem = () => {
           <input
             required
             type="number"
+            autoComplete="off"
             name="purchasedAmount"
             className={`form-control rounded-pill border-0 py-2 ${
               isPurchasedAmountValid
@@ -420,6 +438,7 @@ const AddNewStockItem = () => {
             required
             type="number"
             name="purchaseCost"
+            autoComplete="off"
             className={`form-control rounded-pill border-0 py-2 ${
               isPurchaseCostValid
                 ? "is-valid"
@@ -451,6 +470,7 @@ const AddNewStockItem = () => {
             required
             type="number"
             name="warningLimit"
+            autoComplete="off"
             className={`form-control rounded-pill border-0 py-2 ${
               isWarningLimitValid
                 ? "is-valid"

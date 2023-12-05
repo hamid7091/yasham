@@ -114,7 +114,7 @@ const SingleStock = () => {
 
   return (
     singleStockData && (
-      <div className="container px-4" dir="rtl">
+      <div className="container px-3 mt-100" dir="rtl">
         {isRestockPopupOpen && (
           <>
             <RestockPopup
@@ -129,7 +129,7 @@ const SingleStock = () => {
         )}
         <SingleHeader
           title={singleStockData.overallStockData.stockName}
-          location={"/"}
+          location={location.state}
         />
         <div className="d-flex flex-column align-items-center gap-3 bg-white rounded-5 p-4 drop-shadow">
           <img

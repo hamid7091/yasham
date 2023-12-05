@@ -1,36 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
-import fetchData from "../util-functions/fetchData";
 import EditPen from "../assets/svg-icons/EditPen";
-
+import axiosInstance from "../util-functions/axiosInstance";
+import SingleHeader from "./SingleHeader";
+import { Notify } from "notiflix/build/notiflix-notify-aio";
 const EditBusiness = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
   const param = useParams();
-  const getBusinessInfoURL = "Get Business Info URL";
-  const getBusinessInfoHeader = new Headers();
-  getBusinessInfoHeader.append("Authorization", `Bearer ${accessToken}`);
-  const getBusinessInfoFormdata = new FormData();
-  getBusinessInfoFormdata.append("businessID", param.id);
-  const getBusinessInfoRequestOptions = {
-    method: "POST",
-    headers: getBusinessInfoHeader,
-    body: getBusinessInfoFormdata,
-    redirect: "follow",
-  };
-
-  const mockBusinessInfo = {
-    businessInfo: {
-      businessName: "کلینیک قهرمانی",
-      businessTel: "4432659898",
-      businessAvatar:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      businessAddress: "خیابان اینجا کوچه ی اونجا",
-      businessLocation: "www.google.com/googlemaps",
-      businessID: "25",
-    },
-  };
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [businessInfo, setBusinessInfo] = useState();
 
@@ -49,54 +27,48 @@ const EditBusiness = () => {
   const [businessAddressIsValid, setBusinessAddressIsValid] = useState();
   const [locationIsValid, setLocationIsValid] = useState();
 
-  const getBusinessInfo = async (url, options) => {
-    Loading.standard("در حال بارگذاری");
-    // const response = await fetchData(url, options);
-    const response = mockBusinessInfo.businessInfo;
-    setBusinessInfo(response);
-    Loading.remove();
+  const getUserData = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/client/get_client", {
+        clientID: param.id,
+      });
+      Loading.remove();
+      console.log(response.data.response);
+      setBusinessInfo(response.data.response.businessInfo);
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    const formdata = new FormData();
+    businessNameIsValid && formdata.append("businessName", businessName);
+    businessAddress && formdata.append("address", businessAddress);
+    mobileIsValid && formdata.append("phone", businessMobile);
+    avatarIsChanged && formdata.append("clientAvatar", businessAvatar);
+    businessLocation && formdata.append("location", businessLocation);
+    formdata.append("businessID", param.id);
 
-    const editBusinessInfoURL = "Edit Business Info URL";
-    const editBusinessInfoHeader = new Headers();
-    editBusinessInfoHeader.append("Authorization", `Bearer ${accessToken}`);
-    const editBusinessInfoFormdata = new FormData();
-
-    if (businessAvatar) {
-      editBusinessInfoFormdata.append("businessAvatar", businessAvatar);
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post(
+        "/client/update_business",
+        formdata
+      );
+      Loading.remove();
+      if (response.data.response) {
+        Notify.success(response.data.response);
+        navigate(`/businessReception/${param.id}`);
+      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+      Notify.failure("خطا ! لطفا مجددا تلاش کنید");
     }
-    if (businessLocation) {
-      editBusinessInfoFormdata.append("businessLocation", businessLocation);
-    }
-    if (businessName === undefined || businessName === "") {
-      setBusinessNameIsValid(false);
-    } else {
-      editBusinessInfoFormdata.append("businessName", businessName);
-    }
-    if (businessMobile === undefined || businessMobile === "") {
-      setMobileIsValid(false);
-    } else {
-      editBusinessInfoFormdata.append("businessTel", businessMobile);
-    }
-    if (businessAddress === undefined || businessAddress === "") {
-      setBusinessAddressIsValid(false);
-    } else {
-      editBusinessInfoFormdata.append("businessAddress", businessAddress);
-    }
-    const registerBusinessRequestOptions = {
-      method: "POST",
-      headers: editBusinessInfoHeader,
-      body: editBusinessInfoFormdata,
-      redirect: "follow",
-    };
-
-    console.log(businessName);
-    console.log(businessAddress);
-    console.log(businessMobile);
-    console.log(businessLocation);
   };
+
   const handleAvatarChange = () => {
     const choosenFile = avatarInput.current.files[0];
     if (choosenFile) {
@@ -149,17 +121,16 @@ const EditBusiness = () => {
   };
 
   useEffect(() => {
-    getBusinessInfo(getBusinessInfoURL, getBusinessInfoRequestOptions);
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getUserData();
+    }
   }, []);
   return (
     businessInfo && (
-      <div className="container px-3" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-          <div className="bold-xlarge">ویرایش کسب و کار </div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+      <div className="container px-3 mt-100" dir="rtl">
+        <SingleHeader title={"ویرایش کسب و کار"} location={location.state} />
         <div>
           <form
             className="edit-form mt-5 pb-4"
@@ -230,7 +201,7 @@ const EditBusiness = () => {
               </span>
             </label>
             <input
-              defaultValue={businessInfo.businessTel}
+              defaultValue={businessInfo.businessContact}
               maxLength={10}
               type="number"
               name="mobile"
@@ -281,7 +252,7 @@ const EditBusiness = () => {
               ></span>
             </label>
             <input
-              defaultValue={businessInfo.businessLocation}
+              defaultValue={businessInfo.locations}
               onChange={(event) => handleBusinessLocatoinValidation(event)}
               type="text"
               name="location"
@@ -293,7 +264,7 @@ const EditBusiness = () => {
               type="submit"
               className="btn-royal-bold rounded-pill flex-grow-1 text-center py-3 has-pointer"
             >
-              ثبت کسب و کار
+              اعمال تغییرات
             </button>
           </form>
         </div>

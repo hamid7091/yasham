@@ -6,7 +6,7 @@ import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import axiosInstance from "../util-functions/axiosInstance";
 
-const CancelOrderPopup = ({ orderID, setisModalActive }) => {
+const CancelOrderPopup = ({ orderID, setisModalActive, canceling }) => {
   const navigate = useNavigate();
 
   const handleClosePopup = () => {
@@ -14,17 +14,27 @@ const CancelOrderPopup = ({ orderID, setisModalActive }) => {
   };
 
   const handleCancelOrder = async () => {
+    let url = "";
+    let data = {};
+    if (canceling === "سفارش") {
+      url = "order/abortion";
+      data = { orderID };
+    }
+    if (canceling === "فاکتور") {
+      url = "invoice/abort";
+      data = { invoiceID: orderID };
+    }
+
     try {
       Loading.standard("در حال ارسال درخواست");
-      const response = await axiosInstance.post("order/abortion", {
-        orderID,
-      });
+      const response = await axiosInstance.post(url, data);
       console.log(response.data.response);
       Loading.remove();
       if (response.data.response.success) {
         setisModalActive(false);
-        Notify.success("سفارش با موفقیت لغو شد");
-        navigate("orderList");
+        Notify.success(`${canceling} با موفقیت لغو شد`);
+        canceling === "سفارش" && navigate("/orderList");
+        canceling === "فاکتور" && navigate("/invoices");
       }
     } catch (error) {
       console.error(error);
@@ -38,7 +48,7 @@ const CancelOrderPopup = ({ orderID, setisModalActive }) => {
       <div className="exit-profile-popup bg-default rounded-5 p-4 show">
         <div className="exit-profile-popup-head position-relative">
           <div className="d-flex align-items-center justify-content-between mb-3">
-            <span className="bold-xxlarge">لغو سفارش</span>
+            <span className="bold-xxlarge">لغو {canceling}</span>
             <span className="has-pointer" onClick={handleClosePopup}>
               <CloseIcon />
             </span>
@@ -49,7 +59,7 @@ const CancelOrderPopup = ({ orderID, setisModalActive }) => {
         </div>
         <div className="exit-profile-popup-taxt text-center">
           <p className="lgrey-large-bold500">
-            آیا از لغو این سفارش مطمئن هستید ؟
+            آیا از لغو این {canceling} مطمئن هستید ؟
           </p>
         </div>
         <div className="d-flex justify-content-center gap-3 align-items-center">

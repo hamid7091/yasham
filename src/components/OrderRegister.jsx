@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import BackArrow from "../assets/svg-icons/BackArrow";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import Select from "react-select";
@@ -11,8 +10,100 @@ import Message from "../micro-components/Message";
 import MinusButton from "../assets/svg-icons/MinusButton";
 import EditButton from "../assets/svg-icons/EditButton";
 import axiosInstance from "../util-functions/axiosInstance";
-import useRoleSetter from "../micro-components/useRoleSetter";
+import useAuth from "../micro-components/useAuth";
 import SingleHeader from "./SingleHeader";
+import ErrorPage from "./ErrorPage";
+const customStyles = {
+  option: (defaultStyles, state) => ({
+    ...defaultStyles,
+    color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+    backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
+    padding: "8px",
+    fontWeight: "bold",
+    ":not(:last-child)": {
+      borderBottom: "2px solid var(--gray-ultra-light)",
+    },
+    ":hover": {
+      color: "#000",
+    },
+  }),
+  control: (defaultStyles) => ({
+    ...defaultStyles,
+    backgroundColor: "#fff",
+    borderRadius: "10rem",
+    paddingInline: "8px",
+    paddingBlock: "4px",
+    border: "none",
+    ":hover": {
+      border: "1px solid var( --blue-royal)",
+    },
+  }),
+  singleValue: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--gray-dark)",
+    fontWeight: "bold",
+  }),
+  placeholder: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--gray-very-light)",
+    fontWeight: "bold",
+    fontSize: "14px",
+  }),
+  dropdownIndicator: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--blue-royal)",
+    ":hover": {
+      color: "var(--blue-royal-light)",
+    },
+    backgroundColor: "var(--blue-royal-very-light)",
+    padding: "3px",
+    marginRight: "8px",
+    marginLeft: "8px",
+    marginBlock: "4px",
+    borderRadius: "6px",
+  }),
+  clearIndicator: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--blue-royal)",
+    ":hover": {
+      color: "var(--blue-royal-light)",
+    },
+  }),
+  menuList: (defaultStyles) => ({
+    ...defaultStyles,
+    borderRadius: "4px",
+    paddingInline: "10px",
+  }),
+  input: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--gray-dark)",
+    fontSize: "16px",
+  }),
+  multiValue: (defaultStyles) => ({
+    ...defaultStyles,
+    color: "var(--blue-royal)",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    paddingRight: "10px",
+  }),
+  multiValueRemove: (defaultStyles) => ({
+    ...defaultStyles,
+    backgroundColor: "var(--blue-royal-light)",
+    borderRadius: "50%",
+    padding: "2px",
+    margin: "5px",
+  }),
+  menu: (defaultStyles) => ({
+    ...defaultStyles,
+    width: "90%",
+    marginRight: "5%",
+    border: "none",
+  }),
+  indicatorSeparator: (defaultStyles) => ({
+    ...defaultStyles,
+    display: "none",
+  }),
+};
 
 const OrderRegister = () => {
   const location = useLocation();
@@ -21,17 +112,6 @@ const OrderRegister = () => {
   const mobileRadio = useRef(null);
   const maleRadio = useRef(null);
   const femaleRadio = useRef(null);
-  const [userRole, setUserRole] = useState();
-  const [
-    isEmployee,
-    isClient,
-    isSupervisor,
-    isShipping,
-    isInventory,
-    isPManager,
-    isFManager,
-    isReception,
-  ] = useRoleSetter(userRole);
 
   const [firstname, setFirstname] = useState();
   const [lastname, setLastname] = useState();
@@ -40,125 +120,23 @@ const OrderRegister = () => {
   const [description, setDescription] = useState();
   const [clientName, setClientName] = useState();
   const [clientID, setClientID] = useState();
-
   const [selectedDetail, setSelectedDetail] = useState(null);
 
-  // Add Details Popup States
+  const [businessList, setBusinessList] = useState();
+  const [formattedBusinessList, setFormattedBusinessList] = useState([]);
+  const [fixedServices, setFixedServices] = useState([]);
+  const [mobileServices, setMobileServices] = useState([]);
 
   const [isAddDetailPopupActive, setIsAddDetailPopupActive] = useState(false);
   const [details, setDetails] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const { isLoading, isError, errorItself, hasAccess, isReady, isReception } =
+    useAuth(["client", "reception"]);
+
   useEffect(() => {
-    console.log(isClient);
-    console.log("ue1");
-    if (!isLoading) {
-      !isClient && !isSupervisor && navigate("/unauthorized");
-    }
-  }, [isClient, isSupervisor]);
+    isReady && !isLoading && !hasAccess && navigate("/unauthorized");
+  }, [isLoading, isReady]);
 
-  const fixedServices = location.state?.serviceType[1].serviceTaskTypes;
-  const mobileServices = location.state?.serviceType[2].serviceTaskTypes;
-  const clients = location.state?.clientsList;
-
-  const customStyles = {
-    option: (defaultStyles, state) => ({
-      ...defaultStyles,
-      color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
-      backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
-      padding: "8px",
-      fontWeight: "bold",
-      ":not(:last-child)": {
-        borderBottom: "2px solid var(--gray-ultra-light)",
-      },
-      ":hover": {
-        color: "#000",
-      },
-    }),
-    control: (defaultStyles) => ({
-      ...defaultStyles,
-      backgroundColor: "#fff",
-      borderRadius: "10rem",
-      paddingInline: "8px",
-      paddingBlock: "4px",
-      border: "none",
-      ":hover": {
-        border: "1px solid var( --blue-royal)",
-      },
-    }),
-    singleValue: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--gray-dark)",
-      fontWeight: "bold",
-    }),
-    placeholder: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--gray-very-light)",
-      fontWeight: "bold",
-      fontSize: "14px",
-    }),
-    dropdownIndicator: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--blue-royal)",
-      ":hover": {
-        color: "var(--blue-royal-light)",
-      },
-      backgroundColor: "var(--blue-royal-very-light)",
-      padding: "3px",
-      marginRight: "8px",
-      marginLeft: "8px",
-      marginBlock: "4px",
-      borderRadius: "6px",
-    }),
-    clearIndicator: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--blue-royal)",
-      ":hover": {
-        color: "var(--blue-royal-light)",
-      },
-    }),
-    menuList: (defaultStyles) => ({
-      ...defaultStyles,
-      borderRadius: "4px",
-      paddingInline: "10px",
-    }),
-    input: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--gray-dark)",
-      fontSize: "16px",
-    }),
-    multiValue: (defaultStyles) => ({
-      ...defaultStyles,
-      color: "var(--blue-royal)",
-      borderRadius: "10px",
-      fontWeight: "bold",
-      paddingRight: "10px",
-    }),
-    multiValueRemove: (defaultStyles) => ({
-      ...defaultStyles,
-      backgroundColor: "var(--blue-royal-light)",
-      borderRadius: "50%",
-      padding: "2px",
-      margin: "5px",
-    }),
-    menu: (defaultStyles) => ({
-      ...defaultStyles,
-      width: "90%",
-      marginRight: "5%",
-      border: "none",
-    }),
-    indicatorSeparator: (defaultStyles) => ({
-      ...defaultStyles,
-      display: "none",
-    }),
-  };
-
-  const clientOptions = [];
-  clients?.forEach((client) => {
-    clientOptions.push({
-      value: client.clientID,
-      label: client.clientName,
-    });
-  });
   const serviceListConvertor = (array) => {
     const result = [];
     array.forEach((arr) => {
@@ -278,241 +256,280 @@ const OrderRegister = () => {
     }
   };
   const handleClientName = (value) => {
-    console.log(value);
     setClientID(value?.value);
   };
-  const getUser = async () => {
+
+  const getBusinessList = async () => {
     try {
-      const response = await axiosInstance.post("/user/check_access_token");
-      setUserRole(response.data.response.userInfo.userRole);
-      setIsLoading(false);
-      console.log(response.data.response);
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/client/client-list");
+      setBusinessList(response.data.response.cards);
+
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getServices = async () => {
+    try {
+      const response = await axiosInstance.post("service/get_all");
+      setFixedServices(response.data.service[1].serviceTaskTypes);
+      setMobileServices(response.data.service[2].serviceTaskTypes);
+      console.log(response.data);
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    businessList &&
+      businessList.forEach((business) => {
+        setFormattedBusinessList((prev) => [
+          ...prev,
+          {
+            label: business.businessName,
+            value: business.businessID,
+          },
+        ]);
+      });
+  }, [businessList]);
+
   useEffect(() => {
     if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
     } else {
-      getUser();
+      getBusinessList();
+      getServices();
     }
   }, []);
 
-  return (
-    <div className="container bg-default" dir="rtl">
-      {isAddDetailPopupActive && (
-        <>
-          <AddDetailPopup
-            setIsAddDetailPopupActive={setIsAddDetailPopupActive}
-            fixedRadio={fixedRadio}
-            mobileRadio={mobileRadio}
-            fixedOptions={serviceListConvertor(fixedServices)}
-            mobileOptions={serviceListConvertor(mobileServices)}
-            customStyles={customStyles}
-            details={
-              selectedDetail || {
-                id: "",
-                serviceType: "",
-                taskType: "",
-                toothColors: [[]],
-                toothNumbers: [[]],
-              }
-            }
-            handleUpdate={handleUpdate}
-          />
-          <PopupBackground
-            isPopupActive={setIsAddDetailPopupActive}
-            handleStartDateChange={() => {}}
-            handleEndDateChange={() => {}}
-            setStatusField={() => {}}
-          />
-        </>
-      )}
-      <SingleHeader title={"ثبت سفارش جدید"} location={location.state} />
-      <form
-        className="edit-form form-group mt-3 p-3 tasks"
-        onSubmit={handleFormSubmitAxios}
-      >
-        {isSupervisor && (
+  return !isLoading ? (
+    !isError ? (
+      <div className="container bg-default mt-100" dir="rtl">
+        {isAddDetailPopupActive && (
           <>
-            <label htmlFor="clients-name" className="bold500-large my-3 pe-3">
-              مشتری
-            </label>
-            <Select
-              id="clients-name"
-              name="cliens-name"
-              value={clientName}
-              onChange={(e) => handleClientName(e)}
-              options={clientOptions}
-              placeholder="نام مشتری را انتخاب کنید"
-              styles={customStyles}
-              isClearable
+            <AddDetailPopup
+              setIsAddDetailPopupActive={setIsAddDetailPopupActive}
+              fixedRadio={fixedRadio}
+              mobileRadio={mobileRadio}
+              fixedOptions={serviceListConvertor(fixedServices)}
+              mobileOptions={serviceListConvertor(mobileServices)}
+              customStyles={customStyles}
+              details={
+                selectedDetail || {
+                  id: "",
+                  serviceType: "",
+                  taskType: "",
+                  toothColors: [[]],
+                  toothNumbers: [[]],
+                }
+              }
+              handleUpdate={handleUpdate}
+            />
+            <PopupBackground
+              isPopupActive={setIsAddDetailPopupActive}
+              handleStartDateChange={() => {}}
+              handleEndDateChange={() => {}}
+              setStatusField={() => {}}
             />
           </>
         )}
-
-        <label htmlFor="patient-firstname" className="bold500-large mb-3 pe-3">
-          نام بیمار
-        </label>
-        <input
-          required
-          onChange={handleFirstnameSet}
-          type="text"
-          name="patient-firstname"
-          className="form-control rounded-pill mb-3 py-2 border-0 px-3"
-          id="patient-firstname"
-          placeholder="نام بیمار وارد کنید"
-        />
-        <label htmlFor="patient-lastname" className="bold500-large mb-3 pe-3">
-          نام خانوادگی بیمار
-        </label>
-        <input
-          required
-          onChange={handleLastnameSet}
-          type="text"
-          name="patient-lastname"
-          className="form-control rounded-pill mb-3 py-2 border-0 px-3"
-          id="patient-lastname"
-          placeholder="نام خانوادگی بیمار را وارد کنید"
-        />
-        <label htmlFor="patient-age" className="bold500-large mb-3 pe-3">
-          سن بیمار
-        </label>
-        <input
-          required
-          onChange={handleAgeSet}
-          type="number"
-          name="patient-age"
-          className="form-control rounded-pill mb-3 py-2 border-0 px-3"
-          id="patient-age"
-          placeholder="سن بیمار را وارد کنید"
-        />
-
-        <label
-          className="bold500-large my-3 pe-3 d-block"
-          htmlFor="patient-sex"
+        <SingleHeader title={"ثبت سفارش جدید"} location={location.state} />
+        <form
+          className="edit-form form-group px-3 pb-3 tasks"
+          onSubmit={handleFormSubmitAxios}
         >
-          جنسیت
-        </label>
-        <div className="d-flex gap-4 pe-3 mb-3">
-          <div>
-            <input
-              ref={femaleRadio}
-              onClick={handleGenderSet}
-              type="radio"
-              className="form-check-input ms-2"
-              name="patient-sex"
-              id="flexRadioDefault1"
-            />
-            <label
-              htmlFor="flexRadioDefault1"
-              className="form-check-label bold500-large me-1"
-            >
-              زن
-            </label>
-          </div>
-          <div>
-            <input
-              ref={maleRadio}
-              onChange={handleGenderSet}
-              type="radio"
-              className="form-check-input ms-2"
-              name="patient-sex"
-              id="flexRadioDefault2"
-            />
-            <label
-              htmlFor="flexRadioDefault2"
-              className="form-check-label bold500-large me-1"
-            >
-              مرد
-            </label>
-          </div>
-        </div>
-        <label htmlFor="extra-info" className="bold500-large my-3 pe-3">
-          توضیحات
-        </label>
-        <textarea
-          onChange={handleDescriptionSet}
-          name="extra-info"
-          id=""
-          cols="6"
-          rows="6"
-          className="form-control rounded-5 border-0 py-3 px-4"
-          placeholder="جزئیات ..."
-        ></textarea>
-        <hr />
-        {details.length > 0 ? (
-          details.map((detail, index) => {
-            return (
-              <div
-                key={index}
-                className="bg-white rounded-4 drop-shadow p-3 mt-3 "
-              >
-                <div className="d-flex align-items-center">
-                  <span className="flex-grow-1 royal-xlarge-bold">
-                    {detail.taskType.label}
-                  </span>
-                  <span
-                    className="has-pointer"
-                    onClick={() => handleDeleteDetail(detail)}
-                  >
-                    <MinusButton />
-                  </span>
-                  <span
-                    className="has-pointer"
-                    onClick={() => handleEdit(detail)}
-                  >
-                    <EditButton />
-                  </span>
-                </div>
-                <div className="table-container mt-3">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>شماره دندان</th>
-                        <th>رنگ دندان</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {detail.toothColors.map((colorArray, i) => {
-                        return (
-                          <tr key={i} className="">
-                            <td>
-                              {detail.toothNumbers[i].map((numArray, i) => {
-                                return <span key={i}>{numArray.label} </span>;
-                              })}
-                            </td>
-                            <td>{colorArray[0]?.label}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <Message>هیچ جزئیات سفارشی وجود ندارد</Message>
-        )}
-        <div
-          className="bg-white rounded-pill py-2 px-2 d-inline-block border-royal-2 mt-3 has-pointer"
-          onClick={handleAddDetails}
-        >
-          <PlusButton />
-          <span className="bold-large">افزودن جزئیات جدید</span>
-        </div>
-        <div className="d-flex justify-content-between align-items-center px-1 py-2 mt-3">
-          <button
-            type="submit"
-            className="btn-royal-bold rounded-pill flex-grow-1 py-3"
+          {isReception && (
+            <>
+              <label htmlFor="clients-name" className="bold500-large my-3 pe-3">
+                مشتری
+              </label>
+              <Select
+                id="clients-name"
+                name="cliens-name"
+                value={clientName}
+                onChange={(e) => handleClientName(e)}
+                options={formattedBusinessList}
+                placeholder="نام مشتری را انتخاب کنید"
+                styles={customStyles}
+                isClearable
+              />
+            </>
+          )}
+
+          <label
+            htmlFor="patient-firstname"
+            className="bold500-large my-3 pe-3"
           >
-            ثبت سفارش
-          </button>
-        </div>
-      </form>
-    </div>
+            نام بیمار
+          </label>
+          <input
+            required
+            onChange={handleFirstnameSet}
+            autoComplete="off"
+            type="text"
+            name="patient-firstname"
+            className="form-control rounded-pill mb-3 py-2 border-0 px-3"
+            id="patient-firstname"
+            placeholder="نام بیمار وارد کنید"
+          />
+          <label htmlFor="patient-lastname" className="bold500-large mb-3 pe-3">
+            نام خانوادگی بیمار
+          </label>
+          <input
+            required
+            onChange={handleLastnameSet}
+            type="text"
+            name="patient-lastname"
+            autoComplete="off"
+            className="form-control rounded-pill mb-3 py-2 border-0 px-3"
+            id="patient-lastname"
+            placeholder="نام خانوادگی بیمار را وارد کنید"
+          />
+          <label htmlFor="patient-age" className="bold500-large mb-3 pe-3">
+            سن بیمار
+          </label>
+          <input
+            required
+            onChange={handleAgeSet}
+            type="number"
+            name="patient-age"
+            autoComplete="off"
+            className="form-control rounded-pill mb-3 py-2 border-0 px-3"
+            id="patient-age"
+            placeholder="سن بیمار را وارد کنید"
+          />
+
+          <label
+            className="bold500-large my-3 pe-3 d-block"
+            htmlFor="patient-sex"
+          >
+            جنسیت
+          </label>
+          <div className="d-flex gap-4 pe-3 mb-3">
+            <div>
+              <input
+                ref={femaleRadio}
+                onClick={handleGenderSet}
+                type="radio"
+                className="form-check-input ms-2"
+                name="patient-sex"
+                id="flexRadioDefault1"
+              />
+              <label
+                htmlFor="flexRadioDefault1"
+                className="form-check-label bold500-large me-1"
+              >
+                زن
+              </label>
+            </div>
+            <div>
+              <input
+                ref={maleRadio}
+                onChange={handleGenderSet}
+                type="radio"
+                className="form-check-input ms-2"
+                name="patient-sex"
+                id="flexRadioDefault2"
+              />
+              <label
+                htmlFor="flexRadioDefault2"
+                className="form-check-label bold500-large me-1"
+              >
+                مرد
+              </label>
+            </div>
+          </div>
+          <label htmlFor="extra-info" className="bold500-large my-3 pe-3">
+            توضیحات
+          </label>
+          <textarea
+            onChange={handleDescriptionSet}
+            name="extra-info"
+            id=""
+            cols="6"
+            rows="6"
+            className="form-control rounded-5 border-0 py-3 px-4"
+            placeholder="جزئیات ..."
+          ></textarea>
+          <hr />
+          {details.length > 0 ? (
+            details.map((detail, index) => {
+              return (
+                <div
+                  key={index}
+                  className="bg-white rounded-4 drop-shadow p-3 mt-3 "
+                >
+                  <div className="d-flex align-items-center">
+                    <span className="flex-grow-1 royal-xlarge-bold">
+                      {detail.taskType.label}
+                    </span>
+                    <span
+                      className="has-pointer"
+                      onClick={() => handleDeleteDetail(detail)}
+                    >
+                      <MinusButton />
+                    </span>
+                    <span
+                      className="has-pointer"
+                      onClick={() => handleEdit(detail)}
+                    >
+                      <EditButton />
+                    </span>
+                  </div>
+                  <div className="table-container mt-3">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>شماره دندان</th>
+                          <th>رنگ دندان</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detail.toothColors.map((colorArray, i) => {
+                          return (
+                            <tr key={i} className="">
+                              <td>
+                                {detail.toothNumbers[i].map((numArray, i) => {
+                                  return <span key={i}>{numArray.label} </span>;
+                                })}
+                              </td>
+                              <td>{colorArray[0]?.label}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <Message>هیچ جزئیات سفارشی وجود ندارد</Message>
+          )}
+          <div
+            className="bg-white rounded-pill py-2 px-2 d-inline-block border-royal-2 mt-3 has-pointer"
+            onClick={handleAddDetails}
+          >
+            <PlusButton />
+            <span className="bold-large">افزودن جزئیات جدید</span>
+          </div>
+          <div className="d-flex justify-content-between align-items-center px-1 py-2 mt-3">
+            <button
+              type="submit"
+              className="btn-royal-bold rounded-pill flex-grow-1 py-3"
+            >
+              ثبت سفارش
+            </button>
+          </div>
+        </form>
+      </div>
+    ) : (
+      <ErrorPage error={errorItself} />
+    )
+  ) : (
+    Loading.standard("در حال دریافت اطلاعات")
   );
 };
 

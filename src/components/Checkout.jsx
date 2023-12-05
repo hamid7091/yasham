@@ -109,7 +109,7 @@ const Checkout = () => {
   }, [isCheckoutSubmitted]);
 
   return (
-    <div className="container px-4" dir="rtl">
+    <div className="container px-3 mt-100" dir="rtl">
       <SingleHeader title={"تسویه حساب"} location={"/"} />
       <div className="mb-100">
         {checkoutData.length > 0 ? (

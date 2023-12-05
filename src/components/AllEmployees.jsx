@@ -155,102 +155,7 @@ const AllEmployees = () => {
         startDate: tmsu,
         endDate: teu,
       });
-      // const response = {
-      //   data: {
-      //     response: {
-      //       cards: [
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //         {
-      //           employeeAvatar:
-      //             "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      //           employeeName: "علی قناتیانی",
-      //           employeeID: 6969,
-      //           doneTasks: 12,
-      //           assignedTasks: 14,
-      //         },
-      //       ],
-      //     },
-      //   },
-      // };
+
       setEmployees(response.data.response?.cards);
       console.log(response.data.response);
 
@@ -309,7 +214,7 @@ const AllEmployees = () => {
   }, [isSubmited]);
   console.log(isSubmited);
   return (
-    <div className="container px-3" dir="rtl">
+    <div className="container px-3 mt-100" dir="rtl">
       <SingleHeader title={"کلیه کارمندان"} location={location.state} />
       <section className="mt-3">
         <div className="d-flex align-items-center justify-content-between bg-white p-3 rounded-5">

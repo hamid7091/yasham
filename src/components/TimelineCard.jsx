@@ -11,9 +11,14 @@ const TimelineCard = ({
   index,
   assignedUser,
   isClient,
+  lastStepID,
+  currentStepId,
 }) => {
   const completeDate = useDate(step.endDate);
   const startDate = useDate(step.startDate);
+
+  console.log(lastStepID === currentStepId);
+  console.log(step.id === lastStepID);
 
   const showExtraInfo = (event) => {
     const cardWrapper = event.currentTarget;
@@ -34,14 +39,16 @@ const TimelineCard = ({
     <div
       className={`timeline-task-wrapper has-pointer d-flex align-items-center gap-2 ${getClass(
         index,
-        currentStepIndex
+        currentStepIndex,
+        lastStepID === currentStepId
       )}`}
-      onClick={index <= currentStepIndex ? showExtraInfo : undefined}
+      onClick={index < currentStepIndex ? showExtraInfo : undefined}
     >
       <div className="dot"></div>
       <div className="flex-grow-1 timeline-task">
         <div className="pe-4">
-          {index < currentStepIndex && (
+          {(index < currentStepIndex ||
+            (lastStepID === currentStepId && step.id === lastStepID)) && (
             <h5 className=" mb-2">
               مرحله <span className="dgrey-thin-bold">{step.name}</span>{" "}
               {!isClient && (
@@ -60,6 +67,7 @@ const TimelineCard = ({
             </h5>
           )}
           {index == currentStepIndex &&
+            !(lastStepID === currentStepId && step.id === lastStepID) &&
             (assignedUser ? (
               <h5 className="mb-2">
                 مرحله <span className="dgrey-thin-bold">{step.name}</span>{" "}

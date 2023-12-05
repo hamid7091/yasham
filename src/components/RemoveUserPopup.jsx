@@ -5,42 +5,41 @@ import { useNavigate } from "react-router-dom";
 import fetchData from "../util-functions/fetchData";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
+import axiosInstance from "../util-functions/axiosInstance";
 
 const RemoveUserPopup = ({
   isPopupActive,
   selectedUserToDelete,
   setNewReqSent,
+  clientID,
 }) => {
-  const accessToken = window.localStorage.getItem("AccessToken");
-  const removeUserURL = "some url";
-  const removeUserHeader = new Headers();
-  removeUserHeader.append("Authorization", `Bearer ${accessToken}`);
-  const removeUserFormdata = new FormData();
-  removeUserFormdata.append("userID", selectedUserToDelete);
-  const removeUserRequestOptions = {
-    method: "POST",
-    headers: removeUserHeader,
-    body: removeUserFormdata,
-    redirect: "follow",
-  };
   const navigate = useNavigate();
   const handleClosePopup = () => {
     isPopupActive(false);
   };
-  const handleRemoveUser = async () => {
-    Loading.standard("در حال ارسال درخواست");
-    const response = await fetchData(removeUserURL, removeUserRequestOptions);
-    if (response.success) {
-      isPopupActive(false);
+
+  const removeUser = async () => {
+    const formdata = new FormData();
+    formdata.append("userID", selectedUserToDelete);
+    formdata.append("clientID", clientID);
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post(
+        "client/remove_employee",
+        formdata
+      );
+      console.log(response.data);
       Loading.remove();
-      Notify.success("کاربر مورد نظر با موفقیت حذف شد");
-      setNewReqSent(true);
-    } else {
-      isPopupActive(false);
+      if (response.data.response) {
+        isPopupActive(false);
+        Notify.success(response.data.response.response);
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
       Loading.remove();
       Notify.failure("خطایی پیش آمده ! لطفا مجددا تلاش کنید");
     }
-    console.log(selectedUserToDelete);
   };
 
   return (
@@ -61,7 +60,7 @@ const RemoveUserPopup = ({
           <p className="lgrey-large-bold500">آیا از حذف کاربر مطمئن هستید ؟</p>
         </div>
         <div className="d-flex justify-content-center gap-3 align-items-center">
-          <button className="btn-green-bold" onClick={handleRemoveUser}>
+          <button className="btn-green-bold" onClick={removeUser}>
             بله
           </button>
           <button

@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import TimelineCard from "./TimelineCard";
 
 const SingleTaskTimeline = ({ timelineData, assignedUser, userRole }) => {
-  console.log(userRole);
   const lineBarRef = useRef(null);
   let progressbar = require("progressbar.js");
 
+  console.log(timelineData);
   const percentage = timelineData.taskProgressPercentage;
   const [currentStepIndex, setCurrentStepIndex] = useState();
   const [isClient, setIsClient] = useState(false);
@@ -50,11 +50,12 @@ const SingleTaskTimeline = ({ timelineData, assignedUser, userRole }) => {
 
   const steps = timelineData.totalSteps;
   const currentStepId = timelineData.currentStep.id;
+  const lastStepID =
+    timelineData.totalSteps[timelineData.totalSteps.length - 1].id;
   const activity = timelineData.activity;
   const activityIDs = Object.keys(timelineData.activity);
 
   useEffect(() => {
-    console.log(activity);
     steps.forEach((step, index) => {
       if (step.id == currentStepId) {
         setCurrentStepIndex(index);
@@ -73,18 +74,15 @@ const SingleTaskTimeline = ({ timelineData, assignedUser, userRole }) => {
       }
     });
   }, []);
-  const getClass = (index, currentStep) => {
-    if (index < currentStep) {
-      return " finished";
+  const getClass = (index, currentStep, isTaskDone) => {
+    if (index < currentStep || isTaskDone) {
+      return "finished";
     } else if (index == currentStep) {
       return " current-step";
     } else {
       return "";
     }
   };
-
-  console.log(steps);
-  console.log(currentStepIndex);
 
   return (
     <div className="single-task-container">
@@ -112,6 +110,8 @@ const SingleTaskTimeline = ({ timelineData, assignedUser, userRole }) => {
                 getClass={getClass}
                 index={i}
                 isClient={isClient}
+                lastStepID={lastStepID}
+                currentStepId={currentStepId}
               />
             );
           })}

@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
 import CloseIcon from "../assets/svg-icons/CloseIcon";
 import Select from "react-select";
-import fetchData from "../util-functions/fetchData";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
+import axiosInstance from "../util-functions/axiosInstance";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const AssignPopup = ({
   employees,
@@ -11,7 +12,8 @@ const AssignPopup = ({
   taskSteps,
   taskID,
 }) => {
-  const accessToken = window.localStorage.getItem("AccessToken");
+  const navigate = useNavigate();
+  const location = useLocation();
   const [emplyeeID, setEmployeeID] = useState(null);
   const [stepID, setStepID] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
@@ -44,7 +46,6 @@ const AssignPopup = ({
         borderBottom: "2px solid var(--gray-ultra-light)",
       },
       ":hover": {
-        backgroundColor: "var(--gray-very-light)",
         color: "#000",
       },
     }),
@@ -56,7 +57,7 @@ const AssignPopup = ({
       paddingBlock: "4px",
       border: "none",
       ":hover": {
-        border: "2px solid var( --blue-royal)",
+        border: "1px solid var( --blue-royal)",
       },
     }),
     singleValue: (defaultStyles) => ({
@@ -78,7 +79,9 @@ const AssignPopup = ({
       },
       backgroundColor: "var(--blue-royal-very-light)",
       padding: "3px",
-      marginRight: "5px",
+      marginRight: "8px",
+      marginLeft: "8px",
+      marginBlock: "4px",
       borderRadius: "6px",
     }),
     clearIndicator: (defaultStyles) => ({
@@ -91,6 +94,7 @@ const AssignPopup = ({
     menuList: (defaultStyles) => ({
       ...defaultStyles,
       borderRadius: "4px",
+      paddingInline: "10px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
@@ -111,10 +115,22 @@ const AssignPopup = ({
       padding: "2px",
       margin: "5px",
     }),
+    menu: (defaultStyles) => ({
+      ...defaultStyles,
+      width: "90%",
+      marginRight: "5%",
+      border: "none",
+    }),
+    indicatorSeparator: (defaultStyles) => ({
+      ...defaultStyles,
+      display: "none",
+    }),
   };
+
   const handleClosePopup = () => {
     setIsAssignPopupActive(false);
   };
+
   const handleRedirectLevel = () => {
     if (!isChecked) {
       setIsChecked(true);
@@ -122,68 +138,26 @@ const AssignPopup = ({
       setIsChecked(false);
     }
   };
-  const handleAssignTask = async (event) => {
-    const assignTaskURL = "https://samane.zbbo.net/api/v1/task/assign_Task?";
-    const assignTaskHeader = new Headers();
-    assignTaskHeader.append("Authorization", `Bearer ${accessToken}`);
-    const assignTaskFormData = new FormData();
+  const hasndleAssign = async (event) => {
     event.preventDefault();
-    Loading.standard("در حال ارسال درخواست");
-
-    assignTaskFormData.append("taskID", taskID);
-    assignTaskFormData.append("user_to_assign_list", emplyeeID?.value);
-    if (!isChecked && emplyeeID) {
-      const assignTaskReqOptions = {
-        method: "POST",
-        headers: assignTaskHeader,
-        body: assignTaskFormData,
-        redirect: "follow",
-      };
-      const response = await fetchData(assignTaskURL, assignTaskReqOptions);
-      if (response.success) {
-        Loading.remove();
-        Notify.success("تسک با موفقیت اساین شد", {
-          position: "center-top",
-          borderRadius: "5rem",
-          fontFamily: "Vazir FD",
-          fontSize: "14px",
-        });
-        setIsAssignPopupActive(false);
-      } else {
-        Loading.remove();
-        Notify.failure("خطا ! مشکلی پیش آمده");
-        setIsAssignPopupActive(false);
-      }
-    } else if (isChecked && emplyeeID && stepID) {
-      assignTaskFormData.append("redirect_level", "true");
-      assignTaskFormData.append("level", `${stepID.value}`);
-      const assignTaskReqOptions = {
-        method: "POST",
-        headers: assignTaskHeader,
-        body: assignTaskFormData,
-        redirect: "follow",
-      };
-      const response = await fetchData(assignTaskURL, assignTaskReqOptions);
-      if (response.success) {
-        Loading.remove();
-        Notify.success("تسک با موفقیت اساین شد", {
-          rtl: "true",
-        });
-        setIsAssignPopupActive(false);
-      } else {
-        Loading.remove();
-        Notify.failure("خطا ! مشکلی پیش آمده");
-        setIsAssignPopupActive(false);
-      }
-    } else {
+    const formdata = new FormData();
+    formdata.append("taskID", taskID);
+    formdata.append("user_to_assign_list", emplyeeID.value);
+    isChecked && formdata.append("redirect_level", "true");
+    isChecked && formdata.append("level", stepID.value);
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post("/task/assign_Task", formdata);
       Loading.remove();
-      Notify.failure("فیلد انتخاب کاربر خالی است", {
-        position: "center-top",
-        rtl: "true",
-        borderRadius: "5rem",
-        fontFamily: "Vazir FD",
-        fontSize: "14px",
-      });
+      setIsAssignPopupActive(false);
+      if (response.data.response.success) {
+        Notify.success("تسک با موفقیت اساین شد");
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+      Notify.failure("فیلد انتخاب کاربر خالی است");
     }
   };
 
@@ -197,7 +171,7 @@ const AssignPopup = ({
       </div>
       <div className="tborder-vlroyal mt-2 pt-3 px-3">
         <form
-          onSubmit={handleAssignTask}
+          onSubmit={hasndleAssign}
           className="edit-form form-group mt-3 px-3 pt-3"
         >
           <div className="mt-3">

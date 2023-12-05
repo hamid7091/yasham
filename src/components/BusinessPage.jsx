@@ -124,14 +124,14 @@ const Profile = () => {
 
   return (
     state && (
-      <>
+      <div className="container px-3 pb-3" dir="rtl">
         {isPopupActive && (
           <>
             <ExitProfilePopup isPopupActive={setIsPopupActive} />
             <PopupBackground isPopupActive={setIsPopupActive} />
           </>
         )}
-        <div ref={editProfile} dir="rtl" className="container d-none">
+        <div ref={editProfile} className="d-none">
           <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
             <div className="bold-xlarge">ویرایش پروفایل کسب و کار</div>
             <span onClick={handleChangePage}>
@@ -200,7 +200,7 @@ const Profile = () => {
             <input
               defaultValue={state.clientPhone}
               maxLength={10}
-              type="tel"
+              type="number"
               name="mobile"
               className={`form-control rounded-pill mb-3 py-2 ${
                 mobileIsValid ? "is-valid" : "is-invalid"
@@ -277,7 +277,7 @@ const Profile = () => {
             </button>
           </form>
         </div>
-        <div ref={profile} className="container px-3 pb-3" dir="rtl">
+        <div ref={profile} className="">
           <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 px-3">
             <div className="bold-xlarge">پروفایل کسب و کار</div>
             <Link to="/" state={state}>
@@ -326,7 +326,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-      </>
+      </div>
     )
   );
 };

@@ -2,6 +2,7 @@ import React from "react";
 import ClientTaskCard from "./ClientTaskCard";
 import PackageCard from "./PackageCard";
 import { useNavigate } from "react-router-dom";
+import Message from "../micro-components/Message";
 
 const ReceptionDashboard = ({ dailyOrders, recentOrders, packageData }) => {
   const naviagte = useNavigate();
@@ -21,7 +22,9 @@ const ReceptionDashboard = ({ dailyOrders, recentOrders, packageData }) => {
         <section>
           <div className="bg-white rounded-5 p-4 d-flex align-items-center justify-content-center dborder-thick-royal">
             <span className="grey-xxlarge-bold ms-2">سفارشات امروز: </span>
-            <span className="bold-xxlarge">{dailyOrders.count}</span>
+            <span className="bold-xxlarge">
+              {dailyOrders?.count.order_count}
+            </span>
           </div>
         </section>
         <hr />
@@ -35,16 +38,21 @@ const ReceptionDashboard = ({ dailyOrders, recentOrders, packageData }) => {
               مشاهده همه
             </span>
           </div>
-          {recentOrders.map((order, index) => {
-            return (
-              <ClientTaskCard
-                order={order}
-                key={index}
-                isSingle={false}
-                isDirect={true}
-              />
-            );
-          })}
+          {recentOrders ? (
+            recentOrders?.map((order, index) => {
+              return (
+                <ClientTaskCard
+                  order={order}
+                  key={index}
+                  loadedFrom={"dashboard"}
+                  isClient={false}
+                  isFManager={true}
+                />
+              );
+            })
+          ) : (
+            <Message>سفارشی ثبت نشده است</Message>
+          )}
         </section>
         <hr />
         <section>
@@ -57,15 +65,19 @@ const ReceptionDashboard = ({ dailyOrders, recentOrders, packageData }) => {
               مشاهده همه
             </span>
           </div>
-          {packageData.map((pkg, index) => {
-            return (
-              <PackageCard
-                key={index}
-                packageData={pkg}
-                isFromShipping={true}
-              />
-            );
-          })}
+          {packageData.length ? (
+            packageData?.map((pkg, index) => {
+              return (
+                <PackageCard
+                  key={index}
+                  packageData={pkg}
+                  isFromShipping={true}
+                />
+              );
+            })
+          ) : (
+            <Message>وظیفه ای ثبت نشده است</Message>
+          )}
         </section>
       </div>
     )

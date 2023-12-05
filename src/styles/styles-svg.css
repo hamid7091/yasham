@@ -39,3 +39,17 @@
   align-items: center;
   height: 54px;
 }
+
+.form-control.is-valid,
+.was-validated .form-control:valid {
+  background-image: url(../assets/svg-icons/tick-circle.svg);
+  background-size: calc(30px) calc(30px);
+  padding-right: calc(1.5em + 1.2rem);
+}
+
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  background-image: url(../assets/svg-icons/invalid.svg);
+  background-size: calc(30px) calc(30px);
+  padding-right: calc(1.5em + 1.2rem);
+}

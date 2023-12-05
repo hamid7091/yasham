@@ -14,7 +14,7 @@ const SupervisorDashboardCard = ({ data }) => {
               <FlagRoyal30 />
             </span>
             <span className="grey-large-bold500">
-              بخش {data.departmentName}
+              دپارتمان {data.departmentName}
             </span>
           </span>
           <span className="">

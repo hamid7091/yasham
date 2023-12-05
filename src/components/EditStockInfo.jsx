@@ -65,13 +65,15 @@ const EditStockInfo = () => {
   const customStyles = {
     option: (defaultStyles, state) => ({
       ...defaultStyles,
-      color: state.isSelected ? "#2f66db" : "#79a3fe",
-      backgroundColor: state.isSelected ? "#b8cfff" : "#fff)",
+      color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+      backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
       padding: "8px",
       fontWeight: "bold",
+      ":not(:last-child)": {
+        borderBottom: "2px solid var(--gray-ultra-light)",
+      },
       ":hover": {
-        backgroundColor: "#dee7fa",
-        color: "var(--blue-royal)",
+        color: "#000",
       },
     }),
     control: (defaultStyles) => ({
@@ -82,12 +84,12 @@ const EditStockInfo = () => {
       paddingBlock: "4px",
       border: "none",
       ":hover": {
-        border: "2px solid var( --blue-royal)",
+        border: "1px solid var( --blue-royal)",
       },
     }),
     singleValue: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontWeight: "bold",
     }),
     placeholder: (defaultStyles) => ({
@@ -104,7 +106,9 @@ const EditStockInfo = () => {
       },
       backgroundColor: "var(--blue-royal-very-light)",
       padding: "3px",
-      marginRight: "5px",
+      marginRight: "8px",
+      marginLeft: "8px",
+      marginBlock: "4px",
       borderRadius: "6px",
     }),
     clearIndicator: (defaultStyles) => ({
@@ -116,11 +120,12 @@ const EditStockInfo = () => {
     }),
     menuList: (defaultStyles) => ({
       ...defaultStyles,
-      borderRadius: "8px",
+      borderRadius: "4px",
+      paddingInline: "10px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontSize: "16px",
     }),
     multiValue: (defaultStyles) => ({
@@ -136,6 +141,16 @@ const EditStockInfo = () => {
       borderRadius: "50%",
       padding: "2px",
       margin: "5px",
+    }),
+    menu: (defaultStyles) => ({
+      ...defaultStyles,
+      width: "90%",
+      marginRight: "5%",
+      border: "none",
+    }),
+    indicatorSeparator: (defaultStyles) => ({
+      ...defaultStyles,
+      display: "none",
     }),
   };
   // ---------------functions------------------
@@ -264,7 +279,7 @@ const EditStockInfo = () => {
 
   return (
     stockData && (
-      <div className="container px-2" dir="rtl">
+      <div className="container px-3 mt-100" dir="rtl">
         <SingleHeader title={"ویرایش آیتم"} location={location.state} />
         <div className="text-center d-flex flex-column justify-content-center align-items-center">
           <div>

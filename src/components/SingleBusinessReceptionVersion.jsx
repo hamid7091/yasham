@@ -1,67 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
-import fetchData from "../util-functions/fetchData";
 import BusinessUserCard from "./BusinessUserCard";
 import PlusButton from "../assets/svg-icons/PlusButton";
 import RemoveUserPopup from "./RemoveUserPopup";
 import AddUserPopup from "./AddUserPopup";
 import PopupBackground from "./PopupBackground";
 import Message from "../micro-components/Message";
+import axiosInstance from "../util-functions/axiosInstance";
+import SingleHeader from "./SingleHeader";
 
 const SingleBusinessReceptionVersion = () => {
-  const mockBusinessInfoResponse = {
-    businessInfo: {
-      businessName: "علی دین پرست",
-      businessAvatar:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      businessContact: "04433443344",
-      businessAddress: "یک آدرس مشخص در خیابان معلوم و کوچه مذکور",
-      locations: "some shitty link to a shity location",
-    },
-    statusReport: {
-      orderCount: "23",
-      income: 25000000,
-      profit: 15000000,
-      debt: 11000000,
-    },
-    orders: [
-      {
-        orderID: "123456",
-        patientName: "حمید قهرمانی",
-        price: 1500000,
-        date: "1402-09-22",
-        invoiceID: "22",
-        invoiceStatus: "1",
-      },
-    ],
-    invoices: [
-      {
-        invoiceID: "123456",
-        price: 35000000,
-        date: "1402-09-12",
-        paymentMethod: "نقدی",
-        invoiceStatus: "1",
-      },
-    ],
-    usersList: [
-      {
-        userAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        userName: "محمود احمدی",
-        userID: "12",
-      },
-      {
-        userAvatar:
-          "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-        userName: "شهرام احمدی",
-        userID: "13",
-      },
-    ],
-  };
-  const accessToken = window.localStorage.getItem("AccessToken");
   const param = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [isAddUserPopupActive, setIsAddUserPopupActive] = useState(false);
@@ -72,65 +23,64 @@ const SingleBusinessReceptionVersion = () => {
   const [selectedUserToDelete, setSelectedUserToDelete] = useState();
   const [newReqSent, setNewReqSent] = useState(false);
 
-  const getBusinessInfoURL = "some url";
-  const getBusinessInfoHeader = new Headers();
-  getBusinessInfoHeader.append("Authorization", `Bearer ${accessToken}`);
-  const getBusinessInfoFormdata = new FormData();
-  getBusinessInfoFormdata.append("businessID", param.id);
-  const getBusinessInfoRequestOptions = {
-    method: "POST",
-    headers: getBusinessInfoHeader,
-    body: getBusinessInfoFormdata,
-    redirect: "follow",
+  const getUserData = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/client/get_client", {
+        clientID: param.id,
+      });
+      Loading.remove();
+      console.log(response.data.response);
+      setBusinessInfo(response.data.response.businessInfo);
+      setBusinessUsers(response.data.response.usersList);
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-  const getBusinessInfo = async (url, options) => {
-    Loading.standard("در حال دریافت اطلاعات");
-    // const response = await fetchData(url, options);
-    const response = mockBusinessInfoResponse;
 
-    setBusinessInfo(response.businessInfo);
-    setBusinessUsers(response.usersList);
-
-    console.log(response);
-    Loading.remove();
-  };
   const handleAddUser = () => {
     setIsAddUserPopupActive(true);
     console.log("clicked");
   };
 
   const handleRedirect = () => {
-    navigate(`/editBusiness/${param.id}`);
+    navigate(`/editBusiness/${param.id}`, { state: location.pathname });
   };
 
   useEffect(() => {
-    getBusinessInfo(getBusinessInfoURL, getBusinessInfoRequestOptions);
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getUserData();
+    }
   }, [newReqSent]);
+
   return (
     businessInfo && (
-      <div className="container px-3" dir="rtl">
+      <div className="container px-3 mt-100" dir="rtl">
         {isRemoveUserPopupActive && (
           <>
             <RemoveUserPopup
               isPopupActive={setIsRemoveUserPopupActive}
               selectedUserToDelete={selectedUserToDelete}
               setNewReqSent={setNewReqSent}
+              clientID={param.id}
             />
             <PopupBackground isPopupActive={setIsRemoveUserPopupActive} />
           </>
         )}
         {isAddUserPopupActive && (
           <>
-            <AddUserPopup isPopupActive={setIsAddUserPopupActive} />
+            <AddUserPopup
+              isPopupActive={setIsAddUserPopupActive}
+              clientID={param.id}
+            />
             <PopupBackground isPopupActive={setIsAddUserPopupActive} />
           </>
         )}
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-          <div className="bold-xlarge">عنوان کسب و کار</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+        <SingleHeader title={"عنوان کسب و کار"} location={location.state} />
+
         <section className="d-flex flex-column align-items-center gap-3 mb-5">
           <div>
             <img

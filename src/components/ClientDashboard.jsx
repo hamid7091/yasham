@@ -5,7 +5,12 @@ import ClientAssignedCard from "./ClientAssignedCard";
 import ClientTaskCard from "./ClientTaskCard";
 import Message from "../micro-components/Message";
 
-const ClientDashboard = ({ ongoingOrders, assignedTasks, isClient }) => {
+const ClientDashboard = ({
+  ongoingOrders,
+  assignedTasks,
+  isClient,
+  isFManager,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <>
@@ -82,6 +87,7 @@ const ClientDashboard = ({ ongoingOrders, assignedTasks, isClient }) => {
                 key={index}
                 order={order}
                 isClient={isClient}
+                isFManager={isFManager}
                 loadedFrom={"dashboard"}
               />
             );

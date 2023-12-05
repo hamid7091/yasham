@@ -223,6 +223,8 @@ const SalesPage = () => {
   const [departmentReport, setDepartmentReport] = useState();
   const [orders, setOrders] = useState();
 
+  const [isLoading, setIsloading] = useState(true);
+
   const [userRole, setUserRole] = useState();
   const [
     isEmployee,
@@ -235,10 +237,13 @@ const SalesPage = () => {
     isReception,
   ] = useRoleSetter(userRole);
 
+  const [desiredChartData, setDesiredChartData] = useState();
+
   const getUser = async () => {
     try {
       const response = await axiosInstance.post("/user/check_access_token");
       setUserRole(response.data.response.userInfo.userRole);
+      setIsloading(false);
       console.log(response.data.response);
     } catch (error) {
       console.error(error);
@@ -327,13 +332,14 @@ const SalesPage = () => {
     }
     try {
       Loading.standard("در حال دریافت اطلاعات");
-      // const response = await axiosInstance.post("/order/sale-report",formdata)
-      const response = mockResponse;
+      const response = await axiosInstance.post("/financial/sale", formdata);
+      // const response = mockResponse;
+      console.log(response.data.response);
       setSalesReport(response.data.response.salesReport);
       setChartData(response.data.response.chartData);
       setDepartmentReport(response.data.response.departmentReport);
       setOrderTypeData(response.data.response.orderTypeData);
-      setOrders(response.data.response.orders);
+      setOrders(response.data.response.cards);
       Loading.remove();
     } catch (error) {
       console.error(error);
@@ -380,7 +386,9 @@ const SalesPage = () => {
   //   // console.log(startDate.toUnix());
   //   console.log(endDate);
   // };
-
+  useEffect(() => {
+    getUser();
+  }, []);
   useEffect(() => {
     setStartDateFront(tms);
     setEndtDateFront(te);
@@ -388,12 +396,39 @@ const SalesPage = () => {
     setEndDate(teu);
   }, [te, tms]);
   useEffect(() => {
-    getSaleData();
-    getUser();
-  }, []);
+    !isLoading && getSaleData();
+  }, [isLoading]);
 
   // console.log(departmentReport);
 
+  const chartDataConvertor = (cData) => {
+    const dateArray = Object.keys(cData);
+    const saleArray = Object.values(cData);
+    const desiredDataFormat = [];
+
+    const jDateArray = [];
+    dateArray.forEach((date) => {
+      const jDate = moment(date, "YYYY-MM-DD").format("jMM/jDD");
+      jDateArray.push(jDate);
+    });
+    console.log(jDateArray);
+
+    jDateArray.forEach((date, index) => {
+      desiredDataFormat.push({
+        date: date,
+        sale: saleArray[index],
+      });
+    });
+    return desiredDataFormat;
+  };
+
+  useEffect(() => {
+    if (chartData) {
+      setDesiredChartData(chartDataConvertor(chartData));
+    }
+  }, [chartData]);
+
+  // console.log(desiredDataFormat);
   return (
     salesReport && (
       <div className="px-3 mb-100">
@@ -469,7 +504,7 @@ const SalesPage = () => {
               aspect={1.5}
               style={{ pointerEvents: "none" }}
             >
-              <BarChart width="100%" data={chartData}>
+              <BarChart width="100%" data={desiredChartData}>
                 {/* <CartesianGrid strokeDasharray="1 3" /> */}
                 <XAxis
                   dataKey="date"
@@ -526,7 +561,7 @@ const SalesPage = () => {
                       <span className="bold-default">{data.count} عدد</span>
                     </span>
                     <span className="lgrey-default-bold">
-                      {data.income / 100000} میلیون
+                      {data.income / 1000000} میلیون
                     </span>
                   </div>
                 );
@@ -554,13 +589,13 @@ const SalesPage = () => {
                     <td className="bg-ulroyal royal-default-bold500">ثابت</td>
                     <td>{departmentReport.fixed.all}</td>
                     <td>{departmentReport.fixed.income / 1000000} میلیون</td>
-                    <td>{departmentReport.fixed.profit / 1000000} میلیون</td>
+                    <td>{departmentReport.fixed.profit} میلیون</td>
                   </tr>
                   <tr className="">
                     <td className="bg-ulroyal royal-default-bold500">متحرک</td>
                     <td>{departmentReport.mobile.all}</td>
                     <td>{departmentReport.mobile.income / 1000000} میلیون</td>
-                    <td>{departmentReport.mobile.profit / 1000000} میلیون</td>
+                    <td>{departmentReport.mobile.profit} میلیون</td>
                   </tr>
                 </tbody>
               </table>

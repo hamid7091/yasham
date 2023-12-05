@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import BackArrow from "../assets/svg-icons/BackArrow";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import fetchData from "../util-functions/fetchData";
@@ -7,25 +7,17 @@ import fetchData from "../util-functions/fetchData";
 import Select from "react-select";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import EditPen from "../assets/svg-icons/EditPen";
+import useRoleSetter from "../micro-components/useRoleSetter";
+import axiosInstance from "../util-functions/axiosInstance";
+import SingleHeader from "./SingleHeader";
 
 const EditUser = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
   const param = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const avatar = useRef(null);
   const avatarInput = useRef(null);
-
-  const getUserInfoURL = "Get User Info URL";
-  const getUserInfoHeader = new Headers();
-  getUserInfoHeader.append("Authorization", `Bearer ${accessToken}`);
-  const getUserInfoFormdata = new FormData();
-  getUserInfoFormdata.append("userID", param.id);
-  const getUserInfoRequestOptions = {
-    method: "POST",
-    headers: getUserInfoHeader,
-    body: getUserInfoFormdata,
-    redirect: "follow",
-  };
 
   const [rolesList, setRolesList] = useState();
   const [businessList, setBusinessList] = useState();
@@ -39,21 +31,40 @@ const EditUser = () => {
   const [password, setPassword] = useState();
 
   const [avatarIsChanged, setAvatarIsChanged] = useState(false);
-  const [firstNameIsValid, setFirstNameIsValid] = useState();
-  const [lastNameIsValid, setLastNameIsValid] = useState();
-  const [userTelIsValid, setUserTelIsValid] = useState();
-  const [passwordIsValid, setPasswordIsvalid] = useState();
+  const [firstNameIsValid, setFirstNameIsValid] = useState(true);
+  const [lastNameIsValid, setLastNameIsValid] = useState(true);
+  const [userTelIsValid, setUserTelIsValid] = useState(true);
+  const [passwordIsValid, setPasswordIsvalid] = useState(true);
+
+  const [departmentList, setDepartmentList] = useState();
+  const [selectedDepartment, setSelectedDepartment] = useState();
+
+  const [userRoles, setUserRoles] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRoles);
+  const [userInfo, setUserInfo] = useState();
 
   const customStyles = {
     option: (defaultStyles, state) => ({
       ...defaultStyles,
-      color: state.isSelected ? "#2f66db" : "#79a3fe",
-      backgroundColor: state.isSelected ? "#b8cfff" : "#fff)",
+      color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+      backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
       padding: "8px",
       fontWeight: "bold",
+      ":not(:last-child)": {
+        borderBottom: "2px solid var(--gray-ultra-light)",
+      },
       ":hover": {
-        backgroundColor: "#dee7fa",
-        color: "var(--blue-royal)",
+        color: "#000",
       },
     }),
     control: (defaultStyles) => ({
@@ -64,12 +75,12 @@ const EditUser = () => {
       paddingBlock: "4px",
       border: "none",
       ":hover": {
-        border: "2px solid var( --blue-royal)",
+        border: "1px solid var( --blue-royal)",
       },
     }),
     singleValue: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontWeight: "bold",
     }),
     placeholder: (defaultStyles) => ({
@@ -86,7 +97,9 @@ const EditUser = () => {
       },
       backgroundColor: "var(--blue-royal-very-light)",
       padding: "3px",
-      marginRight: "5px",
+      marginRight: "8px",
+      marginLeft: "8px",
+      marginBlock: "4px",
       borderRadius: "6px",
     }),
     clearIndicator: (defaultStyles) => ({
@@ -98,12 +111,12 @@ const EditUser = () => {
     }),
     menuList: (defaultStyles) => ({
       ...defaultStyles,
-      borderRadius: "8px",
-      border: "2px solid var( --blue-royal)",
+      borderRadius: "4px",
+      paddingInline: "10px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontSize: "16px",
     }),
     multiValue: (defaultStyles) => ({
@@ -120,93 +133,154 @@ const EditUser = () => {
       padding: "2px",
       margin: "5px",
     }),
+    menu: (defaultStyles) => ({
+      ...defaultStyles,
+      width: "90%",
+      marginRight: "5%",
+      border: "none",
+    }),
+    indicatorSeparator: (defaultStyles) => ({
+      ...defaultStyles,
+      display: "none",
+    }),
   };
 
-  const mockUserInfo = {
-    userInfo: {
-      firstName: "حمید",
-      lastName: "قهرمانی",
-      roleID: 2,
-      businessID: 6,
-      avatar:
-        "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
-      tel: "9360390020",
-      password: 123456789,
-    },
-    rolesList: [
-      {
-        name: "گچ کار",
-        id: 1,
-      },
-      {
-        name: "مشتری",
-        id: 2,
-      },
-      {
-        name: "سوپروایزر",
-        id: 3,
-      },
-      {
-        name: "کارمند",
-        id: 4,
-      },
-      {
-        name: "نقاش",
-        id: 5,
-      },
-      {
-        name: "پیک",
-        id: 6,
-      },
-      {
-        name: "انباردار",
-        id: 7,
-      },
-    ],
+  const getBusinessList = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/client/client-list");
+      setBusinessList(response.data.response.cards);
+      console.log(response.data.response);
 
-    businessList: [
-      { name: "کلینیک یک", id: 1 },
-      { name: "کلینیک دو", id: 2 },
-      { name: "کلینیک سه", id: 3 },
-      { name: "کلینیک چهار", id: 4 },
-      { name: "کلینیک پنج", id: 5 },
-      { name: "کلینیک شش", id: 6 },
-    ],
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
-
-  const getUserInfo = async (url, options) => {
-    Loading.standard("در حال دریافت اطلاعات");
-    // const response = await fetchData(url , options)
-    const response = mockUserInfo;
-    setUserAvatar(response.userInfo.avatar);
-    setUserFirstName(response.userInfo.firstName);
-    setUserLastName(response.userInfo.lastName);
-    setUserRole({
-      label: response.rolesList.find(
-        (element) => element.id === response.userInfo.roleID
-      ).name,
-      value: response.userInfo.roleID,
-    });
-    response.userInfo.businessID &&
-      setBusinessID({
-        label: response.businessList.find(
-          (element) => element.id === response.userInfo?.businessID
-        ).name,
-        value: response.userInfo.businessID,
+  const getInitInfo = async () => {
+    try {
+      Loading.standard("در حال ایجاد فرم");
+      const response = await axiosInstance.post("/user/roles");
+      // const response = mockResponse;
+      console.log(response.data);
+      setRolesList(response.data.roles);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getUserData = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/user/get_user", {
+        userID: param.id,
       });
-    setUserTel(response.userInfo.tel);
-    setPassword(response.userInfo.password);
-    setRolesList(response.rolesList);
-    setBusinessList(response.businessList);
-    Loading.remove();
+      Loading.remove();
+      console.log(response.data.response);
+
+      setUserAvatar(response.data.response.userInfo.userAvatar);
+      setUserFirstName(response.data.response.userInfo.userFirstName);
+      setUserLastName(response.data.response.userInfo.userLastName);
+      setUserTel(response.data.response.userInfo.mobile);
+      setUserInfo(response.data.response.userInfo);
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      setUserRoles(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      //console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getDepartments = async () => {
+    try {
+      const response = await axiosInstance.post("/department/get_all");
+      console.log(response.data.response.departments);
+      setDepartmentList(response.data.response.departments);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const formdata = new FormData();
+    firstNameIsValid && formdata.append("userFirstName", userFirstName);
+    lastNameIsValid && formdata.append("userLastName", userLastName);
+    userTelIsValid && formdata.append("mobile", userTel);
+    passwordIsValid && password && formdata.append("userPassword", password);
+    avatarIsChanged && formdata.append("userAvatar", userAvatar);
+    userRole && formdata.append("role", userRole.value);
+    userRole.value === "supervisor" &&
+      formdata.append(
+        "departmentIDs",
+        JSON.stringify(
+          selectedDepartment.map((department) => {
+            return department.value;
+          })
+        )
+      );
+    businessID.value && formdata.append("business", businessID.value);
+    formdata.append("userID", userInfo.userID);
+    console.log(Object.fromEntries(formdata));
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post(
+        "/user/update_profile",
+        formdata
+      );
+      console.log(response.data.response);
+      Loading.remove();
+      if (response.data.response) {
+        Notify.success(response.data.response);
+        navigate(`/user/${param.id}`);
+      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+      Notify.failure("خطا ! لطفا مجددا تلاش کنید");
+    }
   };
 
-  const listConvertor = (list) => {
-    const formatedList = [];
-    list.forEach((item) => {
-      formatedList.push({ label: item.name, value: item.id });
+  useEffect(() => {
+    if (!isLoading) {
+      !isReception && navigate("/unauthorized");
+    }
+  }, [isReception]);
+  useEffect(() => {
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getUserData();
+      getUser();
+      getBusinessList();
+      getInitInfo();
+      getDepartments();
+    }
+  }, []);
+  useEffect(() => {
+    console.log(rolesList, businessList, userInfo);
+    if (rolesList && businessList) {
+      console.log("fired");
+      setUserRole(roleFinder(userInfo?.userRole, rolesList));
+      setBusinessID(businessFinder(userInfo?.businessName, businessList));
+    }
+  }, [userInfo, rolesList, businessList]);
+
+  const listConvertor = (list, labelPropertyName, valuePropertyName) => {
+    const formattedList = [];
+    list?.forEach((item) => {
+      const { [labelPropertyName]: label, [valuePropertyName]: value } = item;
+      formattedList.push({ label, value });
     });
-    return formatedList;
+    return formattedList;
   };
   const handleAvatarChange = () => {
     const choosenFile = avatarInput.current.files[0];
@@ -263,23 +337,40 @@ const EditUser = () => {
       setPasswordIsvalid();
     }
   };
+  const roleFinder = (item, list) => {
+    let roleObject = {};
 
-  const handleSubmit = () => {};
+    list?.forEach((role, index) => {
+      if (role.label === item[0]) {
+        roleObject = {
+          label: role.label,
+          value: role.value,
+        };
+      }
+    });
+    return roleObject;
+  };
+  const businessFinder = (item, list) => {
+    let businessObject = {};
+    list?.forEach((business, index) => {
+      if (business.businessName == item) {
+        businessObject = {
+          label: business.businessName,
+          value: business.businessID,
+        };
+      }
+    });
+    return businessObject;
+  };
 
-  useEffect(() => {
-    getUserInfo(getUserInfoURL, getUserInfoRequestOptions);
-  }, []);
-  console.log(rolesList);
-  console.log(businessList);
   return (
-    rolesList && (
-      <div className="container px-3" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-          <div className="bold-xlarge">ویرایش اطلاعات کاربر</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+    userRole &&
+    businessID && (
+      <div className="container px-3 mt-100" dir="rtl">
+        <SingleHeader
+          title={"ویرایش اطلاعات کاربر"}
+          location={location.state}
+        />
         <div>
           <form
             className="edit-form mt-5 pb-4"
@@ -290,7 +381,7 @@ const EditUser = () => {
                 <img
                   ref={avatar}
                   className="avatar-svg-image"
-                  src="https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg"
+                  src={userAvatar}
                   alt=""
                 />
               </div>
@@ -376,8 +467,11 @@ const EditUser = () => {
               id="user-role"
               name="user-role"
               value={userRole}
-              onChange={setUserRole}
-              options={listConvertor(rolesList)}
+              onChange={(value) => {
+                setUserRole(value);
+                console.log(value);
+              }}
+              options={listConvertor(rolesList, "label", "value")}
               placeholder="انتخاب کنید"
               styles={customStyles}
               isClearable
@@ -387,7 +481,7 @@ const EditUser = () => {
 
             {/* ========================================================= */}
 
-            {userRole?.value === 2 && (
+            {userRole?.value === "client" && (
               <>
                 <label
                   htmlFor="business"
@@ -396,16 +490,45 @@ const EditUser = () => {
                   کسب و کار (مشتری)
                 </label>
                 <Select
-                  required={userRole?.value === 2 ? true : false}
+                  required={userRole?.value === "client" ? true : false}
                   id="business"
                   name="business"
                   value={businessID}
                   onChange={setBusinessID}
-                  options={listConvertor(businessList)}
+                  options={listConvertor(
+                    businessList,
+                    "businessName",
+                    "businessID"
+                  )}
                   placeholder="انتخاب کنید"
                   styles={customStyles}
                   isClearable
                   // isMulti
+                  // hideSelectedOptions={false}
+                />
+              </>
+            )}
+            {userRole?.value === "supervisor" && (
+              <>
+                <label
+                  htmlFor="department"
+                  className="bold500-large mb-2 mt-3 pe-3"
+                >
+                  دپارتمان مربوطه
+                </label>
+                <Select
+                  required={userRole?.value === "supervisor" ? true : false}
+                  id="department"
+                  value={selectedDepartment}
+                  onChange={(value) => {
+                    setSelectedDepartment(value);
+                    console.log(value);
+                  }}
+                  options={departmentList}
+                  placeholder="انتخاب کنید"
+                  styles={customStyles}
+                  isClearable
+                  isMulti
                   // hideSelectedOptions={false}
                 />
               </>
@@ -452,7 +575,6 @@ const EditUser = () => {
             </label>
             <input
               defaultValue={password}
-              required
               onChange={(event) => handlePasswordValidation(event)}
               type="password"
               name="password"

@@ -9,6 +9,8 @@ import InventoryItemCard from "./InventoryItemCard";
 import FilterIcon from "../assets/svg-icons/FilterIcon";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
 import axiosInstance from "../util-functions/axiosInstance";
+import useAuth from "../micro-components/useAuth";
+import ErrorPage from "./ErrorPage";
 
 const AllInventory = () => {
   const navigate = useNavigate();
@@ -30,8 +32,16 @@ const AllInventory = () => {
 
   const [filteredCats, setFilteredCats] = useState([]);
 
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const {
+    isLoading,
+    setIsLoading,
+    isError,
+    errorItself,
+    setIsError,
+    setErrorItself,
+  } = useAuth(["inventory_manager"]);
 
   const handleSearchedStock = (event) => {
     setSearchedStock(event.target.value);
@@ -138,26 +148,28 @@ const AllInventory = () => {
     }
   };
   const getInventoryListAxios = async () => {
-    setIsLoading(true);
     try {
       Loading.standard("در حال دریافت اطلاعات");
       const response = await axiosInstance.post("/item/all_items", {
         pageNum: currentPageNum,
       });
-      setAllStockData((prevCards) => [
-        ...prevCards,
-        ...response.data.response.cards,
-      ]);
+      response.data.response.cards &&
+        setAllStockData((prevCards) => [
+          ...prevCards,
+          ...response.data.response.cards,
+        ]);
       setTotalPages(response.data.response.total_pages);
       setCurrentPageNum((prevNum) => prevNum + 1);
-      setIsLoading(false);
-      setIsSom(true);
-      console.log(response.data.response);
 
+      setIsSom(true);
+
+      console.log(response.data.response);
       Loading.remove();
     } catch (error) {
       console.error(error);
-      Loading.remove();
+      setErrorItself(error);
+      setIsError(error);
+      setIsLoading(false);
     }
   };
   const handleScroll = () => {
@@ -181,6 +193,7 @@ const AllInventory = () => {
       getFilteredInventoryListAutoAxios();
     }
   };
+
   useEffect(() => {
     if (window.localStorage.getItem("AccessToken") === null) {
       navigate("/");
@@ -205,98 +218,110 @@ const AllInventory = () => {
     }
   }, [isSubmitted, stockStatus, searchedStock]);
 
+  // Loading.remove();
   return (
-    <div className="mb-100 px-3 mt-3" dir="rtl">
-      {isFilterPopupActive && (
-        <>
-          <AllStockFilterPopup
-            setIsFilterPopupActive={setIsFilterPopupActive}
-            handleFilter={getFilteredInventoryListAxios}
-            setIsFilter={setIsFiltered}
-            setStockStatus={setStockStatus}
-            stockStatus={stockStatus}
-          />
-          <PopupBackground
-            isPopupActive={setIsFilterPopupActive}
-            setIsFilter={setIsFiltered}
-          />
-        </>
-      )}
-      <div className="d-flex align-items-center gap-3 mb-3">
-        <input
-          ref={searchField}
-          onChange={handleSearchedStock}
-          type="text"
-          className="flex-grow-1 rounded-pill p-3"
-          placeholder="جستجوی نام بیمار ..."
-        />
-        <span className="has-pointer" onClick={getSearchedInventoryListAxios}>
-          <SearchIcon />
-        </span>
-      </div>
-      {filteredCats.length > 0 && (
-        <>
-          <div className="d-flex ">
-            {filteredCats.map((cat, i) => {
-              return (
-                <div
-                  key={i}
-                  className="bg-white py-1 px-3 mt-3 rounded-pill has-pointer ms-1"
-                >
-                  <span className="thin-default">
-                    {cat.label === "1" && "رو به اتمام"}
-                    {cat.label === "2" && "موجود"}
-                    {cat.label === "0" && "ناموجود"}
-                    {cat.value === "itemName" && cat.label}
-                  </span>
-                  <span onClick={() => handleCapReduction(cat)}>
-                    <BLCloseBtn />
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <hr className="text-primary" />
-        </>
-      )}
-      <div>
-        {!isFiltered && (
-          <div>
-            <div className=" mb-3">
-              <span className="bold-xlarge pe-3">همه آیتم‌های انبار</span>
-            </div>
-            {allStockData ? (
-              allStockData.map((data, index) => {
-                return (
-                  <div key={index}>
-                    <InventoryItemCard data={data} />
-                  </div>
-                );
-              })
-            ) : (
-              <Message>موردی یافت نشد</Message>
+    <>
+      {isLoading && Loading.standard("در حال دریافت اطلاعات")}
+      {!isLoading &&
+        (!isError ? (
+          <div className="mb-100 px-3 mt-3" dir="rtl">
+            {isFilterPopupActive && (
+              <>
+                <AllStockFilterPopup
+                  setIsFilterPopupActive={setIsFilterPopupActive}
+                  handleFilter={getFilteredInventoryListAxios}
+                  setIsFilter={setIsFiltered}
+                  setStockStatus={setStockStatus}
+                  stockStatus={stockStatus}
+                />
+                <PopupBackground
+                  isPopupActive={setIsFilterPopupActive}
+                  setIsFilter={setIsFiltered}
+                />
+              </>
             )}
-          </div>
-        )}
+            <div className="d-flex align-items-center gap-3 mb-3">
+              <input
+                ref={searchField}
+                onChange={handleSearchedStock}
+                type="text"
+                className="flex-grow-1 rounded-pill p-3"
+                placeholder="جستجوی نام بیمار ..."
+              />
+              <span
+                className="has-pointer"
+                onClick={getSearchedInventoryListAxios}
+              >
+                <SearchIcon />
+              </span>
+            </div>
+            {filteredCats.length > 0 && (
+              <>
+                <div className="d-flex ">
+                  {filteredCats.map((cat, i) => {
+                    return (
+                      <div
+                        key={i}
+                        className="bg-white py-1 px-3 mt-3 rounded-pill has-pointer ms-1"
+                      >
+                        <span className="thin-default">
+                          {cat.label === "1" && "رو به اتمام"}
+                          {cat.label === "2" && "موجود"}
+                          {cat.label === "0" && "ناموجود"}
+                          {cat.value === "itemName" && cat.label}
+                        </span>
+                        <span onClick={() => handleCapReduction(cat)}>
+                          <BLCloseBtn />
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <hr className="text-primary" />
+              </>
+            )}
+            <div>
+              {!isFiltered && (
+                <div>
+                  <div className=" mb-3">
+                    <span className="bold-xlarge pe-3">همه آیتم‌های انبار</span>
+                  </div>
+                  {allStockData && allStockData.length ? (
+                    allStockData.map((data, index) => {
+                      return (
+                        <div key={index}>
+                          <InventoryItemCard data={data} />
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <Message>موردی یافت نشد</Message>
+                  )}
+                </div>
+              )}
 
-        {isFiltered &&
-          (filteredAllStockData ? (
-            filteredAllStockData.map((data, index) => {
-              return <InventoryItemCard key={index} data={data} />;
-            })
-          ) : (
-            <Message>موردی یافت نشد</Message>
-          ))}
-      </div>
-      <span
-        className="fixed-bottom-80 drop-shadow has-pointer"
-        onClick={() => {
-          setIsFilterPopupActive(true);
-        }}
-      >
-        <FilterIcon />
-      </span>
-    </div>
+              {isFiltered &&
+                (filteredAllStockData ? (
+                  filteredAllStockData.map((data, index) => {
+                    return <InventoryItemCard key={index} data={data} />;
+                  })
+                ) : (
+                  <Message>موردی یافت نشد</Message>
+                ))}
+            </div>
+            <span
+              className="fixed-bottom-80 drop-shadow has-pointer"
+              onClick={() => {
+                setIsFilterPopupActive(true);
+              }}
+            >
+              <FilterIcon />
+            </span>
+          </div>
+        ) : (
+          <ErrorPage error={errorItself} />
+        ))}
+    </>
   );
 };
 

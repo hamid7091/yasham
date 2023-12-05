@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import CloseIcon from "../assets/svg-icons/CloseIcon";
 
-const EndTaskPopup = ({ setIsEndTaskPopupActive, handleEndTask }) => {
+const EndTaskPopup = ({
+  setIsEndTaskPopupActive,
+  handleEndTask,
+  isClient,
+  isShipping,
+}) => {
   const [commentContent, setCommentContent] = useState("");
 
   const handleClosePopup = () => {
@@ -24,19 +29,28 @@ const EndTaskPopup = ({ setIsEndTaskPopupActive, handleEndTask }) => {
       </div>
       <hr />
       <div className="mt-2">
-        <div className="">
+        {isClient && (
+          <div className="">
+            <p className="bold500-default my-3">
+              <label htmlFor="message-text">کامنت خود را بنویسید</label>
+            </p>
+            <textarea
+              onKeyUp={handleCommentKeyup}
+              className="form-control border-0 mb-3"
+              name=""
+              id="message-text"
+              rows="7"
+              placeholder="کامنت خود را بنویسید"
+            ></textarea>
+          </div>
+        )}
+        {isShipping && (
           <p className="bold500-default my-3">
-            <label htmlFor="message-text">کامنت خود را بنویسید</label>
+            <label htmlFor="message-text">
+              آیا از اتمام این وظیفه اطمینان دارید ؟
+            </label>
           </p>
-          <textarea
-            onKeyUp={handleCommentKeyup}
-            className="form-control border-0 mb-3"
-            name=""
-            id="message-text"
-            rows="7"
-            placeholder="کامنت خود را بنویسید"
-          ></textarea>
-        </div>
+        )}
         <div className="d-flex gap-2">
           <button className="btn-royal-bold py-3" onClick={handleEndTheTask}>
             اتمام

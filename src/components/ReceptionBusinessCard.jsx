@@ -1,12 +1,14 @@
 import React from "react";
 import BackIcon from "../assets/svg-icons/BackIcon";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 const ReceptionBusinessCard = ({ data }) => {
-  console.log(data);
+  const location = useLocation();
 
   const navigate = useNavigate();
   const handleNavigate = () => {
-    navigate(`/businessReception/${data.businessID}`);
+    navigate(`/businessReception/${data.businessID}`, {
+      state: location.pathname,
+    });
   };
   return (
     <div

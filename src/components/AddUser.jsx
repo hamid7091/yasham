@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useLocation, useNavigate } from "react-router-dom";
 import Select from "react-select";
-import fetchData from "../util-functions/fetchData";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
-import { Notify } from "notiflix/build/notiflix-notify-aio";
 import EditPen from "../assets/svg-icons/EditPen";
+import axiosInstance from "../util-functions/axiosInstance";
+import useRoleSetter from "../micro-components/useRoleSetter";
+import SingleHeader from "./SingleHeader";
+import { Notify } from "notiflix/build/notiflix-notify-aio";
+import defImg from "../assets/svg-pics/userDefaultPic.svg";
 
 const AddUser = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const avatar = useRef(null);
   const avatarInput = useRef(null);
@@ -16,79 +19,18 @@ const AddUser = () => {
   const [rolesList, setRolesList] = useState();
   const [businessList, setBusinessList] = useState();
 
-  const addUserURL = "Add User URL";
-  const addUserHeader = new Headers();
-  addUserHeader.append("Authorization", `Bearer ${accessToken}`);
-  const addUserFormdata = new FormData();
-
-  const getInitialInfoURL = "Get Initial Info URL";
-  const getInitialInfoRequestOptions = {
-    method: "POST",
-    headers: addUserHeader,
-    redirect: "follow",
-  };
-
-  const mockResponse = {
-    mockRolesList: [
-      {
-        name: "گچ کار",
-        id: 1,
-      },
-      {
-        name: "مشتری",
-        id: 2,
-      },
-      {
-        name: "سوپروایزر",
-        id: 3,
-      },
-      {
-        name: "کارمند",
-        id: 4,
-      },
-      {
-        name: "نقاش",
-        id: 5,
-      },
-      {
-        name: "پیک",
-        id: 6,
-      },
-      {
-        name: "انباردار",
-        id: 7,
-      },
-    ],
-
-    mockBusinessList: [
-      { name: "کلینیک یک", id: 1 },
-      { name: "کلینیک دو", id: 2 },
-      { name: "کلینیک سه", id: 3 },
-      { name: "کلینیک چهار", id: 4 },
-      { name: "کلینیک پنج", id: 5 },
-      { name: "کلینیک شش", id: 6 },
-    ],
-  };
-  const getInitialInfo = async (url, options) => {
-    Loading.standard("در حال ایجاد فرم");
-    // const response = await fetchData(url, options)
-    const response = mockResponse;
-
-    setRolesList(response.mockRolesList);
-    setBusinessList(response.mockBusinessList);
-    Loading.remove();
-  };
-
   const customStyles = {
     option: (defaultStyles, state) => ({
       ...defaultStyles,
-      color: state.isSelected ? "#2f66db" : "#79a3fe",
-      backgroundColor: state.isSelected ? "#b8cfff" : "#fff)",
+      color: state.isSelected ? "var(--gray-dark)" : "var(--gray)",
+      backgroundColor: state.isSelected ? "var(--gray-ultra-light)" : "#fff)",
       padding: "8px",
       fontWeight: "bold",
+      ":not(:last-child)": {
+        borderBottom: "2px solid var(--gray-ultra-light)",
+      },
       ":hover": {
-        backgroundColor: "#dee7fa",
-        color: "var(--blue-royal)",
+        color: "#000",
       },
     }),
     control: (defaultStyles) => ({
@@ -99,12 +41,12 @@ const AddUser = () => {
       paddingBlock: "4px",
       border: "none",
       ":hover": {
-        border: "2px solid var( --blue-royal)",
+        border: "1px solid var( --blue-royal)",
       },
     }),
     singleValue: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontWeight: "bold",
     }),
     placeholder: (defaultStyles) => ({
@@ -121,7 +63,9 @@ const AddUser = () => {
       },
       backgroundColor: "var(--blue-royal-very-light)",
       padding: "3px",
-      marginRight: "5px",
+      marginRight: "8px",
+      marginLeft: "8px",
+      marginBlock: "4px",
       borderRadius: "6px",
     }),
     clearIndicator: (defaultStyles) => ({
@@ -133,12 +77,12 @@ const AddUser = () => {
     }),
     menuList: (defaultStyles) => ({
       ...defaultStyles,
-      borderRadius: "8px",
-      border: "2px solid var( --blue-royal)",
+      borderRadius: "4px",
+      paddingInline: "10px",
     }),
     input: (defaultStyles) => ({
       ...defaultStyles,
-      color: "var(--blue-royal)",
+      color: "var(--gray-dark)",
       fontSize: "16px",
     }),
     multiValue: (defaultStyles) => ({
@@ -154,6 +98,16 @@ const AddUser = () => {
       borderRadius: "50%",
       padding: "2px",
       margin: "5px",
+    }),
+    menu: (defaultStyles) => ({
+      ...defaultStyles,
+      width: "90%",
+      marginRight: "5%",
+      border: "none",
+    }),
+    indicatorSeparator: (defaultStyles) => ({
+      ...defaultStyles,
+      display: "none",
     }),
   };
 
@@ -171,40 +125,134 @@ const AddUser = () => {
   const [userTelIsValid, setUserTelIsValid] = useState();
   const [passwordIsValid, setPasswordIsvalid] = useState();
 
-  const handleSubmit = async (event) => {
+  const [userRoles, setUserRoles] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRoles);
+
+  const [departmentList, setDepartmentList] = useState();
+  const [selectedDepartment, setSelectedDepartment] = useState();
+
+  const getInitInfo = async () => {
+    try {
+      Loading.standard("در حال ایجاد فرم");
+      const response = await axiosInstance.post("/user/roles");
+
+      setRolesList(response.data.roles);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const getBusinessList = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/client/client-list");
+      setBusinessList(response.data.response.cards);
+      console.log(response.data.response);
+
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
+  };
+  const handleSubmitAxios = async (event) => {
+    console.log(selectedDepartment);
     event.preventDefault();
-    Loading.standard("در حال ارسال درخواست");
+    const formdata = new FormData();
+    formdata.append("firstName", userFirstName);
+    formdata.append("lastName", userLastName);
+    formdata.append("role", userRole.value);
+    userRole.value === "client" &&
+      formdata.append("business", businessID.value);
+    userRole.value === "supervisor" &&
+      formdata.append(
+        "departmentIDs",
+        JSON.stringify(
+          selectedDepartment.map((department) => {
+            return department.value;
+          })
+        )
+      );
+    formdata.append("mobile", userTel);
+    formdata.append("userPassword", password);
+    avatarIsChanged && formdata.append("userAvatar", userAvatar);
 
-    addUserFormdata.append("firstName", userFirstName);
-    addUserFormdata.append("lastName", userLastName);
-    addUserFormdata.append("role", userRole.value);
-    userRole.value === 2 &&
-      addUserFormdata.append("business", businessID.value);
-    addUserFormdata.append("mobile", userTel);
-    addUserFormdata.append("password", password);
-
-    const addUserRequestOptions = {
-      method: "POST",
-      headers: addUserHeader,
-      body: addUserFormdata,
-      redirect: "follow",
-    };
-    const response = await fetchData(addUserURL, addUserRequestOptions);
-    console.log(userFirstName);
-    console.log(userLastName);
-    console.log(userRole);
-    console.log(businessID);
-    console.log(userTel);
-    console.log(password);
-    Loading.remove();
+    console.log(Object.fromEntries(formdata));
+    try {
+      Loading.standard("در حال ارسال درخواست");
+      const response = await axiosInstance.post("/user/add_user", formdata);
+      console.log(response.data.response);
+      Loading.remove();
+      if (response.data.response) {
+        Notify.success(response.data.response[0]);
+        navigate(location.state);
+      }
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+      Notify.failure(error.response.data.message);
+    }
   };
 
-  const listConvertor = (list) => {
-    const formatedList = [];
-    list.forEach((item) => {
-      formatedList.push({ label: item.name, value: item.id });
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      // const response = {
+      //   data: {
+      //     response: {
+      //       userInfo: {
+      //         mobile: "9360390099",
+      //         userAvatar:
+      //           "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //         userCaps: {
+      //           اطلاعیه: true,
+      //           پروفایل: true,
+      //           "لیست سفارشات": true,
+      //           "کسب و کارها": true,
+      //         },
+      //         userFirstName: "حمید",
+      //         userID: 123,
+      //         userLastName: "مدیر مالی",
+      //         userRole: ["financial_manager"],
+      //       },
+      //     },
+      //   },
+      // };
+      setUserRoles(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getDepartments = async () => {
+    try {
+      const response = await axiosInstance.post("/department/get_all");
+      console.log(response.data.response.departments);
+      setDepartmentList(response.data.response.departments);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const listConvertor = (list, labelPropertyName, valuePropertyName) => {
+    const formattedList = [];
+    list?.forEach((item) => {
+      const { [labelPropertyName]: label, [valuePropertyName]: value } = item;
+      formattedList.push({ label, value });
     });
-    return formatedList;
+    return formattedList;
   };
   const handleAvatarChange = () => {
     const choosenFile = avatarInput.current.files[0];
@@ -263,31 +311,35 @@ const AddUser = () => {
   };
 
   useEffect(() => {
-    getInitialInfo(getInitialInfoURL, getInitialInfoRequestOptions);
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getInitInfo();
+      getBusinessList();
+      getUser();
+      getDepartments();
+    }
   }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      !isReception && navigate("/unauthorized");
+    }
+  }, [isReception]);
 
-  //   console.log(userRole);
+  console.log(userRole);
 
   return (
     rolesList && (
-      <div className="container px-3" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-          <div className="bold-xlarge">ثبت کاربر جدید</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+      <div className="container px-3 mt-100" dir="rtl">
+        <SingleHeader title={"ثبت کاربر جدید"} location={location.state} />
         <div>
-          <form
-            className="edit-form mt-5 pb-4"
-            onSubmit={(event) => handleSubmit(event)}
-          >
+          <form className="edit-form mt-5 pb-4" onSubmit={handleSubmitAxios}>
             <div className="text-center d-flex flex-column justify-content-center align-items-center">
               <div>
                 <img
                   ref={avatar}
                   className="avatar-svg-image"
-                  src="https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg"
+                  src={defImg}
                   alt=""
                 />
               </div>
@@ -325,6 +377,8 @@ const AddUser = () => {
               required
               type="text"
               name="first-name"
+              autoComplete="off"
+              autoCorrect="off"
               className={`form-control rounded-pill mb-3 py-2 ${
                 firstNameIsValid === false
                   ? "is-invalid"
@@ -350,6 +404,8 @@ const AddUser = () => {
               required
               type="text"
               name="last-name"
+              autoComplete="off"
+              autoCorrect="off"
               className={`form-control rounded-pill mb-3 py-2 ${
                 lastNameIsValid === false
                   ? "is-invalid"
@@ -372,7 +428,7 @@ const AddUser = () => {
               name="user-role"
               value={userRole}
               onChange={setUserRole}
-              options={listConvertor(rolesList)}
+              options={listConvertor(rolesList, "label", "value")}
               placeholder="انتخاب کنید"
               styles={customStyles}
               isClearable
@@ -382,7 +438,7 @@ const AddUser = () => {
 
             {/* ========================================================= */}
 
-            {userRole?.value === 2 && (
+            {userRole?.value === "client" && (
               <>
                 <label
                   htmlFor="business"
@@ -391,16 +447,42 @@ const AddUser = () => {
                   کسب و کار (مشتری)
                 </label>
                 <Select
-                  required={userRole?.value === 2 ? true : false}
+                  required={userRole?.value === "client" ? true : false}
                   id="business"
                   name="business"
                   value={businessID}
                   onChange={setBusinessID}
-                  options={listConvertor(businessList)}
+                  options={listConvertor(
+                    businessList,
+                    "businessName",
+                    "businessID"
+                  )}
                   placeholder="انتخاب کنید"
                   styles={customStyles}
                   isClearable
                   // isMulti
+                  // hideSelectedOptions={false}
+                />
+              </>
+            )}
+            {userRole?.value === "supervisor" && (
+              <>
+                <label
+                  htmlFor="business"
+                  className="bold500-large mb-2 mt-3 pe-3"
+                >
+                  دپارتمان مربوطه
+                </label>
+                <Select
+                  required={userRole?.value === "supervisor" ? true : false}
+                  id="department"
+                  value={selectedDepartment}
+                  onChange={setSelectedDepartment}
+                  options={departmentList}
+                  placeholder="انتخاب کنید"
+                  styles={customStyles}
+                  isClearable
+                  isMulti
                   // hideSelectedOptions={false}
                 />
               </>
@@ -422,6 +504,8 @@ const AddUser = () => {
               maxLength={10}
               type="number"
               name="mobile"
+              autoComplete="off"
+              autoCorrect="off"
               className={`form-control rounded-pill mb-3 py-2 ${
                 userTelIsValid === false
                   ? "is-invalid"

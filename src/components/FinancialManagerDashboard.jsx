@@ -1,5 +1,6 @@
 import moment from "moment-jalaali";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   BarChart,
   Bar,
@@ -16,9 +17,7 @@ const FinancialManagerDashboard = ({
   financialBusinessInfo,
   financialWeelyChartData,
 }) => {
-  console.log(dailyOrders);
-  console.log(financialBusinessInfo);
-  console.log(financialWeelyChartData);
+  const navigate = useNavigate();
 
   const dateArray = Object.keys(financialWeelyChartData);
   const saleArray = Object.values(financialWeelyChartData);
@@ -105,7 +104,12 @@ const FinancialManagerDashboard = ({
             <span className="bold-xlarge">وضعیت کسب و کارها</span>
           </div>
           <div>
-            <span className="grey-thin-bold">مشاهده همه</span>
+            <span
+              className="grey-thin-bold has-pointer"
+              onClick={() => navigate("/allBusinesses")}
+            >
+              مشاهده همه
+            </span>
           </div>
         </div>
         <div>
@@ -144,7 +148,7 @@ const FinancialManagerDashboard = ({
             </div>
             <div>
               <span className="lgrey-default-bold">
-                {financialBusinessInfo.mostDebt.value} تومان
+                {financialBusinessInfo.mostDebt.value} سفارش
               </span>
             </div>
           </div>

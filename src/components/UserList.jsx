@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import BackArrow from "../assets/svg-icons/BackArrow";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Loading } from "notiflix/build/notiflix-loading-aio";
-import fetchData from "../util-functions/fetchData";
 import ReceptionUserCard from "./ReceptionUserCard";
 import AddIcon from "../assets/svg-icons/AddIcon";
+import axiosInstance from "../util-functions/axiosInstance";
+import SingleHeader from "./SingleHeader";
+import useRoleSetter from "../micro-components/useRoleSetter";
 
 const UserList = () => {
-  const accessToken = window.localStorage.getItem("AccessToken");
+  const location = useLocation();
   const navigate = useNavigate();
-  const getAllUsersURL = "Get All Users URL";
-  const getAllUsersHeader = new Headers();
-  getAllUsersHeader.append("Authorization", `Bearer ${accessToken}`);
-  const getAllUsersRequestOptions = {
-    method: "POST",
-    headers: getAllUsersHeader,
-    redirect: "follow",
-  };
+
   const [allUsers, setAllUsers] = useState();
+  const [userRole, setUserRole] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [
+    isEmployee,
+    isClient,
+    isSupervisor,
+    isShipping,
+    isInventory,
+    isPManager,
+    isFManager,
+    isReception,
+  ] = useRoleSetter(userRole);
 
   const mockAllUsersData = {
     users: [
@@ -72,31 +78,74 @@ const UserList = () => {
     ],
   };
 
-  const getAllUsers = async (url, options) => {
-    Loading.standard("در حال دریافت اطلاعات");
-    // const response = await fetchData(url, options);
-    const response = mockAllUsersData.users;
-    setAllUsers(response);
-    Loading.remove();
+  const getUser = async () => {
+    try {
+      const response = await axiosInstance.post("/user/check_access_token");
+      // const response = {
+      //   data: {
+      //     response: {
+      //       userInfo: {
+      //         mobile: "9360390099",
+      //         userAvatar:
+      //           "https://samane.zbbo.net/wp-content/uploads/2023/07/IMG_5593.jpeg",
+      //         userCaps: {
+      //           اطلاعیه: true,
+      //           پروفایل: true,
+      //           "لیست سفارشات": true,
+      //           "کسب و کارها": true,
+      //         },
+      //         userFirstName: "حمید",
+      //         userID: 123,
+      //         userLastName: "مدیر مالی",
+      //         userRole: ["financial_manager"],
+      //       },
+      //     },
+      //   },
+      // };
+      setUserRole(response.data.response.userInfo.userRole);
+      setIsLoading(false);
+      console.log(response.data.response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getUsersData = async () => {
+    try {
+      Loading.standard("در حال دریافت اطلاعات");
+      const response = await axiosInstance.post("/user/get_users_list");
+      //const response = mockAllUsersData.users;
+      console.log(response.data);
+      setAllUsers(response.data.response.users);
+      Loading.remove();
+    } catch (error) {
+      console.error(error);
+      Loading.remove();
+    }
   };
 
   useEffect(() => {
-    getAllUsers(getAllUsersURL, getAllUsersRequestOptions);
+    if (window.localStorage.getItem("AccessToken") === null) {
+      navigate("/login");
+    } else {
+      getUsersData();
+      getUser();
+    }
   }, []);
+  useEffect(() => {
+    if (!isLoading) {
+      !isReception && navigate("/unauthorized");
+    }
+  }, [isReception]);
 
   const handleRedirect = () => {
-    navigate("/addUser");
+    navigate("/addUser", { state: location.pathname });
   };
 
   return (
     allUsers && (
-      <div className="container px-3" dir="rtl">
-        <header className="d-flex bg-default rounded-bottom-5 align-items-center justify-content-between position-sticky top-0 py-3 mt-2 mb-3">
-          <div className="bold-xlarge">کاربران</div>
-          <Link to="/">
-            <BackArrow />
-          </Link>
-        </header>
+      <div className="container px-3 mt-100" dir="rtl">
+        <SingleHeader title={"کاربران"} location={"/"} />
         {allUsers.map((data, index) => {
           return <ReceptionUserCard data={data} key={index} />;
         })}

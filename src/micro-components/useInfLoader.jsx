@@ -2,22 +2,21 @@ import { useState, useEffect } from "react";
 import axiosInstance from "../util-functions/axiosInstance";
 import moment from "moment-jalaali";
 
-const useInfLoader = (query, pageNumber, isClient) => {
+const useInfLoader = (query, pageNumber, isClient, state) => {
+  console.log(state);
+
   const [od, setOD] = useState([]);
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingg, setIsLoadingg] = useState(true);
   const [fCats, setFCats] = useState([]);
+
   useEffect(() => {
     setIsLoadingg(true);
-    console.log("fired");
     const formdata = new FormData();
 
-    console.log(query);
     if (query.length > 0) {
-      console.log(query);
       setFCats([]);
       query.map((q) => {
-        console.log(Boolean(q.startDate));
         if (q.invoiceStatus || q.invoiceStatus === 0) {
           formdata.append("invoiceStatusID", q.invoiceStatus);
           setFCats((prevStates) => [
@@ -34,7 +33,6 @@ const useInfLoader = (query, pageNumber, isClient) => {
           ]);
         }
         if (q.startDate) {
-          console.log(q.startDate, q.endDate);
           formdata.append(
             "startDate",
             typeof q.startDate === "object"
@@ -78,26 +76,25 @@ const useInfLoader = (query, pageNumber, isClient) => {
           ]);
         }
       });
-      console.log(Object.fromEntries(formdata));
     } else {
       setFCats([]);
     }
     formdata.append("pageNum", pageNumber);
     pageNumber === 1 && setOD([]);
-    axiosInstance
-      .post("/order/history", formdata)
-      .then((res) => {
-        console.log(res.data.response);
-        console.log(pageNumber);
-        res.data.response.cards
-          ? setOD((prevod) => [...prevod, ...res.data.response.cards])
-          : setOD([]);
-        setHasMore(res.data.response.total_pages > pageNumber);
-        setIsLoadingg(false);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    console.log(Object.fromEntries(formdata));
+    !state &&
+      axiosInstance
+        .post("/order/history", formdata)
+        .then((res) => {
+          res.data.response.cards
+            ? setOD((prevod) => [...prevod, ...res.data.response.cards])
+            : setOD([]);
+          setHasMore(res.data.response.total_pages > pageNumber);
+          setIsLoadingg(false);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
   }, [query, pageNumber]);
 
   return { od, hasMore, isLoadingg, fCats };

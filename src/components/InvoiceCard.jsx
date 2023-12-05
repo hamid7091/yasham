@@ -8,7 +8,7 @@ const InvoiceCard = (factor) => {
   const location = useLocation();
   const newDate = useDate(factor.factor.date);
   return (
-    <div className="bg-white rounded-4 p-4 mb-3 d-flex flex-column">
+    <div className="bg-white rounded-5 p-4 mb-3 d-flex flex-column">
       <div>
         <InvoiceCardDollarIcon />
         <span className="grey-large-bold me-2">
@@ -29,9 +29,17 @@ const InvoiceCard = (factor) => {
             <span className="grey-default-bold500">{newDate}</span>
           </div>
         </div>
+        <div>
+          <div className="my-2">
+            <span className="royal-default-bold ms-2">نام مشتری </span>
+            <span className="grey-default-bold500">
+              {factor.factor.clientName}
+            </span>
+          </div>
+        </div>
         <div className="d-flex align-items-center justify-content-between">
           <div className="my-3">
-            <span className="royal-default-bold ms-2">روش پرداخت</span>
+            <span className="royal-default-bold ms-2">روش پرداخت </span>
             <span className="grey-default-bold500">{factor.factor.type}</span>
           </div>
           <div className="my-3">

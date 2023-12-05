@@ -4,7 +4,8 @@ function useMathRound(initialNum) {
   const [roundedNum, setRoundNum] = useState(initialNum);
 
   useEffect(() => {
-    console.log(initialNum);
+    console.log(initialNum === NaN);
+
     setRoundNum(Math.round(initialNum));
   }, [initialNum]);
 

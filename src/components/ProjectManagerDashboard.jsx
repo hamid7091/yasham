@@ -60,7 +60,7 @@ const ProjectManagerDashboard = ({
 
   const handleNavgate = () => {
     navigate("/orderList", {
-      state: { searchToday: "searchToday", location: location.pathname },
+      state: { searchToday: "searchToday" },
     });
   };
   const handleNavigationToAllTask = () => {

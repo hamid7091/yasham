@@ -213,6 +213,8 @@ const Login = () => {
                 ref={cellNumInput}
                 type="text"
                 maxLength={10}
+                autoComplete="off"
+                autoCorrect="off"
                 className={`form-control rounded-pill  py-3 ${
                   canLogin === false
                     ? "is-invalid"
@@ -291,7 +293,7 @@ const Login = () => {
                 >
                   <input
                     ref={passwordInput}
-                    type="text"
+                    type="password"
                     name="password"
                     id="password"
                     className="active form-control rounded-pill mt-3 py-3"
@@ -313,7 +315,7 @@ const Login = () => {
                   <input
                     ref={otpInput}
                     className="disabled form-control rounded-pill mt-3 py-3 px-4 "
-                    type="text"
+                    type="password"
                     placeholder="کد دریافتی را وارد کنید ..."
                     name="disposable-pass"
                     id="disposable-pass-input"
